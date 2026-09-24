@@ -148,7 +148,7 @@ Thank you.`;
                             type="text"
                             name="name"
                             value={formData.name}
-                            
+                            onChange={handleChange}
                         />
 
 
@@ -165,7 +165,7 @@ Thank you.`;
                             type="email"
                             name="email"
                             value={formData.email}
-                    
+                            onChange={handleChange}
                         />
 
                     </div>

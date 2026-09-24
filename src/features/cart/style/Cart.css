@@ -17,7 +17,7 @@
 .order-summary {
     width: 60%;
     flex-shrink: 0;
-    background: #fff;
+    background: #fa9f26;
     border-radius: 12px;
     padding: 30px;
     box-shadow: 0 5px 20px rgba(0, 0, 0, .05);
@@ -61,7 +61,7 @@
 }
 
 .product-details p {
-    color: #777;
+    color: #000000;
     font-size: 14px;
 }
 
@@ -132,7 +132,7 @@
 /* CARD */
 
 .Checkout_card {
-    background: #fff;
+    background: #fa9f26;
     border-radius: 12px;
     padding: 28px;
     box-shadow: 0 5px 20px rgba(0, 0, 0, .05);
@@ -180,7 +180,7 @@
 }
 
 .price-row {
-    color: #666;
+    color: #000000;
     font-size: 15px;
 }
 

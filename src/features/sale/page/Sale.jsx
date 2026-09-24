@@ -11,7 +11,8 @@ function Sale() {
 
 
     const navigate = useNavigate()
-    const { data: data_filter = [] } = ShopBy_categoryQuery()
+    const { data: rawDataFilter } = ShopBy_categoryQuery()
+    const data_filter = Array.isArray(rawDataFilter) ? rawDataFilter : []
 
     const [selectedCategory, setSelectedCategory] = useState(null)
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 1140)

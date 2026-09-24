@@ -329,11 +329,12 @@ function Single_product() {
 
     const {
 
-        data: wishdata = [],
+        data: rawWishdata,
 
         refetch: refetchWishlist
 
     } = WishlistQuery();
+    const wishdata = Array.isArray(rawWishdata) ? rawWishdata : [];
 
     const addToWishlist = async () => {
 

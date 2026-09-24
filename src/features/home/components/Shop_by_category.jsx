@@ -11,7 +11,8 @@ import { RiArrowUpWideLine } from "react-icons/ri";
 import { getImageUrl } from "../../../utils/imageUrl";
 function Shop_by_category() {
 
-    const { data: categories = [], isLoading } = ShopBy_categoryQuery();
+    const { data: rawCategories, isLoading } = ShopBy_categoryQuery();
+    const categories = Array.isArray(rawCategories) ? rawCategories : [];
 
     const navigate = useNavigate();
 
@@ -121,7 +122,8 @@ function Shop_by_category() {
     // const { data: offers = [] } = Offer_Query();
     // const offerActive = offers?.[0]?.is_active ?? false;
 
-    const { data: offerAvail = [] } = Offer_Query()
+    const { data: rawOfferAvail } = Offer_Query()
+    const offerAvail = Array.isArray(rawOfferAvail) ? rawOfferAvail : []
 
     const offerAvailable = offerAvail.length >= 1;
 

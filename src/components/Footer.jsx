@@ -1,7 +1,7 @@
 import React from 'react'
 import "./../Footer.css";
 
-import amora from './../assets/footer-logo.png'
+import amora from './../assets/eehook.jpeg'
 import visa from './../assets/visa-payment.png'
 import master from './../assets/master-payment.png'
 import amc from './../assets/american-exp-payment.png'

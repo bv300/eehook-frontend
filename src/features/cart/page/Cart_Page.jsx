@@ -28,7 +28,7 @@ function Cart_page() {
 
             setCartItems(
 
-    data.items.map(item => ({
+    (Array.isArray(data.items) ? data.items : []).map(item => ({
 
         id: item.id,
 

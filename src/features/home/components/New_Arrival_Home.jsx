@@ -16,10 +16,11 @@ const New_Arrival_Home = ({ products = [] }) => {
     const navigate = useNavigate();
 
     const {
-        data = [],
+        data: rawData,
         isLoading,
         error,
     } = Newarrival_Query();
+    const data = Array.isArray(rawData) ? rawData : [];
 
     const [showLoader, setShowLoader] = useState(true);
 

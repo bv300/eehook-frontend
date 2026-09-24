@@ -42,7 +42,7 @@
 }
 
 .amora-checkout-card{
-    background:#fff;
+    background: #fa9f26;
     border:1px solid #ececec;
     border-radius:14px;
     padding:24px;
@@ -65,7 +65,7 @@
 .amora-checkout-card h2{
     font-size:21px;
     font-weight:600;
-    color:#222;
+    color: #000000;
 }
 
 .amora-add-address-btn{
@@ -126,13 +126,13 @@
 .amora-address-info h4{
     font-size:17px;
     font-weight:600;
-    color:#222;
+    color: #000000;
     margin-bottom:6px;
 }
 
 .amora-address-info p{
     font-size:14px;
-    color:#666;
+    color: #000000;
     line-height:1.6;
     margin-bottom:2px;
 }
@@ -155,13 +155,13 @@
 .amora-payment-title{
     font-size:16px;
     font-weight:600;
-    color:#222;
+    color: #000000;
     margin-bottom:5px;
 }
 
 .amora-payment-card p{
     font-size:14px;
-    color:#666;
+    color: #000000;
     line-height:1.6;
 }
 
@@ -170,7 +170,7 @@
     border:1px dashed #d7d7d7;
     border-radius:10px;
     text-align:center;
-    color:#777;
+    color: #000000;
     font-size:15px;
 }
 .amora-summary-item{
@@ -213,21 +213,21 @@
 .amora-summary-details h4{
     font-size:16px;
     font-weight:600;
-    color:#222;
+    color: #000000;
     margin-bottom:6px;
     line-height:1.4;
 }
 
 .amora-summary-details p{
     font-size:13px;
-    color:#777;
+    color: #000000;
     margin-bottom:4px;
 }
 
 .amora-summary-price{
     font-size:17px;
     font-weight:600;
-    color:#222;
+    color: #000000;
     white-space:nowrap;
 }
 
@@ -243,7 +243,7 @@
     align-items:center;
     margin-bottom:14px;
     font-size:15px;
-    color:#555;
+    color: #000000;
 }
 
 .amora-summary-row:last-child{
@@ -252,7 +252,7 @@
 
 .amora-summary-row span:last-child{
     font-weight:500;
-    color:#222;
+    color: #000000;
 }
 
 .amora-grand-total{
@@ -282,7 +282,7 @@
 .amora-payment-note{
     margin-top:18px;
     font-size:13px;
-    color:#777;
+    color: #000000;
     text-align:center;
     line-height:1.6;
 }
@@ -341,7 +341,7 @@
     margin:0;
     font-size:18px;
     font-weight:600;
-    color:#222;
+    color: #000000;
 }
 
 .amora-grand-total small{

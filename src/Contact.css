@@ -29,7 +29,7 @@
 }
 
 .contact-header p {
-    color: #666;
+    color: #000000;
     line-height: 1.9;
     font-size: 17px;
 }
@@ -68,7 +68,7 @@
 }
 
 .info-box p {
-    color: #777;
+    color: #000000;
     line-height: 1.8;
     font-size: 15px;
 }
@@ -89,7 +89,7 @@
 .input-group label {
     display: block;
     margin-bottom: 10px;
-    color: #333;
+    color: #000000;
     font-weight: 500;
 }
 
@@ -108,7 +108,7 @@
     outline: none;
 
     transition: .35s;
-    background: #fff;
+    background: #fa9f26;
 }
 
 .input-group textarea {

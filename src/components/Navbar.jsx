@@ -10,7 +10,7 @@ import { RiArrowDropDownLine } from "react-icons/ri";
 import { AiOutlineDoubleRight } from "react-icons/ai";
 import { IoClose } from "react-icons/io5";
 
-import amora from '../assets/AmoraLogo.jpeg'
+import amora from '../assets/eehook.jpeg'
 import WishlistQuery from "../features/wishlist/queries/WishlistQuery.jsx";
 import Offer_Query from "../hooks/offers/queries/Offer_Query.jsx";
 import Cart_query from "../features/cart/queries/Cart_query.jsx";
@@ -18,8 +18,8 @@ import ShopBy_categoryQuery from "../features/shop_by_category/queries/ShopBy_ca
 import { getImageUrl } from "../utils/imageUrl.js";
 function Navbar() {
 
-    const { data = [], isLoading } = ShopBy_categoryQuery();
-
+    const { data: rawData, isLoading } = ShopBy_categoryQuery();
+    const data = Array.isArray(rawData) ? rawData : [];
 
     const { data: offers = [] } = Offer_Query();
     const [offerActive, setOfferActive] = useState(false);
@@ -157,7 +157,7 @@ const cartLength = cart.total_items ?? 0;
                                                                 </NavLink>
 
                                                                 <ul>
-                                                                    {category.subcategories.map((sub) => (
+                                                                    {(category.subcategories || []).map((sub) => (
                                                                         <li key={sub.id} >
                                                                             <NavLink onClick={() => setShowMega(false)}
                                                                                 to={`/shop?category=${category.id}&subcategory=${sub.id}`}

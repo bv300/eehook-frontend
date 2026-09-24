@@ -7,7 +7,8 @@ import Hero_Query from "../queries/Hero_Query";
 
 const Heropage = () => {
 
-  const { data: heroSlides = [] } = Hero_Query();
+  const { data: rawHeroSlides } = Hero_Query();
+  const heroSlides = Array.isArray(rawHeroSlides) ? rawHeroSlides : [];
 
   const [currentSlide, setCurrentSlide] = useState(0);
 

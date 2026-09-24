@@ -16,10 +16,11 @@ import { getImageUrl } from "../../../utils/imageUrl";
 import showToast from "../../../utils/toast";
 
 function Product_card({
-    products = [],
+    products: rawProducts,
     isLoading,
     error
 }) {
+    const products = Array.isArray(rawProducts) ? rawProducts : [];
 
 
 
