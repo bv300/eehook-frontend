@@ -1,0 +1,292 @@
+.hero{
+    width:100%;
+    height:90svh;
+    position:relative;
+    overflow:hidden;
+    background:#f9ecec;
+    margin-top: 75px;
+}
+
+/* ---------------- Slide ---------------- */
+
+.hero-slide{
+    position:absolute;
+    inset:0;
+
+    opacity:0;
+    visibility:hidden;
+
+    z-index:1;
+
+    transition:
+        opacity 1.4s cubic-bezier(.4, 0, .2, 1),
+        visibility 1.4s;
+}
+
+.hero-slide.active{
+    opacity:1;
+    visibility:visible;
+    z-index:2;
+}
+
+.hero-image{
+    width:100%;
+    height:100%;
+
+    object-fit:cover;
+    object-position:right;
+
+    display:block;
+
+    transform:scale(1.025);
+
+    transition:
+        transform 6s cubic-bezier(.22, 1, .36, 1);
+
+    will-change:transform;
+}
+
+.hero-slide.active .hero-image{
+    transform:scale(1);
+}
+
+.hero-overlay{
+    position:absolute;
+    inset:0;
+
+    background:
+    linear-gradient(
+        to top,
+        rgba(0,0,0,.70),
+        rgba(0,0,0,.15),
+        rgba(0,0,0,.08)
+    );
+
+    transition:opacity 1.2s ease;
+}
+
+/* .hero-overlay{
+    position:absolute;
+    inset:0;
+    background-color: #36303066;
+} */
+
+
+
+/* ---------------- Content ---------------- */
+
+.hero-content{
+    position:absolute;
+
+    left:7%;
+    bottom:10%;
+
+    z-index:3;
+
+    color:#fff;
+    max-width:560px;
+
+    opacity:0;
+    transform:translateY(18px);
+
+    transition:
+        opacity .8s ease .25s,
+        transform .9s cubic-bezier(.22, 1, .36, 1) .25s;
+}
+
+.hero-slide.active .hero-content{
+    opacity:1;
+    transform:translateY(0);
+}
+
+.hero-subtitle{
+    display:block;
+    margin-bottom:15px;
+    font-size:.85rem;
+    letter-spacing:4px;
+    text-transform:uppercase;
+    color:#f9ecec;
+}
+
+.hero-content h1{
+    font-size:4rem;
+    line-height:1.1;
+    margin-bottom:18px;
+    font-family:"Playfair Display",serif;
+    font-weight:500;
+}
+
+.hero-content p{
+    font-size:1rem;
+    line-height:1.8;
+    margin-bottom:35px;
+    color:rgba(255,255,255,.92);
+    max-width:480px;
+}
+
+.shop-btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding:15px 34px;
+    background:#fff;
+    color:#222;
+    text-decoration:none;
+    font-weight:600;
+    transition:.3s;
+    border-radius:3px;
+}
+
+.shop-btn:hover{
+    background:#f9ecec;
+}
+
+/* ---------------- Dots ---------------- */
+
+.hero-dots{
+    position:absolute;
+    bottom:30px;
+    left:50%;
+    transform:translateX(-50%);
+    display:flex;
+    gap:10px;
+    z-index:5;
+}
+
+.dot{
+    width:12px;
+    height:12px;
+    border-radius:50%;
+    border:none;
+    background:rgba(255,255,255,.45);
+    cursor:pointer;
+    padding:0;
+
+    transition:
+        width .4s cubic-bezier(.22, 1, .36, 1),
+        height .4s ease,
+        background-color .3s ease,
+        color .3s ease;
+}
+
+.dot span{
+    display:none;
+}
+
+.active-dot{
+    width:34px;
+    border-radius:20px;
+    background:#fff;
+}
+
+/* ---------------- Tablet ---------------- */
+
+@media(max-width:768px){
+.hero-section{
+        height:75svh;
+    }
+
+.hero-content{
+    left:6%;
+    right:6%;
+    bottom:11%;
+    max-width:100%;
+}
+
+.hero-content h1{
+    font-size:2.9rem;
+}
+
+.hero-content p{
+    font-size:.95rem;
+}
+
+.hero-dots{
+    bottom:22px;
+}
+
+.dot{
+    width:28px;
+    height:28px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:.8rem;
+    color:#fff;
+    background:rgba(255,255,255,.35);
+}
+
+.dot span{
+    display:block;
+}
+
+.active-dot{
+    width:32px;
+    height:32px;
+    background:#fff;
+    color:#222;
+}
+
+}
+
+/* ---------------- Mobile ---------------- */
+
+@media(max-width:480px){
+
+.hero-content{
+    left:5%;
+    right:5%;
+    bottom:13%;
+}
+
+.hero-subtitle{
+    font-size:.72rem;
+    letter-spacing:2px;
+}
+
+.hero-content h1{
+    font-size:2.2rem;
+}
+
+.hero-content p{
+    font-size:.9rem;
+    line-height:1.6;
+    margin-bottom:28px;
+}
+
+.shop-btn{
+    width:100%;
+    padding:14px;
+}
+
+.hero-dots{
+    bottom:18px;
+    gap:8px;
+}
+
+.dot{
+    width:26px;
+    height:26px;
+    font-size:.72rem;
+}
+
+}
+
+/* -------- 320px -------- */
+
+@media(max-width:320px){
+
+.hero-content h1{
+    font-size:1.9rem;
+}
+
+.hero-content p{
+    font-size:.82rem;
+}
+
+.shop-btn{
+    font-size:.85rem;
+}
+
+}

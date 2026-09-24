@@ -1,0 +1,467 @@
+.amora-checkout{
+    max-width:1280px;
+    margin:40px auto;
+    padding:0 20px;
+    font-family:"Poppins",sans-serif;
+    padding-top: 53px;
+}
+
+.amora-checkout-header{
+    margin-bottom:32px;
+}
+
+.amora-checkout-title{
+    font-size:34px;
+    font-weight:600;
+    color: #8b2f45;
+    margin-bottom:8px;
+    letter-spacing:-.5px;
+}
+
+.amora-checkout-subtitle{
+    font-size:15px;
+    color:#6b7280;
+}
+
+.amora-checkout-wrapper{
+    display:grid;
+    grid-template-columns:minmax(0,2fr) 420px;
+    gap:32px;
+    align-items:start;
+}
+
+.amora-checkout-left{
+    display:flex;
+    flex-direction:column;
+    gap:24px;
+}
+
+.amora-checkout-right{
+    position:sticky;
+    top:20px;
+}
+
+.amora-checkout-card{
+    background:#fff;
+    border:1px solid #ececec;
+    border-radius:14px;
+    padding:24px;
+    transition:border-color .25s ease,box-shadow .25s ease;
+}
+
+.amora-checkout-card:hover{
+    border-color:#ddd;
+    box-shadow:0 8px 24px rgba(0,0,0,.06);
+}
+
+.amora-card-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:22px;
+}
+
+.amora-card-header h2,
+.amora-checkout-card h2{
+    font-size:21px;
+    font-weight:600;
+    color:#222;
+}
+
+.amora-add-address-btn{
+    border:none;
+    background:#8b2f45;
+    color:#fff;
+    padding:10px 18px;
+    border-radius:8px;
+    font-size:14px;
+    font-weight:500;
+    cursor:pointer;
+    transition:background .25s ease;
+}
+
+.amora-add-address-btn:hover{
+    background:#74273a;
+}
+
+.amora-add-address-btn:active{
+    transform:scale(.98);
+}
+
+.amora-address-card{
+    display:flex;
+    gap:16px;
+    align-items:flex-start;
+    padding:18px;
+    border:1px solid #e6e6e6;
+    border-radius:12px;
+    margin-bottom:16px;
+    cursor:pointer;
+    transition:border-color .25s ease,background .25s ease;
+}
+
+.amora-address-card:last-child{
+    margin-bottom:0;
+}
+
+.amora-address-card:hover{
+    border-color:#c7c7c7;
+    background:#fafafa;
+}
+
+.amora-address-card.active{
+    border-color:#8b2f45;
+    background:#fff9fa;
+}
+
+.amora-address-card input{
+    margin-top:4px;
+    accent-color:#8b2f45;
+}
+
+.amora-address-info{
+    flex:1;
+}
+
+.amora-address-info h4{
+    font-size:17px;
+    font-weight:600;
+    color:#222;
+    margin-bottom:6px;
+}
+
+.amora-address-info p{
+    font-size:14px;
+    color:#666;
+    line-height:1.6;
+    margin-bottom:2px;
+}
+
+.amora-payment-card{
+    display:flex;
+    align-items:flex-start;
+    gap:15px;
+    padding:18px;
+    margin-top:18px;
+    border:1px solid #e6e6e6;
+    border-radius:12px;
+    transition:border-color .25s ease;
+}
+
+.amora-payment-card:hover{
+    border-color:#d2d2d2;
+}
+
+.amora-payment-title{
+    font-size:16px;
+    font-weight:600;
+    color:#222;
+    margin-bottom:5px;
+}
+
+.amora-payment-card p{
+    font-size:14px;
+    color:#666;
+    line-height:1.6;
+}
+
+.amora-empty-box{
+    padding:45px 20px;
+    border:1px dashed #d7d7d7;
+    border-radius:10px;
+    text-align:center;
+    color:#777;
+    font-size:15px;
+}
+.amora-summary-item{
+    display:flex;
+    align-items:center;
+    gap:16px;
+    padding:18px 0;
+    border-bottom:1px solid #efefef;
+}
+
+.amora-summary-item:last-child{
+    border-bottom:none;
+}
+
+.amora-summary-image{
+    width:78px;
+    height:96px;
+    border-radius:10px;
+    overflow:hidden;
+    background:#f7f7f7;
+    flex-shrink:0;
+}
+
+.amora-summary-image img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+    transition:transform .3s ease;
+}
+
+.amora-summary-item:hover .amora-summary-image img{
+    transform:scale(1.05);
+}
+
+.amora-summary-details{
+    flex:1;
+}
+
+.amora-summary-details h4{
+    font-size:16px;
+    font-weight:600;
+    color:#222;
+    margin-bottom:6px;
+    line-height:1.4;
+}
+
+.amora-summary-details p{
+    font-size:13px;
+    color:#777;
+    margin-bottom:4px;
+}
+
+.amora-summary-price{
+    font-size:17px;
+    font-weight:600;
+    color:#222;
+    white-space:nowrap;
+}
+
+.amora-summary-total{
+    margin-top:24px;
+    padding-top:22px;
+    border-top:1px solid #e8e8e8;
+}
+
+.amora-summary-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:14px;
+    font-size:15px;
+    color:#555;
+}
+
+.amora-summary-row:last-child{
+    margin-bottom:0;
+}
+
+.amora-summary-row span:last-child{
+    font-weight:500;
+    color:#222;
+}
+
+.amora-grand-total{
+    margin-top:18px;
+    padding-top:18px;
+    border-top:1px solid #ddd;
+    font-size:18px;
+    font-weight:600;
+}
+
+.amora-grand-total strong{
+    color:#111;
+}
+
+.amora-shipping-free{
+    color:#1a8f3c !important;
+    font-weight:600 !important;
+}
+
+.amora-checkout-divider{
+    width:100%;
+    height:1px;
+    background:#ececec;
+    margin:22px 0;
+}
+
+.amora-payment-note{
+    margin-top:18px;
+    font-size:13px;
+    color:#777;
+    text-align:center;
+    line-height:1.6;
+}
+.amora-checkout-btn{
+    width:100%;
+    height:52px;
+    border:none;
+    border-radius:10px;
+    background:#8b2f45;
+    color:#fff;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    transition:background .25s ease,box-shadow .25s ease;
+}
+
+.amora-checkout-btn:hover{
+    background:#74273a;
+    box-shadow:0 10px 24px rgba(139,47,69,.22);
+}
+
+.amora-checkout-btn:active{
+    transform:scale(.99);
+}
+
+.amora-checkout-btn:disabled{
+    background:#c7c7c7;
+    cursor:not-allowed;
+    box-shadow:none;
+}
+
+.amora-loading{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:60vh;
+    font-size:18px;
+    font-weight:600;
+    color:#444;
+
+}
+
+.amora-summary-divider{
+    height:1px;
+    background:#e8e8e8;
+    margin:18px 0;
+}
+
+.amora-grand-total{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.amora-grand-total h3{
+    margin:0;
+    font-size:18px;
+    font-weight:600;
+    color:#222;
+}
+
+.amora-grand-total small{
+    display:block;
+    margin-top:4px;
+    color:#888;
+    font-size:12px;
+}
+
+.amora-grand-total h2{
+    margin:0;
+    font-size:28px;
+    font-weight:700;
+    color:#8b2f45;
+    letter-spacing:-.5px;
+}
+
+@media (max-width:1024px){
+
+    .amora-checkout-wrapper{
+        grid-template-columns:1fr;
+    }
+
+    .amora-checkout-right{
+        position:static;
+    }
+
+}
+
+@media (max-width:768px){
+
+    .amora-checkout{
+        margin:24px auto;
+        padding:0 16px;
+    }
+
+    .amora-checkout-title{
+        font-size:28px;
+    }
+
+    .amora-checkout-card{
+        padding:20px;
+    }
+
+    .amora-card-header{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:16px;
+    }
+
+    .amora-add-address-btn{
+        width:100%;
+    }
+
+    .amora-summary-item{
+        align-items:flex-start;
+    }
+
+    .amora-summary-image{
+        width:70px;
+        height:90px;
+    }
+
+}
+
+@media (max-width:576px){
+
+    .amora-checkout{
+        padding:0 12px;
+    }
+
+    .amora-checkout-title{
+        font-size:24px;
+    }
+
+    .amora-checkout-subtitle{
+        font-size:14px;
+    }
+
+    .amora-checkout-card{
+        padding:16px;
+        border-radius:10px;
+    }
+
+    .amora-address-card{
+        padding:14px;
+    }
+
+    .amora-summary-item{
+        gap:12px;
+    }
+
+    .amora-summary-image{
+        width:64px;
+        height:82px;
+    }
+
+    .amora-summary-details h4{
+        font-size:15px;
+    }
+
+    .amora-summary-details p{
+        font-size:12px;
+    }
+
+    .amora-summary-price{
+        font-size:15px;
+    }
+
+    .amora-summary-row{
+        font-size:14px;
+    }
+
+    .amora-grand-total{
+        font-size:17px;
+    }
+
+    .amora-checkout-btn{
+        height:48px;
+        font-size:14px;
+    }
+
+}
