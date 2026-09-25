@@ -1,9 +1,8 @@
 .footer {
     width: 100%;
-    background: #F8F8F8;
+    background: #4B636D;
     padding: 50px 8%;
-
-    background-color: #F8F8F8;
+    color: #FFFFFF;
 }
 
 .footer-container {
@@ -24,13 +23,13 @@
 }
 
 .brand p {
-    color: #3D4D5C;
+    color: rgba(255,255,255,0.75);
     line-height: 1.7;
     margin-bottom: 18px;
 }
 
 .footer-column h3 {
-    color: #FF9900;
+    color: #FF9000;
     margin-bottom: 18px;
     font-size: 18px;
     text-transform: uppercase;
@@ -42,7 +41,7 @@
 
 .footer-column ul li {
     margin-bottom: 12px;
-    color: #3D4D5C;
+    color: rgba(255,255,255,0.7);
     cursor: pointer;
     transition: .3s;
     display: flex;
@@ -51,23 +50,23 @@
 }
 
 .footer-column ul li:hover {
-    color: #FF9900;
+    color: #FF9000;
 }
 .footer-column a:hover {
-    color: #FF9900;
+    color: #FF9000;
 }
 .footer-column a{
-    color: #3D4D5C;
+    color: rgba(255,255,255,0.7);
 }
 
 .social-icons {
     display: flex;
     gap: 18px;
     font-size: 20px;
-    color: #FF9900;
+    color: #FF9000;
 }
 .social-icons a{
-    color: #FF9900;
+    color: #FF9000;
 }
 
 .social-icons a {
@@ -90,8 +89,8 @@
 }
 
 .copyright {
-    background: #FF9900;
-    color: #F8F8F8;
+    background: #3A4F58;
+    color: rgba(255,255,255,0.85);
     height: 40px;
     display: flex;
     align-items: center;

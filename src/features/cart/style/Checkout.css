@@ -1,4 +1,4 @@
-.amora-checkout{
+.eehook-checkout{
     max-width:1280px;
     margin:40px auto;
     padding:0 20px;
@@ -6,72 +6,72 @@
     padding-top: 53px;
 }
 
-.amora-checkout-header{
+.eehook-checkout-header{
     margin-bottom:32px;
 }
 
-.amora-checkout-title{
+.eehook-checkout-title{
     font-size:34px;
     font-weight:600;
-    color: #FF9900;
+    color: #FF9000;
     margin-bottom:8px;
     letter-spacing:-.5px;
 }
 
-.amora-checkout-subtitle{
+.eehook-checkout-subtitle{
     font-size:15px;
     color:#6b7280;
 }
 
-.amora-checkout-wrapper{
+.eehook-checkout-wrapper{
     display:grid;
     grid-template-columns:minmax(0,2fr) 420px;
     gap:32px;
     align-items:start;
 }
 
-.amora-checkout-left{
+.eehook-checkout-left{
     display:flex;
     flex-direction:column;
     gap:24px;
 }
 
-.amora-checkout-right{
+.eehook-checkout-right{
     position:sticky;
     top:20px;
 }
 
-.amora-checkout-card{
-    background: #FF9900;
+.eehook-checkout-card{
+    background: #FF9000;
     border:1px solid #ececec;
     border-radius:14px;
     padding:24px;
     transition:border-color .25s ease,box-shadow .25s ease;
 }
 
-.amora-checkout-card:hover{
-    border-color:#ddd;
+.eehook-checkout-card:hover{
+    border-color: #E2E6E0;
     box-shadow:0 8px 24px rgba(0,0,0,.06);
 }
 
-.amora-card-header{
+.eehook-card-header{
     display:flex;
     justify-content:space-between;
     align-items:center;
     margin-bottom:22px;
 }
 
-.amora-card-header h2,
-.amora-checkout-card h2{
+.eehook-card-header h2,
+.eehook-checkout-card h2{
     font-size:21px;
     font-weight:600;
-    color: #3D4D5C;
+    color: #4B636D;
 }
 
-.amora-add-address-btn{
+.eehook-add-address-btn{
     border:none;
-    background:#FF9900;
-    color:#F8F8F8;
+    background:#FF9000;
+    color: #FFFFFF;
     padding:10px 18px;
     border-radius:8px;
     font-size:14px;
@@ -80,15 +80,15 @@
     transition:background .25s ease;
 }
 
-.amora-add-address-btn:hover{
-    background:#E68A00;
+.eehook-add-address-btn:hover{
+    background:#D97F00;
 }
 
-.amora-add-address-btn:active{
+.eehook-add-address-btn:active{
     transform:scale(.98);
 }
 
-.amora-address-card{
+.eehook-address-card{
     display:flex;
     gap:16px;
     align-items:flex-start;
@@ -100,44 +100,44 @@
     transition:border-color .25s ease,background .25s ease;
 }
 
-.amora-address-card:last-child{
+.eehook-address-card:last-child{
     margin-bottom:0;
 }
 
-.amora-address-card:hover{
+.eehook-address-card:hover{
     border-color:#c7c7c7;
-    background:#fafafa;
+    background:#F8F9F3;
 }
 
-.amora-address-card.active{
-    border-color:#FF9900;
+.eehook-address-card.active{
+    border-color:#FF9000;
     background:#FFF5E5;
 }
 
-.amora-address-card input{
+.eehook-address-card input{
     margin-top:4px;
-    accent-color:#FF9900;
+    accent-color:#FF9000;
 }
 
-.amora-address-info{
+.eehook-address-info{
     flex:1;
 }
 
-.amora-address-info h4{
+.eehook-address-info h4{
     font-size:17px;
     font-weight:600;
-    color: #3D4D5C;
+    color: #4B636D;
     margin-bottom:6px;
 }
 
-.amora-address-info p{
+.eehook-address-info p{
     font-size:14px;
-    color: #3D4D5C;
+    color: #4B636D;
     line-height:1.6;
     margin-bottom:2px;
 }
 
-.amora-payment-card{
+.eehook-payment-card{
     display:flex;
     align-items:flex-start;
     gap:15px;
@@ -148,32 +148,32 @@
     transition:border-color .25s ease;
 }
 
-.amora-payment-card:hover{
+.eehook-payment-card:hover{
     border-color:#d2d2d2;
 }
 
-.amora-payment-title{
+.eehook-payment-title{
     font-size:16px;
     font-weight:600;
-    color: #3D4D5C;
+    color: #4B636D;
     margin-bottom:5px;
 }
 
-.amora-payment-card p{
+.eehook-payment-card p{
     font-size:14px;
-    color: #3D4D5C;
+    color: #4B636D;
     line-height:1.6;
 }
 
-.amora-empty-box{
+.eehook-empty-box{
     padding:45px 20px;
     border:1px dashed #d7d7d7;
     border-radius:10px;
     text-align:center;
-    color: #3D4D5C;
+    color: #4B636D;
     font-size:15px;
 }
-.amora-summary-item{
+.eehook-summary-item{
     display:flex;
     align-items:center;
     gap:16px;
@@ -181,11 +181,11 @@
     border-bottom:1px solid #efefef;
 }
 
-.amora-summary-item:last-child{
+.eehook-summary-item:last-child{
     border-bottom:none;
 }
 
-.amora-summary-image{
+.eehook-summary-image{
     width:78px;
     height:96px;
     border-radius:10px;
@@ -194,7 +194,7 @@
     flex-shrink:0;
 }
 
-.amora-summary-image img{
+.eehook-summary-image img{
     width:100%;
     height:100%;
     object-fit:cover;
@@ -202,60 +202,60 @@
     transition:transform .3s ease;
 }
 
-.amora-summary-item:hover .amora-summary-image img{
+.eehook-summary-item:hover .eehook-summary-image img{
     transform:scale(1.05);
 }
 
-.amora-summary-details{
+.eehook-summary-details{
     flex:1;
 }
 
-.amora-summary-details h4{
+.eehook-summary-details h4{
     font-size:16px;
     font-weight:600;
-    color: #3D4D5C;
+    color: #4B636D;
     margin-bottom:6px;
     line-height:1.4;
 }
 
-.amora-summary-details p{
+.eehook-summary-details p{
     font-size:13px;
-    color: #3D4D5C;
+    color: #4B636D;
     margin-bottom:4px;
 }
 
-.amora-summary-price{
+.eehook-summary-price{
     font-size:17px;
     font-weight:600;
-    color: #3D4D5C;
+    color: #4B636D;
     white-space:nowrap;
 }
 
-.amora-summary-total{
+.eehook-summary-total{
     margin-top:24px;
     padding-top:22px;
     border-top:1px solid #e8e8e8;
 }
 
-.amora-summary-row{
+.eehook-summary-row{
     display:flex;
     justify-content:space-between;
     align-items:center;
     margin-bottom:14px;
     font-size:15px;
-    color: #3D4D5C;
+    color: #4B636D;
 }
 
-.amora-summary-row:last-child{
+.eehook-summary-row:last-child{
     margin-bottom:0;
 }
 
-.amora-summary-row span:last-child{
+.eehook-summary-row span:last-child{
     font-weight:500;
-    color: #3D4D5C;
+    color: #4B636D;
 }
 
-.amora-grand-total{
+.eehook-grand-total{
     margin-top:18px;
     padding-top:18px;
     border-top:1px solid #ddd;
@@ -263,109 +263,109 @@
     font-weight:600;
 }
 
-.amora-grand-total strong{
-    color:#3D4D5C;
+.eehook-grand-total strong{
+    color:#4B636D;
 }
 
-.amora-shipping-free{
+.eehook-shipping-free{
     color:#1a8f3c !important;
     font-weight:600 !important;
 }
 
-.amora-checkout-divider{
+.eehook-checkout-divider{
     width:100%;
     height:1px;
     background:#ececec;
     margin:22px 0;
 }
 
-.amora-payment-note{
+.eehook-payment-note{
     margin-top:18px;
     font-size:13px;
-    color: #3D4D5C;
+    color: #4B636D;
     text-align:center;
     line-height:1.6;
 }
-.amora-checkout-btn{
+.eehook-checkout-btn{
     width:100%;
     height:52px;
     border:none;
     border-radius:10px;
-    background:#FF9900;
-    color:#F8F8F8;
+    background:#FF9000;
+    color: #FFFFFF;
     font-size:15px;
     font-weight:600;
     cursor:pointer;
     transition:background .25s ease,box-shadow .25s ease;
 }
 
-.amora-checkout-btn:hover{
-    background:#E68A00;
+.eehook-checkout-btn:hover{
+    background:#D97F00;
     box-shadow:0 10px 24px rgba(139,47,69,.22);
 }
 
-.amora-checkout-btn:active{
+.eehook-checkout-btn:active{
     transform:scale(.99);
 }
 
-.amora-checkout-btn:disabled{
+.eehook-checkout-btn:disabled{
     background:#c7c7c7;
     cursor:not-allowed;
     box-shadow:none;
 }
 
-.amora-loading{
+.eehook-loading{
     display:flex;
     justify-content:center;
     align-items:center;
     min-height:60vh;
     font-size:18px;
     font-weight:600;
-    color:#3D4D5C;
+    color:#4B636D;
 
 }
 
-.amora-summary-divider{
+.eehook-summary-divider{
     height:1px;
     background:#e8e8e8;
     margin:18px 0;
 }
 
-.amora-grand-total{
+.eehook-grand-total{
     display:flex;
     justify-content:space-between;
     align-items:center;
 }
 
-.amora-grand-total h3{
+.eehook-grand-total h3{
     margin:0;
     font-size:18px;
     font-weight:600;
-    color: #3D4D5C;
+    color: #4B636D;
 }
 
-.amora-grand-total small{
+.eehook-grand-total small{
     display:block;
     margin-top:4px;
     color:#888;
     font-size:12px;
 }
 
-.amora-grand-total h2{
+.eehook-grand-total h2{
     margin:0;
     font-size:28px;
     font-weight:700;
-    color:#FF9900;
+    color:#FF9000;
     letter-spacing:-.5px;
 }
 
 @media (max-width:1024px){
 
-    .amora-checkout-wrapper{
+    .eehook-checkout-wrapper{
         grid-template-columns:1fr;
     }
 
-    .amora-checkout-right{
+    .eehook-checkout-right{
         position:static;
     }
 
@@ -373,34 +373,34 @@
 
 @media (max-width:768px){
 
-    .amora-checkout{
+    .eehook-checkout{
         margin:24px auto;
         padding:0 16px;
     }
 
-    .amora-checkout-title{
+    .eehook-checkout-title{
         font-size:28px;
     }
 
-    .amora-checkout-card{
+    .eehook-checkout-card{
         padding:20px;
     }
 
-    .amora-card-header{
+    .eehook-card-header{
         flex-direction:column;
         align-items:flex-start;
         gap:16px;
     }
 
-    .amora-add-address-btn{
+    .eehook-add-address-btn{
         width:100%;
     }
 
-    .amora-summary-item{
+    .eehook-summary-item{
         align-items:flex-start;
     }
 
-    .amora-summary-image{
+    .eehook-summary-image{
         width:70px;
         height:90px;
     }
@@ -409,57 +409,57 @@
 
 @media (max-width:576px){
 
-    .amora-checkout{
+    .eehook-checkout{
         padding:0 12px;
     }
 
-    .amora-checkout-title{
+    .eehook-checkout-title{
         font-size:24px;
     }
 
-    .amora-checkout-subtitle{
+    .eehook-checkout-subtitle{
         font-size:14px;
     }
 
-    .amora-checkout-card{
+    .eehook-checkout-card{
         padding:16px;
         border-radius:10px;
     }
 
-    .amora-address-card{
+    .eehook-address-card{
         padding:14px;
     }
 
-    .amora-summary-item{
+    .eehook-summary-item{
         gap:12px;
     }
 
-    .amora-summary-image{
+    .eehook-summary-image{
         width:64px;
         height:82px;
     }
 
-    .amora-summary-details h4{
+    .eehook-summary-details h4{
         font-size:15px;
     }
 
-    .amora-summary-details p{
+    .eehook-summary-details p{
         font-size:12px;
     }
 
-    .amora-summary-price{
+    .eehook-summary-price{
         font-size:15px;
     }
 
-    .amora-summary-row{
+    .eehook-summary-row{
         font-size:14px;
     }
 
-    .amora-grand-total{
+    .eehook-grand-total{
         font-size:17px;
     }
 
-    .amora-checkout-btn{
+    .eehook-checkout-btn{
         height:48px;
         font-size:14px;
     }

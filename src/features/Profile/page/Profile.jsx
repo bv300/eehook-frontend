@@ -36,7 +36,7 @@ const Profile = () => {
     address_line: "",
     city: "",
     postal_code: "",
-    country: "New Zealand",
+    country: "United Arab Emirates",
     is_default: false
   });
 
@@ -105,7 +105,7 @@ const Profile = () => {
       address_line: "",
       city: "",
       postal_code: "",
-      country: "New Zealand",
+      country: "United Arab Emirates",
       is_default: false
     });
 
@@ -203,7 +203,7 @@ const Profile = () => {
       address_line: address.address_line || "",
       city: address.city || "",
       postal_code: address.postal_code || "",
-      country: address.country || "New Zealand",
+      country: address.country || "United Arab Emirates",
       is_default: address.is_default
     });
 

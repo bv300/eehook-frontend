@@ -56,7 +56,7 @@ body {
 
 .clear-btn {
     padding: 12px 22px;
-    background: #F8F8F8;
+    background: #F8F9F3;
     border: 1px solid #d7cfcf;
     border-radius: 8px;
     cursor: pointer;
@@ -65,7 +65,7 @@ body {
 .bag-btn {
     padding: 12px 22px;
     background: #6d0f2b;
-    color: #F8F8F8;
+    color: #FFFFFF;
     border: none;
     border-radius: 8px;
     cursor: pointer;
@@ -89,7 +89,7 @@ body {
 }
 
 .wishlist-card {
-    background: #F8F8F8;
+    background: #F8F9F3;
     border-radius: 14px;
     overflow: hidden;
     position: relative;
@@ -117,7 +117,7 @@ body {
     width: 34px;
     height: 34px;
     border-radius: 50%;
-    background: #F8F8F8;
+    background: #F8F9F3;
     border: none;
     box-shadow: 0 2px 8px rgba(0, 0, 0, .15);
     cursor: pointer;
@@ -138,7 +138,7 @@ body {
     text-transform: uppercase;
     letter-spacing: 1.2px;
     font-size: 13px;
-    color: #801439;
+    color: #4B636D;
     /* Dark Wine Text color */
     font-weight: 700;
     margin-bottom: 5px;
@@ -168,7 +168,7 @@ body {
     width: 100%;
     padding: 13px;
     background: #6d0f2b;
-    color: #F8F8F8;
+    color: #FFFFFF;
     border: none;
     border-radius: 8px;
     cursor: pointer;
@@ -215,7 +215,7 @@ body {
 
 .recommend-card {
     width: 290px;
-    background: #F8F8F8;
+    background: #F8F9F3;
     border-radius: 12px;
     overflow: hidden;
     padding-bottom: 16px;
@@ -247,8 +247,8 @@ body {
     position:absolute;
     top:15px;
     left:15px;
-    background:#7d1233;
-    color:#F8F8F8;
+    background:#4B636D;
+    color: #FFFFFF;
     padding:6px 12px;
     border-radius:20px;
     font-size:12px;
@@ -271,7 +271,7 @@ body {
 .wishlist-new-price{
     font-size:22px;
     font-weight:700;
-    color:#7d1233;
+    color:#4B636D;
 }
 
 /* Tablet */

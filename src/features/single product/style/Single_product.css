@@ -1,6 +1,6 @@
 .single-product-main {
     margin-top: 80px;
-    background: #F8F8F8;
+    background: #F8F9F3;
 }
 .single-product-toshop{
     padding: 30px 0px 0px 30px ;
@@ -89,7 +89,7 @@
 
     font-size: 42px;
     margin-bottom: 15px;
-    color: #3D4D5C;
+    color: #4B636D;
 
 }
 
@@ -103,7 +103,7 @@
 
 .rating span {
 
-    color: #3D4D5C;
+    color: #4B636D;
     font-size: 15px;
     margin-left: 8px;
 
@@ -143,7 +143,7 @@
 
 .description {
 
-    color: #3D4D5C;
+    color: #4B636D;
     line-height: 1.8;
     margin-bottom: 30px;
 
@@ -214,8 +214,8 @@
 .size-btn {
 
     padding: 13px;
-    border: 1px solid #ddd;
-    background: #F8F8F8;
+    border: 1px solid #E2E6E0;
+    background: #F8F9F3;
     cursor: pointer;
     border-radius: 8px;
     transition: .3s;
@@ -241,7 +241,7 @@
     margin-top: 15px;
     padding: 16px;
     background: #7d0930;
-    color: #F8F8F8;
+    color: #FFFFFF;
     border: none;
     border-radius: 8px;
     font-size: 17px;
@@ -263,7 +263,7 @@
     margin-top: 15px;
     padding: 16px;
     border: 1px solid #8b0d2e;
-    background: #F8F8F8;
+    background: #F8F9F3;
     color: #8b0d2e;
     border-radius: 8px;
     cursor: pointer;
@@ -275,7 +275,7 @@
 .buy-btn:hover {
 
     background: #8b0d2e;
-    color: #F8F8F8;
+    color: #FFFFFF;
 
 }
 
@@ -283,9 +283,9 @@
 
     margin-top: 25px;
     padding: 18px;
-    border: 1px solid #eee;
+    border: 1px solid #EEEFE9;
     border-radius: 10px;
-    color: #3D4D5C;
+    color: #4B636D;
 
 }
 /* 
@@ -299,7 +299,7 @@
 .new-price{
     font-size:42px;
     font-weight:700;
-    color:#7d1233;
+    color:#4B636D;
 } */
 
 /* .discount{
@@ -315,7 +315,7 @@
     margin-top:10px;
     font-size:15px;
     font-weight:500;
-    color:#3D4D5C; */
+    color:#4B636D; */
 /* } */
 
 .price{
@@ -355,7 +355,7 @@
 
 .offer-save{
     font-size:16px;
-    color:#3D4D5C;
+    color:#4B636D;
     font-weight:500;
 }
 

@@ -272,14 +272,14 @@ if (error) {
 
                                                                 <span className="old-price">
 
-                                                                    NZD $
+                                                                    AED
                                                                     {Number(startingPrice).toFixed(2)}
 
                                                                 </span>
 
                                                                 <span className="product-price">
 
-                                                                    NZD $
+                                                                    AED
                                                                     {Number(discountedPrice).toFixed(2)}
 
                                                                 </span>
@@ -290,7 +290,7 @@ if (error) {
 
                                                             <span className="product-price">
 
-                                                                NZD $
+                                                                AED
                                                                 {Number(startingPrice).toFixed(2)}
 
                                                             </span>

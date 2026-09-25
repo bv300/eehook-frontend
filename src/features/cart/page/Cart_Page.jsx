@@ -331,7 +331,7 @@ function Cart_page() {
 
                                                     <del>
 
-                                                        NZD $
+                                                        AED
                                                         {
                                                             (
                                                                 cart.originalPrice *
@@ -346,7 +346,7 @@ function Cart_page() {
 
                                             <h5>
 
-                                                NZD $
+                                                AED
 
                                                 {
                                                     (
@@ -389,7 +389,7 @@ function Cart_page() {
                                 </span>
 
                                 <span>
-                                    NZD ${subtotal.toFixed(2)}
+                                    AED{subtotal.toFixed(2)}
                                 </span>
 
                             </div>
@@ -401,7 +401,7 @@ function Cart_page() {
                                 </span>
 
                                 <span>
-                                    NZD ${shipping.toFixed(2)}
+                                    AED{shipping.toFixed(2)}
                                 </span>
 
                             </div>
@@ -413,7 +413,7 @@ function Cart_page() {
                                 </span>
 
                                 <span>
-                                    NZD ${total.toFixed(2)}
+                                    AED{total.toFixed(2)}
                                 </span>
 
                             </div>

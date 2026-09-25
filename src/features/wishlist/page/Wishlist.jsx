@@ -98,12 +98,12 @@ export default function Wishlist() {
                                         <div className="wishlist-price-box">
 
                                             <span className="wishlist-old-price">
-                                                NZD $
+                                                AED
                                                 {Number(item.original_price).toFixed(2)}
                                             </span>
 
                                             <span className="wishlist-new-price">
-                                                NZD $
+                                                AED
                                                 {Number(item.discounted_price).toFixed(2)}
                                             </span>
 
@@ -112,7 +112,7 @@ export default function Wishlist() {
                                     ) : (
 
                                         <span className="wishlist-new-price">
-                                            NZD $
+                                            AED
                                             {Number(item.original_price).toFixed(2)}
                                         </span>
 

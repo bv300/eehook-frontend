@@ -3,7 +3,7 @@
     height:90svh;
     position:relative;
     overflow:hidden;
-    background:#F8F8F8;
+    background: #F8F9F3;
     margin-top: 75px;
 }
 
@@ -83,7 +83,7 @@
 
     z-index:3;
 
-    color:#F8F8F8;
+    color: #FFFFFF;
     max-width:560px;
 
     opacity:0;
@@ -105,7 +105,7 @@
     font-size:.85rem;
     letter-spacing:4px;
     text-transform:uppercase;
-    color:#F8F8F8;
+    color: #FFFFFF;
 }
 
 .hero-content h1{
@@ -124,21 +124,38 @@
     max-width:480px;
 }
 
-.shop-btn{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    padding:15px 34px;
-    background:#F8F8F8;
-    color:#3D4D5C;
-    text-decoration:none;
-    font-weight:600;
-    transition:.3s;
-    border-radius:3px;
+.shop-btn-premium {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 40px;
+    background: transparent;
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    font-weight: 400;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    transition: all 0.4s ease;
+    border-radius: 50px;
+    backdrop-filter: blur(5px);
+    gap: 12px;
 }
 
-.shop-btn:hover{
-    background:#F8F8F8;
+.shop-btn-premium .arrow {
+    transition: transform 0.3s ease;
+}
+
+.shop-btn-premium:hover {
+    background: #fff;
+    color: #4B636D;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+.shop-btn-premium:hover .arrow {
+    transform: translateX(5px);
 }
 
 /* ---------------- Dots ---------------- */
@@ -153,30 +170,21 @@
     z-index:5;
 }
 
-.dot{
-    width:12px;
-    height:12px;
-    border-radius:50%;
-    border:none;
-    background:rgba(255,255,255,.45);
-    cursor:pointer;
-    padding:0;
-
-    transition:
-        width .4s cubic-bezier(.22, 1, .36, 1),
-        height .4s ease,
-        background-color .3s ease,
-        color .3s ease;
+.modern-dot {
+    width: 35px;
+    height: 3px;
+    border-radius: 2px;
+    border: none;
+    background: rgba(255, 255, 255, 0.4);
+    cursor: pointer;
+    padding: 0;
+    transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.3s ease;
 }
 
-.dot span{
-    display:none;
-}
-
-.active-dot{
-    width:34px;
-    border-radius:20px;
-    background:#F8F8F8;
+.active-modern-dot {
+    width: 70px;
+    background: #fff;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
 }
 
 /* ---------------- Tablet ---------------- */
@@ -205,27 +213,12 @@
     bottom:22px;
 }
 
-.dot{
-    width:28px;
-    height:28px;
-    border-radius:50%;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:.8rem;
-    color:#F8F8F8;
-    background:rgba(255,255,255,.35);
+.modern-dot {
+    width: 25px;
 }
 
-.dot span{
-    display:block;
-}
-
-.active-dot{
-    width:32px;
-    height:32px;
-    background:#F8F8F8;
-    color:#3D4D5C;
+.active-modern-dot {
+    width: 50px;
 }
 
 }
@@ -255,9 +248,10 @@
     margin-bottom:28px;
 }
 
-.shop-btn{
-    width:100%;
-    padding:14px;
+.shop-btn-premium {
+    width: 100%;
+    padding: 14px;
+    font-size: 0.85rem;
 }
 
 .hero-dots{
@@ -265,10 +259,12 @@
     gap:8px;
 }
 
-.dot{
-    width:26px;
-    height:26px;
-    font-size:.72rem;
+.modern-dot {
+    width: 20px;
+}
+
+.active-modern-dot {
+    width: 40px;
 }
 
 }
@@ -285,8 +281,8 @@
     font-size:.82rem;
 }
 
-.shop-btn{
-    font-size:.85rem;
+.shop-btn-premium {
+    font-size: 0.8rem;
 }
 
 }

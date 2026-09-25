@@ -114,7 +114,7 @@ const Invoice = () => {
                         </h1>
 
                         <p>
-                            Wellington, New Zealand
+                            Dubai, United Arab Emirates
                         </p>
 
                         <p>
@@ -295,13 +295,13 @@ const Invoice = () => {
                                     </td>
 
                                     <td>
-                                        NZ$
+                                        AED
                                         {Number(item.price).toFixed(2)}
                                     </td>
 
                                     <td>
 
-                                        NZ$
+                                        AED
                                         {(
                                             Number(item.price) *
                                             item.quantity
@@ -364,7 +364,7 @@ const Invoice = () => {
                             </span>
 
                             <span>
-                                NZ$ {Number(
+                                AED {Number(
                                     order.subtotal || 0
                                 ).toFixed(2)}
                             </span>
@@ -383,7 +383,7 @@ const Invoice = () => {
                                 {
                                     Number(order.shipping_charge || 0) === 0
                                         ? "FREE"
-                                        : `NZ$ ${Number(
+                                        : `AED ${Number(
                                             order.shipping_charge
                                         ).toFixed(2)}`
                                 }
@@ -400,7 +400,7 @@ const Invoice = () => {
                             </span>
 
                             <strong>
-                                NZ$ {Number(
+                                AED {Number(
                                     order.total_amount || 0
                                 ).toFixed(2)}
                             </strong>

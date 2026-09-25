@@ -377,7 +377,7 @@ const MyOrders = () => {
                                     </span>
 
                                     <strong>
-                                        NZD {Number(
+                                        AED {Number(
                                             order.total_amount || 0
                                         ).toFixed(2)}
                                     </strong>

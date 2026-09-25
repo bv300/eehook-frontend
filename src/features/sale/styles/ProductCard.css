@@ -70,9 +70,9 @@
     position: absolute;
     top: 14px;
     left: 14px;
-    background-color: #801439;
+    background-color: #4B636D;
     /* Elegant deep wine/maroon */
-    color: #F8F8F8;
+    color: #FFFFFF;
     padding: 4px 10px;
     border-radius: 100px;
     font-family: 'Plus Jakarta Sans', sans-serif;
@@ -91,8 +91,8 @@
     height: 32px;
     border: none;
     border-radius: 50%;
-    background: #F8F8F8;
-    color: #801439;
+    background: #F8F9F3;
+    color: #4B636D;
     /* Deep maroon */
     display: flex;
     justify-content: center;
@@ -109,7 +109,7 @@
     height:40px;
     border:none;
     border-radius:50%;
-    background:#F8F8F8;
+    background: #F8F9F3;
     color:#9e9e9e;
     cursor:pointer;
     transition:all .3s ease;
@@ -120,7 +120,7 @@
 }
 
 .favorite_btn.active{
-    color: #801439;
+    color: #4B636D;
 }
 
 .favorite_btn:hover {
@@ -134,8 +134,8 @@
     left: 50%;
     transform: translateX(-50%);
     width: 90%;
-    background-color: #801439;
-    color: #F8F8F8;
+    background-color: #4B636D;
+    color: #FFFFFF;
     border: none;
     padding: 11px 0;
     font-family: 'Plus Jakarta Sans', sans-serif;
@@ -173,7 +173,7 @@
     font-size: 0.65rem;
     text-transform: uppercase;
     letter-spacing: 1.2px;
-    color: #801439;
+    color: #4B636D;
 
     font-weight: 700;
     margin-bottom: 5px;
@@ -222,14 +222,14 @@
 }
 
 .star-icon {
-    color: #801439;
+    color: #4B636D;
     font-size: 0.8rem;
 }
 
 .rating-val {
     font-family: 'Plus Jakarta Sans', sans-serif;
     font-size: 0.75rem;
-    color: #3D4D5C;
+    color: #4B636D;
     font-weight: 600;
 }
 
@@ -263,14 +263,14 @@
     font-weight: 600;
     cursor: pointer;
     background: #f7f7f7;
-    color: #3D4D5C;
+    color: #4B636D;
     border-radius: 4px;
     transition: all 0.2s ease;
 }
 
 .page-num.active {
-    background: #801439;
-    color: #F8F8F8;
+    background: #4B636D;
+    color: #FFFFFF;
 }
 
 .page-num:hover:not(.active) {
@@ -281,8 +281,8 @@
     position: absolute;
     top: 12px;
     left: 12px;
-    background: #7d1233;
-    color: #F8F8F8;
+    background: #4B636D;
+    color: #FFFFFF;
     padding: 6px 12px;
     border-radius: 20px;
     font-size: 12px;
@@ -305,7 +305,7 @@
 }
 
 .new-price {
-    color: #7d1233;
+    color: #4B636D;
     font-size: 17px;
     font-weight: 700;
     line-height: 1.2;
@@ -386,8 +386,8 @@
         position: absolute;
         top: 9px;
         left: 3px;
-        background: #7d1233;
-        color: #F8F8F8;
+        background: #4B636D;
+        color: #FFFFFF;
         padding: 6px 12px;
         border-radius: 20px;
         font-size: 9px;
@@ -402,8 +402,8 @@
         left: 50%;
         transform: translateX(-50%);
         width: 82%;
-        background-color: #801439;
-        color: #F8F8F8;
+        background-color: #4B636D;
+        color: #FFFFFF;
         border: none;
         padding: 7px 0;
         font-family: 'Plus Jakarta Sans', sans-serif;

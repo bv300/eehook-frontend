@@ -1,7 +1,7 @@
 .shop-category {
     width: 100%;
     /* padding:45px 20px; */
-    background: #F8F8F8;
+    background: #F8F9F3;
     text-align: center;
     overflow: hidden;
     max-width: 1200px;
@@ -9,10 +9,10 @@
 }
 
 .shop-category h2 {
-    font-family: Georgia, serif;
-    font-size: 32px;
-    font-weight: 500;
-    color: #FF9900;
+    font-family: 'Playfair Display', serif;
+    font-size: 3rem;
+    font-weight: 600;
+    color: #4B636D;
     margin: 0 0 12px;
 }
 
@@ -42,7 +42,7 @@
 }
 
 .divider-shop span {
-    color: #d89b9b;
+    color: #FF9000;
     font-size: 18px;
 }
 
@@ -84,7 +84,7 @@
     overflow-x: auto;
     overflow-y: hidden;
     scroll-behavior: smooth;
-    justify-content: center;
+    justify-content: flex-start;
     scrollbar-width: none;
     padding: 10px 5px;
 }
@@ -147,7 +147,7 @@
 .category-card p,
 .subcategory-card p {
     margin: 15px 0 0;
-    color: #3D4D5C;
+    color: #4B636D;
     font-size: 14px;
     font-weight: 500;
     font-family: Arial, sans-serif;
@@ -155,12 +155,12 @@
 }
 
 .active-category .image-circle {
-    border: 3px solid #d89b9b;
+    border: 3px solid #FF9000;
     transform: scale(1.05);
 }
 
 .active-category p {
-    color: #FF9900;
+    color: #FF9000;
 }
 
 
@@ -173,8 +173,8 @@
     height: 38px;
     border-radius: 50%;
     border: 1px solid #e8bcbc;
-    background: #F8F8F8;
-    color: #FF9900;
+    background: #F8F9F3;
+    color: #FF9000;
     font-size: 28px;
     display: flex;
     justify-content: center;
@@ -184,7 +184,7 @@
 }
 
 .slider-arrow:hover {
-    background: #F8F8F8;
+    background: #F8F9F3;
 }
 
 .slider-arrow.left {
@@ -217,17 +217,19 @@
 }
 
 .subcategory-top-title-arrow {
-    color: #FF9900;
+    color: #FF9000;
 }
 
 .subcategory-top-title h3 {
     text-align: left;
     margin: 0 0 15px 8%;
-    font-family: Georgia, serif;
-    font-size: 25px;
-    color: #FF9900;
-    font-weight: 500;
-    border-bottom: 3px solid #d89b9b;
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    color: #4B636D;
+    font-weight: 600;
+    border-bottom: 3px solid #FF9000;
+    display: inline-block;
+    padding-bottom: 5px;
 }
 
 /* .subcategory-top-title ::after{
@@ -236,7 +238,7 @@
     width:55px;
     height:2px;
     margin-top:8px;
-    background:#d89b9b;
+    background:#FF9000;
 } */
 
 

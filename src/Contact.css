@@ -1,6 +1,6 @@
 .contact-page {
     width: 100%;
-    background: #F8F8F8;
+    background: #F8F9F3;
     padding: 100px 8%;
     min-height: 100vh;
 }
@@ -14,7 +14,7 @@
 
 .contact-tag {
     display: inline-block;
-    color: #FF9900;
+    color: #FF9000;
     font-size: 13px;
     letter-spacing: 3px;
     font-weight: 600;
@@ -23,13 +23,13 @@
 
 .contact-header h1 {
     font-size: 48px;
-    color: #3D4D5C;
+    color: #4B636D;
     margin-bottom: 20px;
     font-weight: 600;
 }
 
 .contact-header p {
-    color: #3D4D5C;
+    color: #4B636D;
     line-height: 1.9;
     font-size: 17px;
 }
@@ -44,7 +44,7 @@
 /* LEFT SIDE */
 
 .contact-info {
-    background: #F8F8F8;
+    background: #F8F9F3;
     border-radius: 20px;
     padding: 40px;
     box-shadow: 0 12px 35px rgba(0,0,0,.06);
@@ -54,7 +54,7 @@
 
 .contact-info h2 {
     margin-bottom: 35px;
-    color: #3D4D5C;
+    color: #4B636D;
 }
 
 .info-box {
@@ -62,13 +62,13 @@
 }
 
 .info-box h4 {
-    color: #FF9900;
+    color: #FF9000;
     margin-bottom: 10px;
     font-size: 17px;
 }
 
 .info-box p {
-    color: #3D4D5C;
+    color: #4B636D;
     line-height: 1.8;
     font-size: 15px;
 }
@@ -76,7 +76,7 @@
 /* RIGHT */
 
 .contact-form {
-    background: #F8F8F8;
+    background: #F8F9F3;
     border-radius: 20px;
     padding: 50px;
     box-shadow: 0 12px 35px rgba(0,0,0,.06);
@@ -89,7 +89,7 @@
 .input-group label {
     display: block;
     margin-bottom: 10px;
-    color: #3D4D5C;
+    color: #4B636D;
     font-weight: 500;
 }
 
@@ -100,7 +100,7 @@
     width: 100%;
     padding: 16px 18px;
 
-    border: 1px solid #ddd;
+    border: 1px solid #E2E6E0;
     border-radius: 12px;
 
     font-size: 15px;
@@ -108,7 +108,7 @@
     outline: none;
 
     transition: .35s;
-    background: #F8F8F8;
+    background: #F8F9F3;
 }
 
 .input-group textarea {
@@ -119,10 +119,10 @@
 .input-group select:focus,
 .input-group textarea:focus {
 
-    border-color: #FF9900;
+    border-color: #FF9000;
 
     box-shadow:
-    0 0 0 4px rgba(255,153,0,.12);
+    0 0 0 4px rgba(255,144,0,.12);
 
 }
 
@@ -134,9 +134,9 @@
     border: none;
     border-radius: 12px;
 
-    background:#FF9900;
+    background:#FF9000;
 
-    color: #F8F8F8;
+    color: #FFFFFF;
 
     font-size: 16px;
     font-weight: 600;
@@ -148,12 +148,12 @@
 
 .whatsapp-btn:hover {
 
-    background: #E68A00;
+    background: #D97F00;
 
     transform: translateY(-3px);
 
     box-shadow:
-    0 18px 30px rgba(255,153,0,.28);
+    0 18px 30px rgba(255,144,0,.28);
 
 }
 

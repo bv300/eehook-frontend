@@ -5,7 +5,7 @@
 .orders-page{
     width:100%;
     min-height:100vh;
-    background:#F8F8F8;
+    background: #F8F9F3;
     font-family:"Poppins",sans-serif;
     padding:120px 20px 80px;
 }
@@ -51,7 +51,7 @@
 
 .orders-header p{
     margin:8px 0 0;
-    color:#777;
+    color: #8A9DA6;
     font-size:14px;
     line-height:1.6;
 }
@@ -61,11 +61,11 @@
     align-items:baseline;
     gap:7px;
     white-space:nowrap;
-    color:#777;
+    color: #8A9DA6;
 }
 
 .orders-count strong{
-    color:#3D4D5C;
+    color:#4B636D;
     font-size:20px;
     font-weight:600;
 }
@@ -93,7 +93,7 @@
 .order-card{
     width:100%;
     overflow:hidden;
-    background:#F8F8F8;
+    background: #F8F9F3;
     border:1px solid #e5e5e5;
     border-radius:12px;
     transition:
@@ -118,7 +118,7 @@
     align-items:center;
     justify-content:space-between;
     gap:20px;
-    background:#fcfcfc;
+    background:#F8F9F3;
     border-bottom:1px solid #ededed;
 }
 
@@ -127,12 +127,12 @@
     display:flex;
     align-items:center;
     gap:9px;
-    color:#777;
+    color: #8A9DA6;
     font-size:13px;
 }
 
 .order-number{
-    color:#3D4D5C;
+    color:#4B636D;
     font-weight:600;
 }
 
@@ -193,7 +193,7 @@
 }
 
 .order-status.default{
-    color:#3D4D5C;
+    color:#4B636D;
     background:#f0f0f0;
 }
 /* =========================================
@@ -211,7 +211,7 @@
     align-items:center;
     gap:22px;
     padding:20px 0;
-    border-bottom:1px solid #eeeeee;
+    border-bottom: 1px solid #EEEFE9;
 }
 
 .order-product:last-child{
@@ -262,7 +262,7 @@
     flex-wrap:wrap;
     gap:7px;
     margin-bottom:15px;
-    color:#777;
+    color: #8A9DA6;
     font-size:13px;
 }
 
@@ -280,7 +280,7 @@
 }
 
 .order-product-quantity strong{
-    color:#3D4D5C;
+    color:#4B636D;
     font-size:12px;
     font-weight:600;
 }
@@ -297,12 +297,12 @@
     align-items:center;
     justify-content:space-between;
     gap:20px;
-    background:#fcfcfc;
+    background:#F8F9F3;
     border-top:1px solid #ededed;
 }
 
 .order-items-total{
-    color:#777;
+    color: #8A9DA6;
     font-size:13px;
 }
 
@@ -313,7 +313,7 @@
 }
 
 .order-total span{
-    color:#777;
+    color: #8A9DA6;
     font-size:12px;
 }
 
@@ -342,7 +342,7 @@
 
 .orders-state p{
     margin:14px 0 0;
-    color:#777;
+    color: #8A9DA6;
     font-size:14px;
 }
 
@@ -363,7 +363,7 @@
 
 .orders-error h2{
     margin:0 0 8px;
-    color:#3D4D5C;
+    color:#4B636D;
     font-size:22px;
 }
 
@@ -373,7 +373,7 @@
     border:0;
     border-radius:5px;
     background:#8B1E3F;
-    color:#F8F8F8;
+    color: #FFFFFF;
     font-family:inherit;
     font-size:13px;
     font-weight:500;
@@ -395,7 +395,7 @@
 
 .orders-empty h1{
     margin:0 0 10px;
-    color:#3D4D5C;
+    color:#4B636D;
     font-family:"Playfair Display",serif;
     font-size:30px;
     font-weight:600;
@@ -404,7 +404,7 @@
 .orders-empty p{
     max-width:390px;
     margin:0;
-    color:#777;
+    color: #8A9DA6;
     font-size:14px;
     line-height:1.7;
 }

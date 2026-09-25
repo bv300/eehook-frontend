@@ -134,17 +134,17 @@ const Checkout = () => {
     }
         return (
 
-        <div className="amora-checkout">
+        <div className="eehook-checkout">
 
-            <div className="amora-checkout-header">
+            <div className="eehook-checkout-header">
 
-                <h1 className="amora-checkout-title">
+                <h1 className="eehook-checkout-title">
 
                     Checkout
 
                 </h1>
 
-                <p className="amora-checkout-subtitle">
+                <p className="eehook-checkout-subtitle">
 
                     Complete your purchase securely.
 
@@ -152,13 +152,13 @@ const Checkout = () => {
 
             </div>
 
-            <div className="amora-checkout-wrapper">
+            <div className="eehook-checkout-wrapper">
 
-                <div className="amora-checkout-left">
+                <div className="eehook-checkout-left">
 
-                    <div className="amora-checkout-card">
+                    <div className="eehook-checkout-card">
 
-                        <div className="amora-card-header">
+                        <div className="eehook-card-header">
 
                             <h2>
 
@@ -167,7 +167,7 @@ const Checkout = () => {
                             </h2>
 
                             <button
-                                className="amora-add-address-btn"
+                                className="eehook-add-address-btn"
                                 onClick={() => navigate("/profile")}
                             >
 
@@ -181,7 +181,7 @@ const Checkout = () => {
 
                             addresses.length === 0 ?
 
-                                <div className="amora-empty-box">
+                                <div className="eehook-empty-box">
 
                                     <p>
 
@@ -197,7 +197,7 @@ const Checkout = () => {
 
                                     <div
                                         key={address.id}
-                                        className={`amora-address-card ${
+                                        className={`eehook-address-card ${
                                             selectedAddress === address.id
                                                 ? "active"
                                                 : ""
@@ -217,7 +217,7 @@ const Checkout = () => {
                                             }
                                         />
 
-                                        <div className="amora-address-info">
+                                        <div className="eehook-address-info">
 
                                             <h4>
 
@@ -260,7 +260,7 @@ const Checkout = () => {
 
                     </div>
 
-                    <div className="amora-checkout-card">
+                    <div className="eehook-checkout-card">
 
                         <h2>
 
@@ -268,9 +268,9 @@ const Checkout = () => {
 
                         </h2>
 
-                        <div className="amora-payment-card">
+                        <div className="eehook-payment-card">
 
-                            <div className="amora-payment-title">
+                            <div className="eehook-payment-title">
 
                                 Stripe Secure Payment
 
@@ -290,9 +290,9 @@ const Checkout = () => {
 
                 </div>
 
-                <div className="amora-checkout-right">
+                <div className="eehook-checkout-right">
 
-                    <div className="amora-checkout-card">
+                    <div className="eehook-checkout-card">
 
                         <h2>
 
@@ -304,7 +304,7 @@ const Checkout = () => {
 
                             cartItems.length === 0 ?
 
-                                <div className="amora-empty-box">
+                                <div className="eehook-empty-box">
 
                                     <p>
 
@@ -320,10 +320,10 @@ const Checkout = () => {
 
                                     <div
                                         key={item.id}
-                                        className="amora-summary-item"
+                                        className="eehook-summary-item"
                                     >
 
-                                        <div className="amora-summary-image">
+                                        <div className="eehook-summary-image">
 
                                             <img
                                                 src={getImageUrl(item.product_image)}
@@ -332,7 +332,7 @@ const Checkout = () => {
 
                                         </div>
 
-                                        <div className="amora-summary-details">
+                                        <div className="eehook-summary-details">
 
                                             <h4>
 
@@ -360,9 +360,9 @@ const Checkout = () => {
 
                                         </div>
 
-                                        <div className="amora-summary-price">
+                                        <div className="eehook-summary-price">
 
-                                            NZD ${Number(item.total_price).toFixed(2)}
+                                            AED{Number(item.total_price).toFixed(2)}
 
                                         </div>
 
@@ -372,8 +372,8 @@ const Checkout = () => {
 
                         }
 
-                        <div className="amora-summary-total">
-                                                        <div className="amora-summary-row">
+                        <div className="eehook-summary-total">
+                                                        <div className="eehook-summary-row">
 
                                 <span>
 
@@ -383,13 +383,13 @@ const Checkout = () => {
 
                                 <span>
 
-                                    NZD ${cartSummary.subtotal.toFixed(2)}
+                                    AED{cartSummary.subtotal.toFixed(2)}
 
                                 </span>
 
                             </div>
 
-                            {/* <div className="amora-summary-row">
+                            {/* <div className="eehook-summary-row">
 
                                 <span>
 
@@ -410,7 +410,7 @@ const Checkout = () => {
 
                             </div> */}
 
-                            <div className="amora-summary-row">
+                            <div className="eehook-summary-row">
 
                                 <span>
 
@@ -423,14 +423,14 @@ const Checkout = () => {
                                     {
                                         cartSummary.shipping === 0
                                             ? "FREE"
-                                            : `NZD $${cartSummary.shipping.toFixed(2)}`
+                                            : `AED${cartSummary.shipping.toFixed(2)}`
                                     }
 
                                 </span>
 
                             </div>
 
-                            <div className="amora-summary-row">
+                            <div className="eehook-summary-row">
 
                                 <span>
 
@@ -446,9 +446,9 @@ const Checkout = () => {
 
                             </div>
 
-                            <div className="amora-summary-divider"></div>
+                            <div className="eehook-summary-divider"></div>
 
-                            <div className="amora-grand-total">
+                            <div className="eehook-grand-total">
 
                                 <div>
 
@@ -462,7 +462,7 @@ const Checkout = () => {
 
                                 <h2>
 
-                                    NZD ${cartSummary.total.toFixed(2)}
+                                    AED{cartSummary.total.toFixed(2)}
 
                                 </h2>
 
@@ -471,7 +471,7 @@ const Checkout = () => {
                         </div>
 
                         <button
-                            className="amora-checkout-btn"
+                            className="eehook-checkout-btn"
                             onClick={proceedToPayment}
                             disabled={processing}
                         >
@@ -492,7 +492,7 @@ const Checkout = () => {
 
                         </button>
 
-                        <p className="amora-payment-note">
+                        <p className="eehook-payment-note">
 
                             You will be redirected securely to Stripe
                             to complete your payment.

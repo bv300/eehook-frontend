@@ -7,7 +7,7 @@
 body{
     background:#fdf8fa;
     font-family:"Poppins",sans-serif;
-    color:#3D4D5C;
+    color:#4B636D;
 }
 
 .admin-order-page{
@@ -32,7 +32,7 @@ body{
     align-items:center;
     margin-bottom:35px;
     padding:28px 35px;
-    background:linear-gradient(135deg,#F8F8F8,#fff7f9);
+    background:linear-gradient(135deg,#F8F9F3,#fff7f9);
     border-radius:18px;
     border:1px solid #f2d9e1;
     box-shadow:0 8px 25px rgba(139,30,63,.12);
@@ -46,7 +46,7 @@ body{
 
 .admin-order-header p{
     margin-top:8px;
-    color:#777;
+    color: #8A9DA6;
     font-size:15px;
 }
 
@@ -76,7 +76,7 @@ body{
     border:none;
     border-radius:10px;
     background:linear-gradient(135deg,#d84c72,#8B1E3F);
-    color:#F8F8F8;
+    color: #FFFFFF;
     font-weight:600;
     cursor:pointer;
     transition:.35s;
@@ -94,7 +94,7 @@ body{
     margin-bottom:30px;
 }
 .admin-order-card{
-    background:#F8F8F8;
+    background: #F8F9F3;
     border:1px solid #f1d7df;
     border-radius:18px;
     padding:28px;
@@ -130,7 +130,7 @@ body{
 }
 
 .admin-detail-row span{
-    color:#777;
+    color: #8A9DA6;
     font-size:15px;
     font-weight:500;
 }
@@ -144,7 +144,7 @@ body{
 }
 
 .admin-order-card p{
-    color:#3D4D5C;
+    color:#4B636D;
     line-height:1.8;
     font-size:15px;
     margin-bottom:8px;
@@ -160,7 +160,7 @@ body{
 
     background:linear-gradient(
         180deg,
-        #F8F8F8,
+        #F8F9F3,
         #fff8fa
     );
 
@@ -172,7 +172,7 @@ body{
 
     background:linear-gradient(
         180deg,
-        #F8F8F8,
+        #F8F9F3,
         #fff6f8
     );
 
@@ -184,7 +184,7 @@ body{
 
     background:linear-gradient(
         180deg,
-        #F8F8F8,
+        #F8F9F3,
         #fff5f7
     );
 
@@ -198,7 +198,7 @@ body{
 
 .admin-order-card span{
 
-    color:#3D4D5C;
+    color:#4B636D;
 
 }
 .admin-order-table{
@@ -211,7 +211,7 @@ body{
     width:100%;
     border-collapse:collapse;
     min-width:850px;
-    background:#F8F8F8;
+    background: #F8F9F3;
 }
 
 .admin-order-table thead{
@@ -224,7 +224,7 @@ body{
 
 .admin-order-table th{
     padding:18px 15px;
-    color:#F8F8F8;
+    color: #FFFFFF;
     font-size:15px;
     font-weight:600;
     text-align:left;
@@ -234,7 +234,7 @@ body{
 .admin-order-table td{
     padding:18px 15px;
     border-bottom:1px solid #f4dce4;
-    color:#3D4D5C;
+    color:#4B636D;
     font-size:15px;
     vertical-align:middle;
 }
@@ -253,7 +253,7 @@ body{
     object-fit:cover;
     border-radius:12px;
     border:2px solid #f2d9e1;
-    background:#F8F8F8;
+    background: #F8F9F3;
     padding:4px;
 }
 
@@ -281,8 +281,8 @@ body{
     font-size:15px;
     margin-top:15px;
     margin-bottom:20px;
-    background:#F8F8F8;
-    color:#3D4D5C;
+    background: #F8F9F3;
+    color:#4B636D;
     transition:.3s;
 }
 
@@ -299,7 +299,7 @@ body{
     cursor:pointer;
     font-size:15px;
     font-weight:600;
-    color:#F8F8F8;
+    color: #FFFFFF;
     background:linear-gradient(
         135deg,
         #D84C72,
@@ -439,7 +439,7 @@ body{
 
     body{
 
-        background:#F8F8F8 !important;
+        background: #F8F9F3 !important;
 
     }
 
@@ -459,7 +459,7 @@ body{
 
     .admin-order-header{
 
-        background:#F8F8F8;
+        background: #F8F9F3;
         border:none;
         box-shadow:none;
         padding:0 0 20px;
@@ -469,14 +469,14 @@ body{
 
     .admin-order-header h2{
 
-        color:#3D4D5C;
+        color:#4B636D;
         font-size:30px;
 
     }
 
     .admin-order-header p{
 
-        color:#3D4D5C;
+        color:#4B636D;
 
     }
 
@@ -491,7 +491,7 @@ body{
 
         border:1px solid #ccc;
         box-shadow:none;
-        background:#F8F8F8;
+        background: #F8F9F3;
         border-radius:8px;
         page-break-inside:avoid;
 
@@ -505,7 +505,7 @@ body{
 
     .admin-order-card h3{
 
-        color:#3D4D5C;
+        color:#4B636D;
         border-bottom:1px solid #ccc;
 
     }
@@ -518,7 +518,7 @@ body{
 
     .admin-detail-row strong{
 
-        color:#3D4D5C;
+        color:#4B636D;
 
     }
 
@@ -543,7 +543,7 @@ body{
 
     .admin-order-table th{
 
-        color:#3D4D5C;
+        color:#4B636D;
         border:1px solid #999;
         background:#eee !important;
 
@@ -588,13 +588,13 @@ body{
     .invoice-footer h3{
 
         font-size:22px;
-        color:#3D4D5C;
+        color:#4B636D;
 
     }
 
     .invoice-footer p{
 
-        color:#3D4D5C;
+        color:#4B636D;
         margin-top:10px;
 
     }

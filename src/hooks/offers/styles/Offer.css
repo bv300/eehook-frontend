@@ -3,7 +3,7 @@
   width: 100%;
   padding: 20px;
   box-sizing: border-box;
-  background-color: #F8F8F8; 
+  background-color: #F8F9F3; 
 }
 
 /* The banner shell */
@@ -44,7 +44,7 @@
   height: 100%;
   width: 100%;
   text-align: left;
-  color: #F8F8F8;
+  color: #FFFFFF;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -93,8 +93,8 @@
 /* The elegant CTA button */
 .offer-btn {
   margin-top: 12px;
-  background-color: #F8F8F8;
-  color: #FF9900;
+  background-color: #F8F9F3;
+  color: #FF9000;
   border: none;
   padding: 12px 32px;
   font-size: 12px;
@@ -107,7 +107,7 @@
 }
 
 .offer-btn:hover {
-  background-color: #F8F8F8;
+  background-color: #F8F9F3;
   transform: translateY(-1px);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
 }
@@ -120,7 +120,7 @@
   align-items: center;
   justify-content: center;
   font-family: sans-serif;
-  color: #FF9900;
+  color: #FF9000;
 }
 
 /* Responsiveness adjustments for smaller devices */

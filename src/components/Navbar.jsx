@@ -10,7 +10,7 @@ import { RiArrowDropDownLine } from "react-icons/ri";
 import { AiOutlineDoubleRight } from "react-icons/ai";
 import { IoClose } from "react-icons/io5";
 
-import amora from '../assets/eehook.jpeg'
+import eehook from '../assets/eehook.jpeg'
 import WishlistQuery from "../features/wishlist/queries/WishlistQuery.jsx";
 import Offer_Query from "../hooks/offers/queries/Offer_Query.jsx";
 import Cart_query from "../features/cart/queries/Cart_query.jsx";
@@ -127,7 +127,7 @@ const cartLength = cart.total_items ?? 0;
 
                     <div className="nav_main2">
                         <NavLink to='/' className="logo-link">
-                            <img src={amora} alt="Logo" className="navbar-logo" />
+                            <img src={eehook} alt="Logo" className="navbar-logo" />
                         </NavLink>
 
                         <div className="link_flex">
@@ -290,7 +290,7 @@ const cartLength = cart.total_items ?? 0;
             <div className={`mobile_menu ${menuOpen ? "show" : ""}`}>
                 <div className="mobile_header">
                     <NavLink to='/' className="logo-link" style={{ marginTop: '5px' }}>
-                        <img src={amora} alt="Logo" className="navbar-logo" />
+                        <img src={eehook} alt="Logo" className="navbar-logo" />
                     </NavLink>
                     <IoClose size={25} onClick={() => setMenuOpen(false)} />
                 </div>

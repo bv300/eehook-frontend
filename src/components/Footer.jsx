@@ -1,7 +1,7 @@
 import React from 'react'
 import "./../Footer.css";
 
-import amora from './../assets/eehook.jpeg'
+import eehook from './../assets/eehook.jpeg'
 import visa from './../assets/visa-payment.png'
 import master from './../assets/master-payment.png'
 import amc from './../assets/american-exp-payment.png'
@@ -15,7 +15,7 @@ function Footer() {
 
         const text = "Hello";
 
-        const phone = "64225493376";
+        const phone = "971501234567";
 
         const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
 
@@ -31,7 +31,7 @@ function Footer() {
                 <div className="footer-container">
 
                     <div className="footer-column brand">
-                        <img src={amora} alt="Logo" className="footer-logo" />
+                        <img src={eehook} alt="Logo" className="footer-logo" />
 
                         <p>
                             Your ultimate destination for<br />
@@ -74,7 +74,7 @@ function Footer() {
                         <ul className="contact">
                             <li  onClick={WhatsappOpen}  style={{ cursor: "pointer" }} >
                                 <FaPhoneAlt />
-                                +64 22 549 3376
+                                +971 50 123 4567
                             </li>
 
                             <li>
@@ -82,7 +82,7 @@ function Footer() {
                             </li>
 
                             <li>
-                                <FaMapMarkerAlt /> Wellington, New Zealand
+                                <FaMapMarkerAlt /> Dubai, United Arab Emirates
                             </li>
                         </ul>
                     </div>

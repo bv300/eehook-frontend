@@ -68,9 +68,9 @@ const Heropage = () => {
 
             <Link
               to="/shop"
-              className="shop-btn"
+              className="shop-btn-premium"
             >
-              {slide.button_text}
+              {slide.button_text} <span className="arrow">→</span>
             </Link>
 
           </div>
@@ -83,12 +83,12 @@ const Heropage = () => {
         {heroSlides.map((_, index) => (
           <button
             key={index}
-            className={`dot ${
-              currentSlide === index ? "active-dot" : ""
+            className={`modern-dot ${
+              currentSlide === index ? "active-modern-dot" : ""
             }`}
             onClick={() => setCurrentSlide(index)}
+            aria-label={`Go to slide ${index + 1}`}
           >
-            <span>{index + 1}</span>
           </button>
         ))}
 

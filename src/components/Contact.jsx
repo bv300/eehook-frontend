@@ -42,7 +42,7 @@ const ContactUs = () => {
             return;
         }
 
-        const whatsappNumber = "64225493376";
+        const whatsappNumber = "971501234567";
 
         const text = `Hello eehook Team,
 

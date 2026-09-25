@@ -42,7 +42,7 @@ function Home() {
             </div>
 
             {/* category */}
-            <div style={{ background: '#F8F8F8', padding: '45px 4% 0px' }}>
+            <div style={{ background: '#F8F9F3', padding: '45px 4% 0px' }}>
                 <Shop_by_category />
             </div>
             {/* new arivals */}

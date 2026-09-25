@@ -364,7 +364,7 @@ function Product_card({
 
                                                             <span className="old-price">
 
-                                                                NZD $
+                                                                AED
 
                                                                 {
                                                                     Number(
@@ -376,7 +376,7 @@ function Product_card({
 
                                                             <span className="new-price">
 
-                                                                NZD $
+                                                                AED
 
                                                                 {
                                                                     Number(
@@ -396,7 +396,7 @@ function Product_card({
 
                                                                 startingPrice
 
-                                                                    ? `NZD $${Number(
+                                                                    ? `AED${Number(
                                                                         startingPrice
                                                                     ).toFixed(2)}`
 
@@ -488,8 +488,8 @@ function Product_card({
                                                 }
 
                                                 className={`page-num ${currentPage === number
-                                                        ? "active"
-                                                        : ""
+                                                    ? "active"
+                                                    : ""
                                                     }`}
                                             >
                                                 {number}
@@ -506,8 +506,8 @@ function Product_card({
 
                             <div
                                 className={`page-num pagination-arrow ${currentPage === totalPages
-                                        ? "disabled"
-                                        : ""
+                                    ? "disabled"
+                                    : ""
                                     }`}
                                 onClick={() => {
 

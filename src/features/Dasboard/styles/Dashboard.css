@@ -41,7 +41,7 @@ body{
 }
 
 .page-header p{
-    color:#777;
+    color: #8A9DA6;
     font-size:15px;
     line-height:24px;
 }
@@ -50,7 +50,7 @@ body{
     border:none;
     outline:none;
     background:#920035;
-    color:#F8F8F8;
+    color: #FFFFFF;
     padding:12px 22px;
     border-radius:8px;
     cursor:pointer;
@@ -72,7 +72,7 @@ body{
 }
 
 .stat-card{
-    background:#F8F8F8;
+    background: #F8F9F3;
     border-radius:14px;
     padding:22px;
     box-shadow:0 5px 18px rgba(0,0,0,.08);
@@ -84,7 +84,7 @@ body{
 }
 
 .stat-card p{
-    color:#777;
+    color: #8A9DA6;
     font-size:14px;
     margin-bottom:12px;
 }
@@ -103,7 +103,7 @@ body{
 /* Orders Container */
 
 .orders-box{
-    background:#F8F8F8;
+    background: #F8F9F3;
     border-radius:14px;
     padding:25px;
     box-shadow:0 5px 18px rgba(0,0,0,.08);
@@ -124,7 +124,7 @@ body{
 .tabs button{
     border:none;
     background:#f7f7f7;
-    color:#3D4D5C;
+    color:#4B636D;
     padding:10px 16px;
     border-radius:8px;
     cursor:pointer;
@@ -140,7 +140,7 @@ body{
 
 .tab-active{
     background:#920035 !important;
-    color:#F8F8F8 !important;
+    color: #FFFFFF !important;
 }
 
 /* ===========================
@@ -151,7 +151,7 @@ body{
     flex:1;
     min-width:220px;
     padding:11px 15px;
-    border:1px solid #ddd;
+    border: 1px solid #E2E6E0;
     border-radius:8px;
     outline:none;
     font-size:14px;
@@ -170,11 +170,11 @@ body{
 .tabs select{
     min-width:170px;
     padding:11px 15px;
-    border:1px solid #ddd;
+    border: 1px solid #E2E6E0;
     border-radius:8px;
     outline:none;
     cursor:pointer;
-    background:#F8F8F8;
+    background: #F8F9F3;
 }
 
 /* ===========================
@@ -188,13 +188,13 @@ table{
 }
 
 thead{
-    background:#fafafa;
+    background:#F8F9F3;
 }
 
 th{
     padding:16px;
     text-align:left;
-    color:#777;
+    color: #8A9DA6;
     font-size:12px;
     letter-spacing:.5px;
     font-weight:600;
@@ -202,7 +202,7 @@ th{
 
 td{
     padding:18px 16px;
-    border-top:1px solid #eee;
+    border-top: 1px solid #EEEFE9;
     font-size:14px;
     vertical-align:middle;
 }
@@ -294,7 +294,7 @@ tbody tr:hover{
     width:38px;
     height:38px;
     border:none;
-    background:#F8F8F8;
+    background: #F8F9F3;
     border-radius:8px;
     cursor:pointer;
     transition:.3s;
@@ -303,7 +303,7 @@ tbody tr:hover{
 
 .view:hover{
     background:#920035;
-    color:#F8F8F8;
+    color: #FFFFFF;
 }
 /* ===========================
    Pagination
@@ -316,12 +316,12 @@ tbody tr:hover{
     gap:20px;
     margin-top:25px;
     padding-top:20px;
-    border-top:1px solid #eee;
+    border-top: 1px solid #EEEFE9;
     flex-wrap:wrap;
 }
 
 .pagination span{
-    color:#3D4D5C;
+    color:#4B636D;
     font-size:14px;
 }
 
@@ -335,8 +335,8 @@ tbody tr:hover{
 .pagination button{
     min-width:38px;
     height:38px;
-    border:1px solid #ddd;
-    background:#F8F8F8;
+    border: 1px solid #E2E6E0;
+    background: #F8F9F3;
     border-radius:8px;
     cursor:pointer;
     transition:.3s;
@@ -351,7 +351,7 @@ tbody tr:hover{
 
 .page-active{
     background:#920035 !important;
-    color:#F8F8F8 !important;
+    color: #FFFFFF !important;
     border-color:#920035 !important;
 }
 
@@ -361,7 +361,7 @@ tbody tr:hover{
 
 .low-stock-box{
     margin-top:35px;
-    background:#F8F8F8;
+    background: #F8F9F3;
     border-radius:14px;
     padding:25px;
     box-shadow:0 5px 18px rgba(0,0,0,.08);
@@ -402,7 +402,7 @@ tbody tr:hover{
 
 .empty-row td{
     text-align:center;
-    color:#777;
+    color: #8A9DA6;
     padding:40px;
 }
 
@@ -554,7 +554,7 @@ tbody tr:hover{
 .dashboard .wishlist-box{
 
     margin-top:35px;
-    background:#F8F8F8;
+    background: #F8F9F3;
     border-radius:18px;
     padding:25px;
     box-shadow:0 8px 25px rgba(0,0,0,.05);
@@ -591,8 +591,8 @@ tbody tr:hover{
     padding:16px;
     font-size:13px;
     font-weight:600;
-    color:#3D4D5C;
-    background:#fafafa;
+    color:#4B636D;
+    background:#F8F9F3;
     border-bottom:1px solid #ececec;
 
 }
@@ -607,7 +607,7 @@ tbody tr:hover{
 
 .dashboard .wishlist-box tbody tr:hover{
 
-    background:#fcfcfc;
+    background:#F8F9F3;
 
 }
 
@@ -629,7 +629,7 @@ tbody tr:hover{
     justify-content:center;
     align-items:center;
     border-radius:10px;
-    background:#F8F8F8;
+    background: #F8F9F3;
     color:#999;
     font-size:11px;
     text-align:center;
