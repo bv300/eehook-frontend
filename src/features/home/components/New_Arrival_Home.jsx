@@ -64,7 +64,7 @@ if (error) {
                         </h2>
 
                         <p className="heading-sub">
-                            The latest curated collection for the modern woman.
+                            The latest curated collection for the modern lifestyle.
                         </p>
 
                     </div>

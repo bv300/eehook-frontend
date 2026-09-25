@@ -56,7 +56,7 @@ body {
 
 .clear-btn {
     padding: 12px 22px;
-    background: white;
+    background: #F8F8F8;
     border: 1px solid #d7cfcf;
     border-radius: 8px;
     cursor: pointer;
@@ -65,7 +65,7 @@ body {
 .bag-btn {
     padding: 12px 22px;
     background: #6d0f2b;
-    color: white;
+    color: #F8F8F8;
     border: none;
     border-radius: 8px;
     cursor: pointer;
@@ -89,7 +89,7 @@ body {
 }
 
 .wishlist-card {
-    background: white;
+    background: #F8F8F8;
     border-radius: 14px;
     overflow: hidden;
     position: relative;
@@ -117,7 +117,7 @@ body {
     width: 34px;
     height: 34px;
     border-radius: 50%;
-    background: white;
+    background: #F8F8F8;
     border: none;
     box-shadow: 0 2px 8px rgba(0, 0, 0, .15);
     cursor: pointer;
@@ -168,7 +168,7 @@ body {
     width: 100%;
     padding: 13px;
     background: #6d0f2b;
-    color: white;
+    color: #F8F8F8;
     border: none;
     border-radius: 8px;
     cursor: pointer;
@@ -215,7 +215,7 @@ body {
 
 .recommend-card {
     width: 290px;
-    background: white;
+    background: #F8F8F8;
     border-radius: 12px;
     overflow: hidden;
     padding-bottom: 16px;
@@ -248,7 +248,7 @@ body {
     top:15px;
     left:15px;
     background:#7d1233;
-    color:#fff;
+    color:#F8F8F8;
     padding:6px 12px;
     border-radius:20px;
     font-size:12px;

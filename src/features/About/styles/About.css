@@ -1,13 +1,13 @@
 :root {
-    --about-primary: #7b1834;
-    --about-primary-dark: #5f0f27;
-    --about-secondary: #b26d7d;
-    --about-bg: #fcf8f6;
-    --about-soft: #f7ece9;
-    --about-card: #ffffff;
-    --about-text: #332a2a;
-    --about-light: #726666;
-    --about-border: #ead9d4;
+    --about-primary: #FF9900;
+    --about-primary-dark: #E68A00;
+    --about-secondary: #FF9900;
+    --about-bg: #F8F8F8;
+    --about-soft: #FFFFFF;
+    --about-card: #F8F8F8;
+    --about-text: #3D4D5C;
+    --about-light: #5A6A7A;
+    --about-border: #E0E0E0;
     --about-shadow: 0 15px 40px rgba(0, 0, 0, .08);
     --about-radius: 22px;
     --about-transition: .4s ease;
@@ -65,7 +65,7 @@ body {
 
 .about-primary-btn {
     background: var(--about-primary);
-    color: #fff;
+    color: #F8F8F8;
     border: none;
     padding: 15px 34px;
     border-radius: 40px;
@@ -78,7 +78,7 @@ body {
 .about-primary-btn:hover {
     background: var(--about-primary-dark);
     transform: translateY(-5px);
-    box-shadow: 0 15px 35px rgba(123, 24, 52, .25);
+    box-shadow: 0 15px 35px rgba(255, 153, 0, .25);
 }
 
 .about-secondary-btn {
@@ -95,7 +95,7 @@ body {
 
 .about-secondary-btn:hover {
     background: var(--about-primary);
-    color: #fff;
+    color: #F8F8F8;
     transform: translateY(-5px);
 }
 
@@ -155,7 +155,7 @@ body {
     position: absolute;
     left: -30px;
     bottom: 40px;
-    background: #fff;
+    background: #F8F8F8;
     padding: 25px;
     width: 250px;
     border-radius: 20px;
@@ -224,7 +224,7 @@ body {
 }
 
 .about-stat-card {
-    background: #fff;
+    background: #F8F8F8;
     padding: 30px;
     border-radius: 20px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, .06);
@@ -308,7 +308,7 @@ body {
 }
 
 .about-pillar-card {
-    background: #fff;
+    background: #F8F8F8;
     padding: 40px 30px;
     border-radius: 25px;
     box-shadow: var(--about-shadow);
@@ -322,7 +322,7 @@ body {
     position: absolute;
     width: 120px;
     height: 120px;
-    background: rgba(123, 24, 52, .08);
+    background: rgba(255, 153, 0, .08);
     border-radius: 50%;
     top: -50px;
     right: -50px;
@@ -358,7 +358,7 @@ body {
     grid-template-columns: 1fr 1fr;
     gap: 90px;
     align-items: center;
-    background: #fff;
+    background: #F8F8F8;
     position: relative;
     z-index: 3;
 }
@@ -421,7 +421,7 @@ body {
 }
 
 .about-quality-item {
-    background: #fff;
+    background: #F8F8F8;
     padding: 35px;
     border-radius: 25px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, .06);
@@ -467,7 +467,7 @@ body {
     align-items: center;
     justify-content: center;
     padding: 60px 7%;
-    background: rgba(40, 15, 20, .35);
+    background: rgba(0, 0, 0, .35);
 }
 
 .about-cta-card {

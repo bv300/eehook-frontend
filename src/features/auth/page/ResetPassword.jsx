@@ -76,7 +76,7 @@ function ResetPassword() {
                     <h1>Reset Password</h1>
 
                     <p>
-                        Create a strong new password to secure your Amora account.
+                        Create a strong new password to secure your eehook account.
                     </p>
 
                 </div>

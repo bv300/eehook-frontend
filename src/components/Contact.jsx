@@ -44,7 +44,7 @@ const ContactUs = () => {
 
         const whatsappNumber = "64225493376";
 
-        const text = `Hello Amora NZ Team,
+        const text = `Hello eehook Team,
 
 Name: ${name}
 

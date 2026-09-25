@@ -2,7 +2,7 @@
 
 .new-arrivals-wrapper {
     width: 100%;
-    background-color: #ffffff;
+    background-color: #F8F8F8;
     padding: 30px 4%;
     box-sizing: border-box;
 }
@@ -25,7 +25,7 @@
     font-family: 'Playfair Display', serif;
     font-size: 1.6rem;
     font-weight: 500;
-    color: #8c1238;
+    color: #FF9900;
     margin: 0 0 6px 0;
 }
 
@@ -40,7 +40,7 @@
     font-family: 'Plus Jakarta Sans', sans-serif;
     font-size: 12px;
     font-weight: 700;
-    color: #8c1238;
+    color: #FF9900;
     /* Elegant deep maroon */
     text-decoration: none;
     letter-spacing: 1.5px;
@@ -148,7 +148,7 @@
 
     background: #801439;
 
-    color: white;
+    color: #F8F8F8;
 
     padding: 4px 12px;
 
@@ -180,7 +180,7 @@
 
     border: none;
 
-    background: white;
+    background: #F8F8F8;
 
     display: flex;
 
@@ -226,9 +226,9 @@
     border-radius: 4px;
 
 
-    background: #801439;
+    background: #FF9900;
 
-    color: white;
+    color: #F8F8F8;
 
 
     font-size: .7rem;
@@ -334,7 +334,7 @@
     top:12px;
     left:12px;
     background:#7d1233;
-    color:#fff;
+    color:#F8F8F8;
     padding:6px 12px;
     border-radius:20px;
     font-size:12px;
@@ -365,7 +365,7 @@
 .swiper-button-prev,
 .swiper-button-next{
     color:#7d1233 !important;
-    /* background:#fff !important; */
+    /* background:#F8F8F8 !important; */
     /* border:1px solid #ddd !important; */
     background:rgba(255,255,255,0.25);
     backdrop-filter:blur(12px);

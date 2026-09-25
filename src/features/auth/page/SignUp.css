@@ -26,7 +26,7 @@ align-items:center;
 .signup-box{
 width:100%;
 max-width:430px;
-background:#fff;
+background:#F8F8F8;
 padding:28px;
 border-radius:20px;
 box-shadow:0 12px 35px rgba(0,0,0,0.08);
@@ -66,7 +66,7 @@ margin-bottom:16px;
 font-size:14px;
 font-weight:500;
 margin-bottom:8px;
-color:#444;
+color:#3D4D5C;
 }
 
 .input-group input{
@@ -78,7 +78,7 @@ border-radius:12px;
 font-size:15px;
 outline:none;
 transition:.3s;
-background:#fff;
+background:#F8F8F8;
 }
 
 .input-group input:focus{
@@ -118,7 +118,7 @@ height:48px;
 border:none;
 border-radius:12px;
 background:#B11F4D;
-color:#fff;
+color:#F8F8F8;
 font-size:16px;
 font-weight:600;
 cursor:pointer;
@@ -157,7 +157,7 @@ padding:0 15px;
 font-size:13px;
 font-weight:500;
 color:#777;
-background:#fff;
+background:#F8F8F8;
 }
 
 .google-section{
@@ -182,7 +182,7 @@ justify-content:center;
 margin-top:18px;
 text-align:center;
 font-size:14px;
-color:#666;
+color:#3D4D5C;
 }
 
 .signup-link a{
@@ -204,8 +204,8 @@ color:#b5b5b5;
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus{
--webkit-box-shadow:0 0 0px 1000px #fff inset;
--webkit-text-fill-color:#333;
+-webkit-box-shadow:0 0 0px 1000px #F8F8F8 inset;
+-webkit-text-fill-color:#3D4D5C;
 transition:background-color 5000s ease-in-out 0s;
 }
 

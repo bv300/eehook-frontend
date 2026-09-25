@@ -5,7 +5,7 @@
 .orders-page{
     width:100%;
     min-height:100vh;
-    background:#fff;
+    background:#F8F8F8;
     font-family:"Poppins",sans-serif;
     padding:120px 20px 80px;
 }
@@ -65,7 +65,7 @@
 }
 
 .orders-count strong{
-    color:#222;
+    color:#3D4D5C;
     font-size:20px;
     font-weight:600;
 }
@@ -93,7 +93,7 @@
 .order-card{
     width:100%;
     overflow:hidden;
-    background:#fff;
+    background:#F8F8F8;
     border:1px solid #e5e5e5;
     border-radius:12px;
     transition:
@@ -132,7 +132,7 @@
 }
 
 .order-number{
-    color:#222;
+    color:#3D4D5C;
     font-weight:600;
 }
 
@@ -193,7 +193,7 @@
 }
 
 .order-status.default{
-    color:#555;
+    color:#3D4D5C;
     background:#f0f0f0;
 }
 /* =========================================
@@ -280,7 +280,7 @@
 }
 
 .order-product-quantity strong{
-    color:#333;
+    color:#3D4D5C;
     font-size:12px;
     font-weight:600;
 }
@@ -363,7 +363,7 @@
 
 .orders-error h2{
     margin:0 0 8px;
-    color:#222;
+    color:#3D4D5C;
     font-size:22px;
 }
 
@@ -373,7 +373,7 @@
     border:0;
     border-radius:5px;
     background:#8B1E3F;
-    color:#fff;
+    color:#F8F8F8;
     font-family:inherit;
     font-size:13px;
     font-weight:500;
@@ -395,7 +395,7 @@
 
 .orders-empty h1{
     margin:0 0 10px;
-    color:#222;
+    color:#3D4D5C;
     font-family:"Playfair Display",serif;
     font-size:30px;
     font-weight:600;

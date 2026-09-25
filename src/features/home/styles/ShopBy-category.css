@@ -1,7 +1,7 @@
 .shop-category {
     width: 100%;
     /* padding:45px 20px; */
-    background: #fff;
+    background: #F8F8F8;
     text-align: center;
     overflow: hidden;
     max-width: 1200px;
@@ -12,7 +12,7 @@
     font-family: Georgia, serif;
     font-size: 32px;
     font-weight: 500;
-    color: #8c1238;
+    color: #FF9900;
     margin: 0 0 12px;
 }
 
@@ -147,7 +147,7 @@
 .category-card p,
 .subcategory-card p {
     margin: 15px 0 0;
-    color: #333;
+    color: #3D4D5C;
     font-size: 14px;
     font-weight: 500;
     font-family: Arial, sans-serif;
@@ -160,7 +160,7 @@
 }
 
 .active-category p {
-    color: #8c1238;
+    color: #FF9900;
 }
 
 
@@ -173,8 +173,8 @@
     height: 38px;
     border-radius: 50%;
     border: 1px solid #e8bcbc;
-    background: #fff;
-    color: #8c1238;
+    background: #F8F8F8;
+    color: #FF9900;
     font-size: 28px;
     display: flex;
     justify-content: center;
@@ -184,7 +184,7 @@
 }
 
 .slider-arrow:hover {
-    background: #f9ecec;
+    background: #F8F8F8;
 }
 
 .slider-arrow.left {
@@ -217,7 +217,7 @@
 }
 
 .subcategory-top-title-arrow {
-    color: #8c1238;
+    color: #FF9900;
 }
 
 .subcategory-top-title h3 {
@@ -225,7 +225,7 @@
     margin: 0 0 15px 8%;
     font-family: Georgia, serif;
     font-size: 25px;
-    color: #8c1238;
+    color: #FF9900;
     font-weight: 500;
     border-bottom: 3px solid #d89b9b;
 }

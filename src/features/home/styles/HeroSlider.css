@@ -13,8 +13,8 @@
   position: relative;
   width: 100%;
   height: 100vh;
-  background-color: #111111;
-  color: #ffffff;
+  background-color: #3D4D5C;
+  color: #F8F8F8;
   display: flex;
   align-items: center;
   overflow: hidden;
@@ -46,7 +46,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(to right, #111111 15%, transparent 70%);
+  background: linear-gradient(to right, #3D4D5C 15%, transparent 70%);
 }
 
 /* Elegant Text Overlay (Using your old styles) */
@@ -56,7 +56,7 @@
   left: 8%;           /* Aligns it horizontally with the section padding */
   z-index: 2;
   max-width: 550px;
-  color: #ffffff;
+  color: #F8F8F8;
   font-family: 'Plus Jakarta Sans', sans-serif;
   animation: fadeInUp 1s ease-out;
 }
@@ -82,12 +82,12 @@
 
 /* Blending the filled/outlined styling into your classic font setup */
 .text-filled {
-  color: #ffffff; 
+  color: #F8F8F8; 
 }
 
 .text-outlined {
   color: transparent;
-  -webkit-text-stroke: 1px #ffffff;
+  -webkit-text-stroke: 1px #F8F8F8;
 }
 
 .hero-description {
@@ -110,7 +110,7 @@
 .cta-text {
   font-size: 0.9rem;
   font-weight: 500;
-  color: #ffffff;
+  color: #F8F8F8;
 }
 
 .cta-circle-arrow {
@@ -157,12 +157,12 @@
 }
 
 .nav-number-item.active {
-  color: #ffffff;
+  color: #F8F8F8;
   font-weight: 500;
 }
 
 .active-line {
-  color: #ffffff;
+  color: #F8F8F8;
   font-weight: 300;
   letter-spacing: -2px;
 }
@@ -192,7 +192,7 @@
     left: 0;
   }
 
-  /* Remove the black gradient side shade and use a standard dimming dark tint instead */
+  /* Remove the #3D4D5C gradient side shade and use a standard dimming dark tint instead */
   .hero-overlay {
     background: rgba(0, 0, 0, 0.65); /* Keeps text readable over full-width image */
   }

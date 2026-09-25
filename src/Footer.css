@@ -1,9 +1,9 @@
 .footer {
     width: 100%;
-    background: #fff;
+    background: #F8F8F8;
     padding: 50px 8%;
 
-    background-color: #f9ecec;
+    background-color: #F8F8F8;
 }
 
 .footer-container {
@@ -24,13 +24,13 @@
 }
 
 .brand p {
-    color: #555;
+    color: #3D4D5C;
     line-height: 1.7;
     margin-bottom: 18px;
 }
 
 .footer-column h3 {
-    color: #a11c3d;
+    color: #FF9900;
     margin-bottom: 18px;
     font-size: 18px;
     text-transform: uppercase;
@@ -42,7 +42,7 @@
 
 .footer-column ul li {
     margin-bottom: 12px;
-    color: #555;
+    color: #3D4D5C;
     cursor: pointer;
     transition: .3s;
     display: flex;
@@ -51,23 +51,23 @@
 }
 
 .footer-column ul li:hover {
-    color: #a11c3d;
+    color: #FF9900;
 }
 .footer-column a:hover {
-    color: #a11c3d;
+    color: #FF9900;
 }
 .footer-column a{
-    color: #555;
+    color: #3D4D5C;
 }
 
 .social-icons {
     display: flex;
     gap: 18px;
     font-size: 20px;
-    color: #a11c3d;
+    color: #FF9900;
 }
 .social-icons a{
-    color: #a11c3d;
+    color: #FF9900;
 }
 
 .social-icons a {
@@ -90,8 +90,8 @@
 }
 
 .copyright {
-    background: #9f1738;
-    color: #fff;
+    background: #FF9900;
+    color: #F8F8F8;
     height: 40px;
     display: flex;
     align-items: center;

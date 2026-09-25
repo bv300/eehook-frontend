@@ -2,10 +2,10 @@ import React, { useEffect, useRef } from "react";
 import '../styles/About.css';
 
 
-import heroImg from "../../../assets/heroimage-21.jpeg";
-import background from "../../../assets/background.png"
-import Founder from "../../../assets/founder.jpg";
-import nano from "../../../assets/nanoGoogle.jpg"
+import teaHavenImg from "../../../assets/tea-haven-poster.jpg";
+import background from "../../../assets/about-image-one.jpg";
+// import Founder from "../../../assets/founder.jpg";
+import imagetwo from "../../../assets/about-image-two.jpg";
 
 import { useNavigate } from "react-router-dom";
 
@@ -38,24 +38,24 @@ const About = () => {
         }
     };
 
-  const pillars = [
-    {
-        title: "Curated Elegance",
-        text: "At Amora, we thoughtfully select each piece from trusted sellers, bringing together timeless designs, refined details, and modern elegance to create a distinctive boutique experience."
-    },
-    {
-        title: "Authenticity",
-        text: "We bring you carefully selected collections from trusted sellers, celebrating unique styles, quality materials, and the stories behind every piece."
-    },
-    {
-        title: "Timeless Style",
-        text: "Beyond passing trends, Amora curates pieces that reflect effortless elegance and lasting beauty for every occasion."
-    },
-    {
-        title: "Thoughtful Selection",
-        text: "We are committed to offering meaningful choices by partnering with sellers who value quality, responsible practices, and exceptional design."
-    }
-];
+    const pillars = [
+        {
+            title: "Cutting-Edge Technology",
+            text: "At eehook, we bring you the latest in electronics, from powerful laptops and smartphones to innovative wearables and gaming gear."
+        },
+        {
+            title: "Premium Lifestyle",
+            text: "Elevate your everyday life with our curated selection of cosmetics, perfumes, and lifestyle accessories designed for modern living."
+        },
+        {
+            title: "Unmatched Variety",
+            text: "Whether you're looking for the newest Apple products or engaging toys for kids, our diverse catalog has something for everyone."
+        },
+        {
+            title: "Customer First",
+            text: "We are committed to providing a seamless shopping experience with top-tier products, secure payments, and excellent customer service."
+        }
+    ];
 
 
     return (
@@ -65,61 +65,39 @@ const About = () => {
                 <div className="about-hero-content">
                     <span className="about-tag">ABOUT US</span>
                     <h1 className="about-title">
-                        Crafting Timeless Luxury,
-                        Inspired by Heritage.
+                        Your Ultimate Destination for Tech & Lifestyle.
                     </h1>
                     <p className="about-description">
-                        At Amora, every creation tells a story of artistry, tradition and refined elegance. Our commitment to exceptional craftsmanship transforms the finest materials into timeless pieces designed to be treasured for generations.
+                        At eehook, we bridge the gap between innovation and everyday life. From the latest electronics to premium cosmetics, we bring you high-quality products that match your dynamic lifestyle.
                     </p>
                     <div className="about-button-group">
-                        <button  onClick={()=>navigate('/shop')}  className="about-primary-btn">Explore Collection</button>
-                        {/* <button className="about-secondary-btn">Our Story</button> */}
+                        <button onClick={() => navigate('/shop')} className="about-primary-btn">Explore Collection</button>
                     </div>
                 </div>
 
                 <div className="about-hero-image-wrapper">
-                    <img src={heroImg} alt="Amora Heritage" className="about-hero-image" />
+                    <img src={background} alt="WhatsApp Channel" className="about-hero-image" />
                     <div className="about-floating-card">
-                        <h4>Timeless Elegance Since 2024</h4>
-                        <p>Crafting premium ethnic wear with modern sophistication.</p>
+                        <h4>Innovation Meets Style</h4>
+                        <p>Delivering top-tier electronics and lifestyle products.</p>
                     </div>
                 </div>
             </section>
 
             <section className="about-story about-fade" ref={addToRefs}>
                 <div className="about-story-image">
-                    <img src={nano} alt="Heritage" />
+                    <img src={teaHavenImg} alt="Tea Haven Grand Opening" />
                 </div>
 
                 <div className="about-story-content">
-                    <span className="about-section-label">OUR HERITAGE</span>
-                    <h2>Tradition Woven Into Every Detail</h2>
+                    <span className="about-section-label">OUR VISION</span>
+                    <h2>Empowering Your Modern Life</h2>
                     <p>
-                        Rooted in tradition and refined through generations, Amora represents timeless craftsmanship where every creation carries a story of elegance and dedication.
-
-                        From handcrafted details to exceptional fabrics, every Amora creation celebrates individuality and elegance.                    </p>
-
-                    {/* <div className="about-stats">
-                        <div className="about-stat-card">
-                            <h3>50+</h3>
-                            <p>Years of Heritage</p>
-                        </div>
-
-                        <div className="about-stat-card">
-                            <h3>120+</h3>
-                            <p>Master Artisans</p>
-                        </div>
-
-                        <div className="about-stat-card">
-                            <h3>10K+</h3>
-                            <p>Happy Clients</p>
-                        </div>
-
-                        <div className="about-stat-card">
-                            <h3>30+</h3>
-                            <p>Countries Served</p>
-                        </div>
-                    </div> */}
+                        Rooted in a passion for technology and lifestyle, eehook was created to be the one-stop shop for modern consumers. We carefully select every product, from the newest smartwatches to the finest perfumes, ensuring you always get the best.
+                    </p>
+                    <p>
+                        Our goal is to make premium electronics and lifestyle products accessible to everyone, combining quality, variety, and convenience in one platform.
+                    </p>
                 </div>
             </section>
 
@@ -129,9 +107,9 @@ const About = () => {
 
                     <div className="about-pillars-header">
                         <span className="about-section-label">OUR VALUES</span>
-                        <h2>Pillars of Amora</h2>
+                        <h2>Pillars of eehook</h2>
                         <p>
-                            Our philosophy is built upon four enduring principles that define every collection we create.
+                            Our philosophy is built upon four enduring principles that guide our product selection and customer service.
                         </p>
                     </div>
 
@@ -153,23 +131,23 @@ const About = () => {
 
             <section className="about-founder about-fade" ref={addToRefs}>
                 <div className="about-founder-image">
-                    <img src={Founder} alt="Founder" />
+                    <img src={imagetwo} alt="Founder" />
                 </div>
 
                 <div className="about-founder-content">
                     <span className="about-section-label">FOUNDER'S NOTE</span>
 
-                    <h2>A Legacy Built With Passion</h2>
+                    <h2>A Commitment to Excellence</h2>
 
                     <p>
-                        What began as a small family vision has evolved into a brand admired for timeless elegance and uncompromising quality. Every collection continues to reflect our dedication to exceptional craftsmanship.
+                        What started as a vision to simplify shopping for high-quality electronics and lifestyle goods has evolved into a trusted platform for thousands of customers.
                     </p>
 
                     <p>
-                        Luxury is not created overnight—it is shaped through patience, precision and passion. That belief remains at the heart of everything we do.
+                        We believe that technology and lifestyle go hand in hand. That’s why we continuously strive to offer a catalog that not only meets your needs but exceeds your expectations.
                     </p>
 
-                    <h4>— Anitta, Amora</h4>
+                    <h4>— The eehook Team</h4>
                 </div>
             </section>
 
@@ -181,37 +159,37 @@ const About = () => {
                     </span>
 
                     <h2>
-                        Uncompromising Quality In Every Creation
+                        Uncompromising Quality In Every Category
                     </h2>
                 </div>
 
                 <div className="about-quality-right">
 
                     <div className="about-quality-item">
-                        <h3>Premium Materials</h3>
+                        <h3>Authentic Products</h3>
                         <p>
-                            Only carefully selected fabrics and materials become part of every Amora masterpiece.
+                            We guarantee the authenticity of every product, sourcing directly from trusted brands and manufacturers.
                         </p>
                     </div>
 
                     <div className="about-quality-item">
-                        <h3>Master Craftsmanship</h3>
+                        <h3>Latest Innovations</h3>
                         <p>
-                            Every product is handcrafted by experienced artisans with remarkable attention to detail.
+                            Stay ahead of the curve with our frequently updated inventory of the newest gadgets and tech releases.
                         </p>
                     </div>
 
                     <div className="about-quality-item">
-                        <h3>Timeless Design</h3>
+                        <h3>Diverse Selection</h3>
                         <p>
-                            Our collections transcend seasonal trends to remain elegant for years to come.
+                            From high-end laptops and gaming gear to cosmetics and toys, we offer a wide range of products.
                         </p>
                     </div>
 
                     <div className="about-quality-item">
-                        <h3>Responsible Luxury</h3>
+                        <h3>Customer Satisfaction</h3>
                         <p>
-                            We embrace ethical sourcing and sustainable practices while preserving traditional craftsmanship.
+                            Your shopping experience is our top priority, supported by easy returns and dedicated customer support.
                         </p>
                     </div>
 
@@ -234,21 +212,19 @@ const About = () => {
                         </span>
 
                         <h2>
-                            Experience The World Of Amora
+                            Experience The World Of eehook
                         </h2>
 
                         <p>
-                            Discover timeless collections created for those who appreciate authentic craftsmanship and refined luxury.
+                            Discover our extensive collections created for those who appreciate quality, innovation, and style.
                         </p>
 
                         <div className="about-button-group">
                             <button
-                            onClick={()=>navigate('/shop')} 
-                            className="about-primary-btn">
-                                Shop Collection
+                                onClick={() => navigate('/shop')}
+                                className="about-primary-btn">
+                                Shop Now
                             </button>
-
-
                         </div>
 
                     </div>

@@ -110,7 +110,7 @@ const Invoice = () => {
                     <div className="invoice-company">
 
                         <h1>
-                            AMORA
+                            eehook
                         </h1>
 
                         <p>
@@ -118,7 +118,7 @@ const Invoice = () => {
                         </p>
 
                         <p>
-                            hello@amorabyanitta.com
+                            info@eehook.com
                         </p>
 
                     </div>
@@ -420,7 +420,7 @@ const Invoice = () => {
 
                         <p>
                             Thank you for shopping with
-                            <strong> AMORA </strong>.
+                            <strong> eehook </strong>.
                         </p>
 
                         <p>
@@ -432,7 +432,7 @@ const Invoice = () => {
                             Email :
                             <strong>
                                 {" "}
-                                hello@amorabyanitta.com
+                                info@eehook.com
                             </strong>
                         </p>
 

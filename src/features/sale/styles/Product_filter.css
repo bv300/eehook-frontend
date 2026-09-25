@@ -19,7 +19,7 @@
     margin-bottom: 8px;
     font-size: .95rem;
     font-weight: 500;
-    color: #444;
+    color: #3D4D5C;
 }
 
 
@@ -42,8 +42,8 @@
     border: 1px solid #ddd;
     border-radius: 10px;
 
-    background: #fff;
-    color: #333;
+    background: #F8F8F8;
+    color: #3D4D5C;
 
     font-size: .95rem;
     cursor: pointer;
@@ -87,7 +87,7 @@
 
     list-style: none;
 
-    background: #fff;
+    background: #F8F8F8;
 
     border: 1px solid #ececec;
     border-radius: 10px;
@@ -104,7 +104,7 @@
 /* Option */
 .select-option {
     padding: 12px 14px;
-    color: #444;
+    color: #3D4D5C;
     cursor: pointer;
     transition: .2s;
 }
@@ -120,7 +120,7 @@
 /* Active */
 .select-option.active {
     background: #87002b;
-    color: #fff;
+    color: #F8F8F8;
 }
 
 
@@ -130,7 +130,7 @@
 }
 
 .select-options::-webkit-scrollbar-track {
-    background: #f5f5f5;
+    background: #F8F8F8;
 }
 
 .select-options::-webkit-scrollbar-thumb {
@@ -148,7 +148,7 @@
     background-color: #87002b;
     padding: 15px 10px;
     text-align: center;
-    color: white;
+    color: #F8F8F8;
 }
 
 /* Mobile */

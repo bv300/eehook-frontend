@@ -126,7 +126,7 @@ function Login() {
 
                         <h1>Welcome Back</h1>
 
-                        <p>Login to your Amora account to continue shopping.</p>
+                        <p>Login to your eehook account to continue shopping.</p>
 
                     </div>
 

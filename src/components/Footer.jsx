@@ -34,13 +34,13 @@ function Footer() {
                         <img src={amora} alt="Logo" className="footer-logo" />
 
                         <p>
-                            Rooted in tradition,<br />
-                            styled for today
+                            Your ultimate destination for<br />
+                            Electronics, Lifestyle & more.
                         </p>
 
                         <div className="social-icons">
-                            <a href="https://www.instagram.com/amorabyanitta?igsh=a21iNWs3YXpxcG05"> <FaInstagram /> </a>
-                            <a href=""><FaFacebookF /></a>
+                            <a href="#"> <FaInstagram /> </a>
+                            <a href="#"><FaFacebookF /></a>
                         </div>
                     </div>
 
@@ -75,18 +75,15 @@ function Footer() {
                             <li  onClick={WhatsappOpen}  style={{ cursor: "pointer" }} >
                                 <FaPhoneAlt />
                                 +64 22 549 3376
-{/* <a href="tel:+64 22 549 3376">+64 22 549 3376</a> */}
                             </li>
 
                             <li>
-                                <FaEnvelope />  <a href="https://mail.google.com/mail/?view=cm&fs=1&to=amorabyanitta@gmail.com" target="_blank">amorabyanitta@gmail.com</a>
+                                <FaEnvelope />  <a href="mailto:info@eehook.com">info@eehook.com</a>
                             </li>
 
                             <li>
                                 <FaMapMarkerAlt /> Wellington, New Zealand
                             </li>
-
-                            <li>& Kerala, India</li>
                         </ul>
                     </div>
 
@@ -106,7 +103,7 @@ function Footer() {
             </footer>
 
             <div className="copyright">
-                © 2026 Amora by Anitta. All Rights Reserved.
+                © 2026 eehook. All Rights Reserved.
             </div>
 
         </div>
@@ -114,3 +111,4 @@ function Footer() {
 }
 
 export default Footer
+

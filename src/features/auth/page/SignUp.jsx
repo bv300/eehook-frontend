@@ -121,7 +121,7 @@ function Signup() {
 
                         <h1>Create Account</h1>
 
-                        <p>Create your Amora account and start shopping.</p>
+                        <p>Create your eehook account and start shopping.</p>
 
                     </div>
 

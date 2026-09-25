@@ -1,12 +1,9 @@
 import React from 'react'
 import './Home.css'
 
-import vedio1 from '../../assets/vedio1.mp4'
+import vedio1 from '../../assets/eehook-video-one.mp4'
 
-import vedio2 from '../../assets/vedio2.mp4'
-import poster1 from '../../assets/poster1.png'
-import poster2 from '../../assets/poster2.png'
-
+import vedio2 from '../../assets/eehook-video-two.mp4'
 
 import Our_speciality from './components/Our_speciality';
 import Shop_by_category from './components/Shop_by_category';
@@ -23,8 +20,8 @@ function Home() {
 
     const sections = [
         {
-            title: "Our Heritage",
-            text: "Rooted in tradition and refined through generations, Amora represents timeless craftsmanship where every creation carries a story of elegance and dedication."
+            title: "Our Vision",
+            text: "Rooted in a passion for innovation, eehook represents cutting-edge technology and premium lifestyle products curated for the modern world."
         }
     ];
 
@@ -45,7 +42,7 @@ function Home() {
             </div>
 
             {/* category */}
-            <div style={{ background: '#fff', padding: '45px 4% 0px' }}>
+            <div style={{ background: '#F8F8F8', padding: '45px 4% 0px' }}>
                 <Shop_by_category />
             </div>
             {/* new arivals */}
@@ -60,19 +57,19 @@ function Home() {
                     <div className="section-heritage-text">
 
                         <span className="heritage-tag">
-                            OUR HERITAGE
+                            OUR PROMISE
                         </span>
 
                         <h2>
-                            Timeless Elegance, Crafted With Tradition
+                            Innovation Meets Premium Lifestyle
                         </h2>
 
                         <p>
-                            At Amora, every saree tells a story of heritage, artistry, and timeless beauty. Inspired by traditional craftsmanship, our collections are thoughtfully curated for women who value elegance in every detail.
+                            At eehook, every product is selected with a focus on quality, performance, and modern design. From powerful electronics to top-tier cosmetics, our collections are thoughtfully curated for customers who value excellence.
                         </p>
 
                         <p>
-                            Blending classic techniques with modern sophistication, we create pieces that honour tradition while becoming a cherished part of today's wardrobe.
+                            Blending the latest tech trends with lifestyle essentials, we create a shopping experience that elevates your everyday life.
                         </p>
 
                     </div>
@@ -85,7 +82,6 @@ function Home() {
                             muted
                             loop
                             playsInline
-                            poster={poster2}
                         >
                             <source src={vedio1} type="video/mp4" />
                         </video>
@@ -96,7 +92,6 @@ function Home() {
                             muted
                             loop
                             playsInline
-                            poster={poster1}
                         >
                             <source src={vedio2} type="video/mp4" />
                         </video>
