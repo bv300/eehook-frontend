@@ -36,8 +36,32 @@ useEffect(() => {
 
 if (isLoading || showLoader) {
     return (
-        <div className="loading-container">
-            <div className="loader"></div>
+        <div className="new-arrivals-wrapper">
+            <section className="new-arrivals">
+                <div className="heading-container">
+                    <div className="heading-text">
+                        <h2>New Arrivals</h2>
+                        <p className="heading-sub">
+                            The latest curated collection for the modern lifestyle.
+                        </p>
+                    </div>
+                    <div className="view-all-link skeleton" style={{width: '80px', height: '24px', padding: 0}}></div>
+                </div>
+                <div className="carousel-container">
+                    <div style={{display: 'flex', gap: '20px', overflow: 'hidden'}}>
+                        {Array.from({ length: 4 }).map((_, i) => (
+                            <div key={i} className="new-product-card" style={{ flex: '0 0 auto', width: '280px' }}>
+                                <div className="image-container skeleton" style={{ height: '350px' }}></div>
+                                <div className="product-details" style={{ marginTop: '15px' }}>
+                                    <div className="skeleton skeleton-text" style={{ width: '40%' }}></div>
+                                    <div className="skeleton skeleton-text" style={{ width: '80%', height: '18px' }}></div>
+                                    <div className="skeleton skeleton-text" style={{ width: '30%', marginTop: '8px' }}></div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
         </div>
     );
 }

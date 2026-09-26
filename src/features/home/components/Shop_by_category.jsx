@@ -227,7 +227,22 @@ function Shop_by_category() {
     };
 
     if (isLoading) {
-        return <p>loading...</p>
+        return (
+            <section className="shop-category">
+                <h2>Shop by Category</h2>
+                <div className="divider-shop"><span>✦</span></div>
+                <div className="slider-wrapper">
+                    <div className="category-container" style={{ overflow: 'hidden' }}>
+                        {Array.from({ length: 6 }).map((_, i) => (
+                            <div key={i} className="category-card">
+                                <div className="image-circle skeleton"></div>
+                                <div className="skeleton skeleton-text" style={{ width: '60%', margin: '15px auto 0' }}></div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+        );
     }
 
 
