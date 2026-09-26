@@ -13,7 +13,7 @@
 .eehook-checkout-title{
     font-size:34px;
     font-weight:600;
-    color: #FF9000;
+    color: #4B636D;
     margin-bottom:8px;
     letter-spacing:-.5px;
 }
@@ -42,7 +42,7 @@
 }
 
 .eehook-checkout-card{
-    background: #FF9000;
+    background: #FFFFFF;
     border:1px solid #ececec;
     border-radius:14px;
     padding:24px;
