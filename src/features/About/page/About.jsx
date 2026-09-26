@@ -3,6 +3,8 @@ import '../styles/About.css';
 
 import heroImg from "../../../assets/eehook_hero_tech.png";
 import vibeImg from "../../../assets/eehook_lifestyle_vibe.png";
+import AboutFirstimage from "../../../assets/About-first-img.png";
+import AboutSecondimage from "../../../assets/About-second-img.png";
 
 import { useNavigate } from "react-router-dom";
 
@@ -45,7 +47,7 @@ const About = () => {
                 </div>
                 <div className="hero-image-content">
                     <div className="image-frame">
-                        <img src={heroImg} alt="Modern Tech Workspace" />
+                        <img src={AboutFirstimage} alt="Modern Tech Workspace" />
                     </div>
                 </div>
             </section>
@@ -79,7 +81,7 @@ const About = () => {
                     </div>
                 </div>
                 <div className="story-right">
-                    <img src={vibeImg} alt="Lifestyle Vibe" className="story-vibe-img" />
+                    <img src={AboutSecondimage} alt="Lifestyle Vibe" className="story-vibe-img" />
                 </div>
             </section>
 

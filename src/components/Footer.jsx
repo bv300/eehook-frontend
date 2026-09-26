@@ -1,10 +1,11 @@
 import React from 'react'
 import "./../Footer.css";
 
-import eehook from './../assets/eehook.jpeg'
+// import eehook from './../assets/eehook.jpeg'
 import visa from './../assets/visa-payment.png'
 import master from './../assets/master-payment.png'
 import amc from './../assets/american-exp-payment.png'
+import footerlogo from './../assets/footer-logo.png'
 import apple from './../assets/apple-payment.png'
 import { useNavigate } from 'react-router-dom';
 import { FaFacebookF, FaInstagram, FaPhoneAlt, FaEnvelope, FaMapMarkerAlt, } from "react-icons/fa";
@@ -31,7 +32,7 @@ function Footer() {
                 <div className="footer-container">
 
                     <div className="footer-column brand">
-                        <img src={eehook} alt="Logo" className="footer-logo" />
+                        <img src={footerlogo} alt="Logo" className="footer-logo" />
 
                         <p>
                             Your ultimate destination for<br />

@@ -14,6 +14,7 @@ import WishlistQuery from "../../wishlist/queries/WishlistQuery";
 
 import { getImageUrl } from "../../../utils/imageUrl";
 import showToast from "../../../utils/toast";
+import defaultImage from "../../../assets/image_not_available.png";
 
 function Product_card({
     products: rawProducts,
@@ -183,9 +184,20 @@ function Product_card({
     if (isLoading) {
 
         return (
-            <h2 className="loading-state">
-                Loading Products...
-            </h2>
+            <div className="catalog-container">
+                <section className="products shop-many-products">
+                    {Array.from({ length: 8 }).map((_, index) => (
+                        <div className="product_card skeleton-card" key={index}>
+                            <div className="product_img skeleton"></div>
+                            <div className="product_info">
+                                <div className="skeleton skeleton-text category-skeleton"></div>
+                                <div className="skeleton skeleton-text title-skeleton"></div>
+                                <div className="skeleton skeleton-text price-skeleton"></div>
+                            </div>
+                        </div>
+                    ))}
+                </section>
+            </div>
         );
 
     }
@@ -254,7 +266,7 @@ function Product_card({
                                         ? getImageUrl(
                                             primaryImageRelative
                                         )
-                                        : "https://images.unsplash.com/photo-1610030469983-98e550d6193c?q=80&w=600";
+                                        : defaultImage;
 
                                 const startingPrice =
                                     product.starting_price;

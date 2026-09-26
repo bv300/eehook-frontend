@@ -9,6 +9,7 @@ import { FaHeart } from "react-icons/fa6";
 import { RiArrowDropDownLine } from "react-icons/ri";
 import { AiOutlineDoubleRight } from "react-icons/ai";
 import { IoClose } from "react-icons/io5";
+import navbarlogo from './../assets/navbar-logo.png';
 
 import eehook from '../assets/eehook.jpeg'
 import WishlistQuery from "../features/wishlist/queries/WishlistQuery.jsx";
@@ -127,7 +128,7 @@ const cartLength = cart.total_items ?? 0;
 
                     <div className="nav_main2">
                         <NavLink to='/' className="logo-link">
-                            <img src={eehook} alt="Logo" className="navbar-logo" />
+                            <img src={navbarlogo} alt="Logo" className="navbar-logo" />
                         </NavLink>
 
                         <div className="link_flex">
