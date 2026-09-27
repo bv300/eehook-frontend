@@ -215,11 +215,11 @@ const cartLength = cart.total_items ?? 0;
                                     />
 
                                     {searchOpen && (
-                                        <LuSearch
-                                            size={20}
-                                            className="input_search_icon"
-                                            onClick={goToSearch}
-                                        />
+                                    <LuSearch
+                                        size={20}
+                                        className="input_search_icon"
+                                        onClick={goToSearch}
+                                    />
                                     )}
                                 </div>
 

@@ -36,15 +36,11 @@ function Home() {
                 {/* <HeroSlider /> */}
             </div>
 
-            {/* our speciality  */}
-            <div>
-                <Our_speciality />
-            </div>
-
             {/* category */}
-            <div style={{ background: '#F8F9F3', padding: '45px 4% 0px' }}>
+            <div className="category-section-wrapper" style={{ background: '#F8F9F3', padding: '15px 15px 45px' }}>
                 <Shop_by_category />
             </div>
+
             {/* new arivals */}
             <div>
                 <New_Arrival_Home />

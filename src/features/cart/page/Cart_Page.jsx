@@ -46,6 +46,8 @@ function Cart_page() {
 
         size: item.size || "",
 
+        unit_type: item.unit_type || "",
+
         price: Number(item.discounted_price || 0),
 
         originalPrice: Number(item.original_price || 0),
@@ -282,7 +284,7 @@ function Cart_page() {
                                             </p>
 
                                             <p>
-                                                Size : {cart.size}
+                                                {cart.unit_type || "Variant Option"} : {cart.size}
                                             </p>
 
                                             <div className="quantity-box">

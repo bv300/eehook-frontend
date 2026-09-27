@@ -323,7 +323,7 @@ const MyOrders = () => {
                                                         )}
 
                                                         <span>
-                                                            {item.size}
+                                                            {item.unit_type ? `${item.unit_type}: ${item.size}` : item.size}
                                                         </span>
 
                                                     </>

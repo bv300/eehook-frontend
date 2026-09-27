@@ -112,7 +112,7 @@
 .category-card,
 .subcategory-card {
     flex: 0 0 auto;
-    width: 130px;
+    width: 100px;
     cursor: pointer;
     text-align: center;
     transition: .35s ease;
@@ -120,42 +120,42 @@
 
 .category-card:hover,
 .subcategory-card:hover {
-    transform: translateY(-7px);
+    transform: translateY(-5px);
 }
 
 .image-circle {
-    width: 120px;
-    height: 120px;
+    width: 90px;
+    height: 110px; /* Proportional to 90px width */
     margin: auto;
-    border-radius: 30%;
-
+    border-radius: 45px 45px 12px 12px; /* Adjusted arched background */
     overflow: hidden;
-    background: #fff8f8;
-    border: 1px solid #f2dddd;
+    background: #FFFFFF; /* Match the common website clean card color */
     display: flex;
     align-items: center;
     justify-content: center;
     transition: .3s ease;
+    padding: 8px; /* scaled down space around image */
 }
 
 .image-circle img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain; /* Contain so the whole product is visible within the arch */
 }
 
 .category-card p,
 .subcategory-card p {
-    margin: 15px 0 0;
-    color: #4B636D;
-    font-size: 14px;
-    font-weight: 500;
-    font-family: Arial, sans-serif;
-    text-transform: uppercase;
+    margin: 10px 0 0;
+    color: #222;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: 'Inter', 'Outfit', sans-serif;
+    text-transform: capitalize;
+    line-height: 1.2;
 }
 
 .active-category .image-circle {
-    border: 3px solid #FF9000;
+    box-shadow: 0 0 0 3px #FF9000;
     transform: scale(1.05);
 }
 

@@ -229,8 +229,6 @@ function Shop_by_category() {
     if (isLoading) {
         return (
             <section className="shop-category">
-                <h2>Shop by Category</h2>
-                <div className="divider-shop"><span>✦</span></div>
                 <div className="slider-wrapper">
                     <div className="category-container" style={{ overflow: 'hidden' }}>
                         {Array.from({ length: 6 }).map((_, i) => (
@@ -250,16 +248,6 @@ function Shop_by_category() {
 
     return (
         <section className="shop-category">
-
-            <h2>
-                Shop by Category
-            </h2>
-
-            <div className="divider-shop">
-                <span>
-                    ✦
-                </span>
-            </div>
 
             {/* CATEGORY SLIDER */}
 

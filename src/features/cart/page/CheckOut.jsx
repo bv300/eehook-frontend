@@ -342,7 +342,7 @@ const Checkout = () => {
 
                                             <p>
 
-                                                Size : {item.size}
+                                                {item.unit_type || "Variant Option"} : {item.size}
 
                                             </p>
 
