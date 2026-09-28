@@ -80,7 +80,7 @@
 /* ---------------- Split Layout ---------------- */
 .hero-split-layout {
     width: 100%;
-    height: 60svh;
+    height: 30svh;
     display: flex;
     gap: 0; /* no gap */
     padding: 0; /* padding moved to wrapper */
@@ -336,7 +336,7 @@
 
 @media(max-width:768px){
 .hero-split-layout {
-    height: 35svh; /* reduced height to keep proportional landscape shape */
+    height: 20svh; /* reduced height to keep proportional landscape shape */
 }
 
 .top-promo-carousel {
@@ -387,7 +387,7 @@
 }
 
 .hero-split-layout {
-    height: 22svh; /* maintain landscape aspect ratio for side-by-side */
+    height: 15svh; /* maintain landscape aspect ratio for side-by-side */
 }
 
 .top-promo-carousel {
@@ -437,7 +437,7 @@
 @media(max-width:320px){
 
 .hero-split-layout {
-    height: 18svh;
+    height: 12svh;
 }
 
 .top-promo-carousel {

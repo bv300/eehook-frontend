@@ -47,6 +47,10 @@ function Home() {
             </div>
 
 
+            <div >
+                <Offer_poster />
+            </div>
+
             <div>
                 <section className="section-heritage">
 
@@ -99,8 +103,6 @@ function Home() {
 
 
             <div >
-                <Offer_poster />
-                
                 <ContactUs />
             </div>
 
