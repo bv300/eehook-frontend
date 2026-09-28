@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
 
 .catalog-container {
     width: 100%;
@@ -75,7 +75,7 @@
     color: #FFFFFF;
     padding: 4px 10px;
     border-radius: 100px;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: Inter, Arial, Helvetica, sans-serif;
     font-size: 0.65rem;
     font-weight: 700;
     letter-spacing: 0.5px;
@@ -138,7 +138,7 @@
     color: #FFFFFF;
     border: none;
     padding: 11px 0;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: Inter, Arial, Helvetica, sans-serif;
     font-size: 0.7rem;
     font-weight: 700;
     letter-spacing: 1.5px;
@@ -169,7 +169,7 @@
 
 /* Category Label */
 .product-category {
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: Inter, Arial, Helvetica, sans-serif;
     font-size: 0.65rem;
     text-transform: uppercase;
     letter-spacing: 1.2px;
@@ -184,9 +184,9 @@
 
 /* Elegant Title */
 .product-title {
-    font-family: 'Playfair Display', serif;
+    font-family: Inter, Arial, Helvetica, sans-serif;
     font-size: 1.05rem;
-    font-weight: 400;
+    font-weight: 600;
     color: #2b2b2b;
     margin: 0 0 8px 0;
     line-height: 1.35;
@@ -208,8 +208,8 @@
 
 
 .product-footer .price {
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-weight: 700;
+    font-family: Inter, Arial, Helvetica, sans-serif;
+    font-weight: 600;
     color: #6d0f2b;
 }
 
@@ -227,7 +227,7 @@
 }
 
 .rating-val {
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: Inter, Arial, Helvetica, sans-serif;
     font-size: 0.75rem;
     color: #4B636D;
     font-weight: 600;
@@ -258,7 +258,7 @@
 }
 .page-num {
     padding: 8px 14px;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: Inter, Arial, Helvetica, sans-serif;
     font-size: 0.85rem;
     font-weight: 600;
     cursor: pointer;
@@ -285,6 +285,7 @@
     color: #FFFFFF;
     padding: 6px 12px;
     border-radius: 20px;
+    font-family: Inter, Arial, Helvetica, sans-serif;
     font-size: 12px;
     font-weight: 600;
     z-index: 5;
@@ -298,6 +299,7 @@
 }
 
 .old-price {
+    font-family: Inter, Arial, Helvetica, sans-serif;
     color: #8a8a8a;
     text-decoration: line-through;
     font-size: 14px;
@@ -305,9 +307,10 @@
 }
 
 .new-price {
+    font-family: Inter, Arial, Helvetica, sans-serif;
     color: #4B636D;
     font-size: 17px;
-    font-weight: 700;
+    font-weight: 600;
     line-height: 1.2;
 }
 
@@ -356,7 +359,7 @@
 .loading-state,
 .error-state,
 .no-products {
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: Inter, Arial, Helvetica, sans-serif;
     font-size: 1rem;
     text-align: center;
     color: #777777;
@@ -447,7 +450,7 @@
         color: #FFFFFF;
         border: none;
         padding: 7px 0;
-        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-family: Inter, Arial, Helvetica, sans-serif;
         font-size: 0.5rem;
         font-weight: 600;
         letter-spacing: 1.5px;

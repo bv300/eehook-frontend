@@ -51,9 +51,12 @@
 
 /* Elegant Text Overlay (Using your old styles) */
 .hero-content {
-  position: absolute; /* Changed from relative to absolute */
-  bottom: 70px;       /* Pushes it 70px up from the very bottom */
-  left: 8%;           /* Aligns it horizontally with the section padding */
+  position: absolute;
+  /* Changed from relative to absolute */
+  bottom: 70px;
+  /* Pushes it 70px up from the very bottom */
+  left: 8%;
+  /* Aligns it horizontally with the section padding */
   z-index: 2;
   max-width: 550px;
   color: #FFFFFF;
@@ -65,7 +68,8 @@
   font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 3px;
-  color: #e5c158; /* Your warm gold */
+  color: #e5c158;
+  /* Your warm gold */
   font-weight: 600;
   display: block;
   margin-bottom: 12px;
@@ -82,7 +86,7 @@
 
 /* Blending the filled/outlined styling into your classic font setup */
 .text-filled {
-  color: #FFFFFF; 
+  color: #FFFFFF;
 }
 
 .text-outlined {
@@ -125,7 +129,8 @@
 }
 
 .arrow {
-  color: #e5c158; /* Using warm gold for the arrow accent */
+  color: #e5c158;
+  /* Using warm gold for the arrow accent */
   font-size: 1.2rem;
   position: absolute;
   left: 15px;
@@ -173,6 +178,7 @@
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -183,7 +189,8 @@
 @media (max-width: 768px) {
   .hero-section {
     padding: 0 5%;
-    justify-content: center; /* Center content horizontally on small screens */
+    justify-content: center;
+    /* Center content horizontally on small screens */
   }
 
   /* Force image container to be full screen width */
@@ -194,19 +201,22 @@
 
   /* Remove the #4B636D gradient side shade and use a standard dimming dark tint instead */
   .hero-overlay {
-    background: rgba(0, 0, 0, 0.65); /* Keeps text readable over full-width image */
+    background: rgba(0, 0, 0, 0.65);
+    /* Keeps text readable over full-width image */
   }
 
   .hero-content {
     max-width: 100%;
-    text-align: center; /* Centers the titles and text */
+    text-align: center;
+    /* Centers the titles and text */
     display: flex;
     flex-direction: column;
     align-items: center;
   }
 
   .hero-title {
-    font-size: 2.5rem; /* Scales down font slightly for smaller viewport widths */
+    font-size: 2.5rem;
+    /* Scales down font slightly for smaller viewport widths */
   }
 
   /* Moves navigation dots to the bottom center instead of clashing on the side */
@@ -222,8 +232,9 @@
   .nav-number-item {
     font-size: 1.5rem;
   }
-  
+
   .active-line {
-    display: none; /* Hide the line indicator on mobile to keep look clean */
+    display: none;
+    /* Hide the line indicator on mobile to keep look clean */
   }
 }

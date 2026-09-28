@@ -40,9 +40,9 @@
 
 .promo-slide h3 {
     margin: 0;
-    font-size: 16px;
+    font-family: Inter, Arial, Helvetica, sans-serif;
+    font-size: clamp(8px, 1.5vw + 4px, 16px);
     font-weight: 600;
-    font-family: 'Inter', sans-serif;
 }
 
 .promo-nav-btn {
@@ -208,22 +208,26 @@
 .hero-subtitle {
     display: block;
     margin-bottom: 10px;
-    font-size: .85rem;
+    font-family: Inter, Arial, Helvetica, sans-serif;
+    font-size: clamp(0.5rem, 1.5vw + 0.2rem, 0.85rem);
+    font-weight: 600;
     letter-spacing: 2px;
     text-transform: uppercase;
     color: #FFFFFF;
 }
 
 .hero-content h1 {
-    font-size: 3rem;
+    font-family: Inter, Arial, Helvetica, sans-serif;
+    font-size: clamp(1rem, 4vw + 1rem, 3rem);
+    font-weight: 700;
     line-height: 1.1;
     margin-bottom: 15px;
-    font-family: "Inter", sans-serif; /* changed to sans-serif */
-    font-weight: 700;
 }
 
 .hero-content p {
-    font-size: 1rem;
+    font-family: Inter, Arial, Helvetica, sans-serif;
+    font-size: clamp(0.9rem, 1.5vw + 0.4rem, 1rem);
+    font-weight: 400;
     line-height: 1.5;
     margin-bottom: 25px;
     color: rgba(255,255,255,.92);
@@ -239,10 +243,11 @@
     color: #fff;
     border: 1px solid rgba(255, 255, 255, 0.7);
     text-decoration: none;
-    font-weight: 500;
+    font-family: Inter, Arial, Helvetica, sans-serif;
+    font-weight: 600;
     letter-spacing: 1px;
     text-transform: uppercase;
-    font-size: 0.85rem;
+    font-size: clamp(0.6rem, 1.5vw + 0.3rem, 0.85rem);
     transition: all 0.4s ease;
     border-radius: 8px; /* Modern slightly rounded corners */
     backdrop-filter: blur(5px);
@@ -343,10 +348,6 @@
     height: 40px;
 }
 
-.promo-slide h3 {
-    font-size: 13px;
-}
-
 .hero-content{
     left:5%;
     right:5%;
@@ -355,12 +356,10 @@
 }
 
 .hero-content h1{
-    font-size: 2rem;
     margin-bottom: 8px;
 }
 
 .hero-content p{
-    font-size: 0.9rem;
     margin-bottom: 15px;
 }
 
@@ -394,10 +393,6 @@
     height: 30px;
 }
 
-.promo-slide h3 {
-    font-size: 10px;
-}
-
 .hero-content{
     left:4%;
     right:4%;
@@ -405,13 +400,11 @@
 }
 
 .hero-subtitle{
-    font-size: 0.6rem;
     letter-spacing: 1px;
     margin-bottom: 5px;
 }
 
 .hero-content h1{
-    font-size: 1.2rem;
     margin-bottom: 5px;
 }
 
@@ -422,7 +415,6 @@
 .shop-btn-premium {
     width: auto;
     padding: 6px 12px;
-    font-size: 0.7rem;
     border-radius: 4px;
 }
 
@@ -444,20 +436,7 @@
     height: 25px;
 }
 
-.promo-slide h3 {
-    font-size: 8px;
-}
-
-.hero-content h1{
-    font-size: 1rem;
-}
-
-.hero-subtitle{
-    font-size: 0.5rem;
-}
-
 .shop-btn-premium {
-    font-size: 0.6rem;
     padding: 4px 8px;
 }
 

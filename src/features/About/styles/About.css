@@ -137,9 +137,24 @@
 .about-modern-story {
     display: flex;
     padding: 8% 8%;
-    background: #fff;
+    background-color: #fff;
     gap: 60px;
     align-items: flex-start;
+    position: relative;
+    z-index: 1;
+}
+
+.about-modern-story::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image: url("../../../assets/navbar-logo.png");
+    background-size: 250px;
+    background-repeat: repeat;
+    background-position: center;
+    opacity: 0.04;
+    z-index: -1;
+    pointer-events: none;
 }
 
 .story-left {
@@ -225,7 +240,22 @@
 /* ================== HUMANIZED VALUES GRID ================== */
 .about-human-values {
     padding: 10% 8%;
-    background: #fff;
+    background-color: #fff;
+    position: relative;
+    z-index: 1;
+}
+
+.about-human-values::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image: url("../../../assets/navbar-logo.png");
+    background-size: 250px;
+    background-repeat: repeat;
+    background-position: center;
+    opacity: 0.04;
+    z-index: -1;
+    pointer-events: none;
 }
 
 .values-header {
