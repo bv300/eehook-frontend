@@ -181,7 +181,7 @@ function Single_product() {
     const selectedSizeVariant =
         selectedVariant?.sizes?.find(
             item =>
-                item.size.id === selectedSize?.id
+                item.size?.id === selectedSize?.id
         );
 
     const displayImages =
@@ -199,7 +199,7 @@ function Single_product() {
 
 
 
-        if (!selectedColor || !selectedSize) {
+        if (!selectedColor || (availableSizes?.some(item => item.size !== null) && !selectedSize)) {
             showToast.warning(
                 "Please select color and size"
             );
@@ -267,7 +267,7 @@ function Single_product() {
 
 
 
-        if (!selectedVariant || !selectedSizeVariant) {
+        if (!selectedVariant || !selectedSizeVariant || (availableSizes?.some(item => item.size !== null) && !selectedSize)) {
             showToast.warning(
                 "Please select color and size"
             );
@@ -448,20 +448,24 @@ function Single_product() {
                         </div>
                     )}
 
-                    <div className="option-block">
-                        <h4>{availableSizes?.[0]?.size?.unit_type || selectedSize?.unit_type || "Variant Option"}: <span className="selected-option-label">{selectedSize?.name}</span></h4>
-                        <div className="sizes">
-                            {availableSizes.map((item) => (
-                                <button
-                                    key={item.id}
-                                    className={selectedSize?.id === item.size.id ? "size-btn active-size" : "size-btn"}
-                                    onClick={() => setSelectedSize(item.size)}
-                                >
-                                    {item.size.name}
-                                </button>
-                            ))}
+                    {availableSizes?.some(item => item.size !== null) && (
+                        <div className="option-block">
+                            <h4>{availableSizes?.[0]?.size?.unit_type || selectedSize?.unit_type || "Variant Option"}: <span className="selected-option-label">{selectedSize?.name}</span></h4>
+                            <div className="sizes">
+                                {availableSizes.map((item) => (
+                                    item.size && (
+                                        <button
+                                            key={item.id}
+                                            className={selectedSize?.id === item.size.id ? "size-btn active-size" : "size-btn"}
+                                            onClick={() => setSelectedSize(item.size)}
+                                        >
+                                            {item.size.name}
+                                        </button>
+                                    )
+                                ))}
+                            </div>
                         </div>
-                    </div>
+                    )}
 
                     <p className="description">{data.description}</p>
 

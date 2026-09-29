@@ -140,7 +140,7 @@ function Shop_by_category() {
         (category) => category.subcategories?.length > 0
     );
 
-    const categoryItems = offerAvailable ? [...filteredCategories, offerCard] : filteredCategories;
+    const categoryItems = offerAvailable ? [offerCard, ...filteredCategories] : filteredCategories;
 
 
 
