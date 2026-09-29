@@ -467,6 +467,27 @@ function Single_product() {
                         </div>
                     )}
 
+                    <div className="product-price-section" style={{ margin: '20px 0', padding: '15px 0', borderTop: '1px solid #eee', borderBottom: '1px solid #eee' }}>
+                        <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#333', marginBottom: '8px' }}>Price:</div>
+                        {(selectedSizeVariant || availableSizes?.[0])?.discounted_price ? (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                <span style={{ fontFamily: 'Inter, Arial, sans-serif', fontSize: '28px', fontWeight: '800', color: '#B12704' }}>
+                                    AED {Number((selectedSizeVariant || availableSizes?.[0])?.discounted_price).toFixed(2)}
+                                </span>
+                                <span style={{ fontFamily: 'Inter, Arial, sans-serif', fontSize: '16px', color: '#565959', textDecoration: 'line-through' }}>
+                                    AED {Number((selectedSizeVariant || availableSizes?.[0])?.price).toFixed(2)}
+                                </span>
+                                <span style={{ background: '#CC0C39', color: '#fff', padding: '4px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold' }}>
+                                    Save AED {Number((selectedSizeVariant || availableSizes?.[0])?.price - (selectedSizeVariant || availableSizes?.[0])?.discounted_price).toFixed(2)}
+                                </span>
+                            </div>
+                        ) : (
+                            <div style={{ fontFamily: 'Inter, Arial, sans-serif', fontSize: '28px', fontWeight: '800', color: '#B12704' }}>
+                                AED {Number((selectedSizeVariant || availableSizes?.[0])?.price || 0).toFixed(2)}
+                            </div>
+                        )}
+                    </div>
+
                     <p className="description">{data.description}</p>
 
                     {data?.key_features && data.key_features.length > 0 && (
@@ -505,7 +526,7 @@ function Single_product() {
                         <div className="delivery-date">Delivery <strong>{data.estimated_delivery_time || "09 Sep - 10 Sep"}</strong></div>
                     </div>
 
-                    <div className="price-right-section" style={{marginBottom: '15px', display: 'none'}}>
+                    <div className="price-right-section" style={{marginBottom: '15px'}}>
                         <span className="price-value">AED {Number((selectedSizeVariant || availableSizes?.[0])?.discounted_price || (selectedSizeVariant || availableSizes?.[0])?.price || 0).toFixed(2)}</span>
                     </div>
 
