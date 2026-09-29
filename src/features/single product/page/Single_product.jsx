@@ -59,14 +59,20 @@ function Single_product() {
             setCouponError("Please enter a coupon code");
             return;
         }
+
+        const token = localStorage.getItem("access");
+        if (!token) {
+            showToast.info("Please login to apply a coupon.");
+            navigate("/login");
+            return;
+        }
         
         try {
-            const token = localStorage.getItem("access");
             const response = await fetch("http://127.0.0.1:8000/validate-coupon/", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    ...(token && { Authorization: `Bearer ${token}` }),
+                    "Authorization": `Bearer ${token}`,
                 },
                 body: JSON.stringify({
                     code: couponCode,
@@ -241,7 +247,7 @@ function Single_product() {
 
         const cartPayload = {
             variant: selectedVariant.id,
-            variant_size: selectedVariant?.price_type === 'single' ? null : selectedSizeVariant?.id,
+            variant_size: selectedVariant?.price_type === 'single' ? (selectedVariant?.sizes?.[0]?.id || null) : selectedSizeVariant?.id,
             quantity: 1
         };
 
