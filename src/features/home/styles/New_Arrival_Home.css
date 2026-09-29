@@ -94,6 +94,7 @@
     box-shadow: none;
     transition: transform 0.4s ease;
     height: 100%;
+    min-width: 0;
 }
 
 .new-product-card:hover {
@@ -107,7 +108,7 @@
 .image-container {
     position: relative;
     width: 100%;
-    aspect-ratio: 1 / 1.25;
+    height: 220px;
     overflow: hidden;
     border-radius: 12px;
     background: #F8F9F3;
@@ -253,12 +254,12 @@
     color: #4B636D;
     margin: 10px 0;
     
-    /* Force exactly 3 lines of space to ensure uniform card height */
-    min-height: calc(1rem * 1.4 * 3);
+    height: 67px;
     display: -webkit-box;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 

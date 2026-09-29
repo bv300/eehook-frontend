@@ -120,13 +120,13 @@ function Single_product() {
                 );
 
                 const size =
-                    variant.sizes.find(
+                    variant.sizes?.find(
                         s => s.id === sizeId
                     ) ||
-                    variant.sizes[0];
+                    variant.sizes?.[0];
 
                 setSelectedSize(
-                    size.size
+                    size ? (size.unit || size.size) : null
                 );
 
                 const image =
@@ -181,7 +181,7 @@ function Single_product() {
     const selectedSizeVariant =
         selectedVariant?.sizes?.find(
             item =>
-                item.size?.id === selectedSize?.id
+                (item.unit?.id === selectedSize?.id) || (item.size?.id === selectedSize?.id)
         );
 
     const displayImages =
@@ -199,30 +199,34 @@ function Single_product() {
 
 
 
-        if (!selectedColor || (availableSizes?.some(item => item.size !== null) && !selectedSize)) {
-            showToast.warning(
-                "Please select color and size"
-            );
+        if (!selectedColor) {
+            showToast.warning("Please select a color");
             return;
         }
 
-        if (!selectedSizeVariant) {
-            showToast.warning(
-                "This combination is not available"
-            );
-            return;
-        }
-
-        if (selectedSizeVariant.stock <= 0) {
-            showToast.info(
-                "Out of stock"
-            );
-            return;
+        if (selectedVariant?.price_type === 'multiple') {
+            if (!selectedSize) {
+                showToast.warning("Please select a size/unit");
+                return;
+            }
+            if (!selectedSizeVariant) {
+                showToast.warning("This combination is not available");
+                return;
+            }
+            if (selectedSizeVariant.stock <= 0) {
+                showToast.info("Out of stock");
+                return;
+            }
+        } else {
+            if (selectedVariant?.stock <= 0) {
+                showToast.info("Out of stock");
+                return;
+            }
         }
 
         const cartPayload = {
             variant: selectedVariant.id,
-            variant_size: selectedSizeVariant.id,
+            variant_size: selectedVariant?.price_type === 'single' ? null : selectedSizeVariant?.id,
             quantity: 1
         };
 
@@ -267,18 +271,23 @@ function Single_product() {
 
 
 
-        if (!selectedVariant || !selectedSizeVariant || (availableSizes?.some(item => item.size !== null) && !selectedSize)) {
-            showToast.warning(
-                "Please select color and size"
-            );
+        if (!selectedVariant) {
+            showToast.warning("Please select a variant");
             return;
+        }
+
+        if (selectedVariant?.price_type === 'multiple') {
+            if (!selectedSizeVariant || !selectedSize) {
+                showToast.warning("Please select color and size");
+                return;
+            }
         }
 
         try {
             const wishlistItem = wishdata.find(
                 item =>
-                    item.variant_size ===
-                    selectedSizeVariant.id
+                    item.variant === selectedVariant.id &&
+                    item.variant_size === (selectedVariant?.price_type === 'single' ? null : selectedSizeVariant?.id)
             );
 
             if (wishlistItem) {
@@ -294,8 +303,7 @@ function Single_product() {
 
             await Wishlist_post({
                 variant: selectedVariant.id,
-                variant_size:
-                    selectedSizeVariant.id
+                variant_size: selectedVariant?.price_type === 'single' ? null : selectedSizeVariant?.id
             });
 
             await refetchWishlist();
@@ -319,8 +327,8 @@ function Single_product() {
 
     const isWishlisted = wishdata.some(
         item =>
-            item.variant_size ===
-            selectedSizeVariant?.id
+            item.variant === selectedVariant?.id &&
+            item.variant_size === (selectedVariant?.price_type === 'single' ? null : selectedSizeVariant?.id)
     );
 
     return (
@@ -448,44 +456,53 @@ function Single_product() {
                         </div>
                     )}
 
-                    {availableSizes?.some(item => item.size !== null) && (
+                    {selectedVariant?.price_type === 'multiple' && availableSizes?.some(item => item.unit || item.size) && (
                         <div className="option-block">
-                            <h4>{availableSizes?.[0]?.size?.unit_type || selectedSize?.unit_type || "Variant Option"}: <span className="selected-option-label">{selectedSize?.name}</span></h4>
+                            <h4>{availableSizes?.[0]?.unit_type?.name || availableSizes?.[0]?.size?.unit_type || selectedSize?.unit_type || "Variant Option"}: <span className="selected-option-label">{selectedSize?.name}</span></h4>
                             <div className="sizes">
-                                {availableSizes.map((item) => (
-                                    item.size && (
+                                {availableSizes.map((item) => {
+                                    const unitObj = item.unit || item.size;
+                                    return unitObj && (
                                         <button
                                             key={item.id}
-                                            className={selectedSize?.id === item.size.id ? "size-btn active-size" : "size-btn"}
-                                            onClick={() => setSelectedSize(item.size)}
+                                            className={selectedSize?.id === unitObj.id ? "size-btn active-size" : "size-btn"}
+                                            onClick={() => setSelectedSize(unitObj)}
                                         >
-                                            {item.size.name}
+                                            {unitObj.name}
                                         </button>
-                                    )
-                                ))}
+                                    );
+                                })}
                             </div>
                         </div>
                     )}
 
                     <div className="product-price-section" style={{ margin: '20px 0', padding: '15px 0', borderTop: '1px solid #eee', borderBottom: '1px solid #eee' }}>
                         <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#333', marginBottom: '8px' }}>Price:</div>
-                        {(selectedSizeVariant || availableSizes?.[0])?.discounted_price ? (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                <span style={{ fontFamily: 'Inter, Arial, sans-serif', fontSize: '28px', fontWeight: '800', color: '#B12704' }}>
-                                    AED {Number((selectedSizeVariant || availableSizes?.[0])?.discounted_price).toFixed(2)}
-                                </span>
-                                <span style={{ fontFamily: 'Inter, Arial, sans-serif', fontSize: '16px', color: '#565959', textDecoration: 'line-through' }}>
-                                    AED {Number((selectedSizeVariant || availableSizes?.[0])?.price).toFixed(2)}
-                                </span>
-                                <span style={{ background: '#CC0C39', color: '#fff', padding: '4px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold' }}>
-                                    Save AED {Number((selectedSizeVariant || availableSizes?.[0])?.price - (selectedSizeVariant || availableSizes?.[0])?.discounted_price).toFixed(2)}
-                                </span>
-                            </div>
-                        ) : (
-                            <div style={{ fontFamily: 'Inter, Arial, sans-serif', fontSize: '28px', fontWeight: '800', color: '#B12704' }}>
-                                AED {Number((selectedSizeVariant || availableSizes?.[0])?.price || 0).toFixed(2)}
-                            </div>
-                        )}
+                        {(() => {
+                            let itemPriceInfo = selectedVariant?.price_type === 'single'
+                                ? selectedVariant
+                                : (selectedSizeVariant || availableSizes?.[0]);
+                                
+                            if (!itemPriceInfo) return null;
+
+                            return itemPriceInfo.discounted_price ? (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                    <span style={{ fontFamily: 'Inter, Arial, sans-serif', fontSize: '28px', fontWeight: '800', color: '#B12704' }}>
+                                        AED {Number(itemPriceInfo.discounted_price).toFixed(2)}
+                                    </span>
+                                    <span style={{ fontFamily: 'Inter, Arial, sans-serif', fontSize: '16px', color: '#565959', textDecoration: 'line-through' }}>
+                                        AED {Number(itemPriceInfo.price).toFixed(2)}
+                                    </span>
+                                    <span style={{ background: '#CC0C39', color: '#fff', padding: '4px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold' }}>
+                                        Save AED {Number(itemPriceInfo.price - itemPriceInfo.discounted_price).toFixed(2)}
+                                    </span>
+                                </div>
+                            ) : (
+                                <div style={{ fontFamily: 'Inter, Arial, sans-serif', fontSize: '28px', fontWeight: '800', color: '#B12704' }}>
+                                    AED {Number(itemPriceInfo.price || 0).toFixed(2)}
+                                </div>
+                            );
+                        })()}
                     </div>
 
                     <p className="description">{data.description}</p>
@@ -527,17 +544,23 @@ function Single_product() {
                     </div>
 
                     <div className="price-right-section" style={{marginBottom: '15px'}}>
-                        <span className="price-value">AED {Number((selectedSizeVariant || availableSizes?.[0])?.discounted_price || (selectedSizeVariant || availableSizes?.[0])?.price || 0).toFixed(2)}</span>
+                        <span className="price-value">AED {Number(selectedVariant?.price_type === 'single' ? (selectedVariant?.discounted_price || selectedVariant?.price || 0) : ((selectedSizeVariant || availableSizes?.[0])?.discounted_price || (selectedSizeVariant || availableSizes?.[0])?.price || 0)).toFixed(2)}</span>
                     </div>
 
                     <div className="stock-status">
-                        {!selectedSizeVariant ? (
+                        {selectedVariant?.price_type === 'single' ? (
+                            (selectedVariant?.stock <= 0 ? (
+                                <span className="stock-out" style={{fontSize: '14px', color: '#b12704'}}>Out of Stock</span>
+                            ) : (
+                                <span className="stock" style={{fontSize: '14px', color: '#007600'}}>In Stock : {selectedVariant?.stock || 0}</span>
+                            ))
+                        ) : (!selectedSizeVariant ? (
                             <span className="stock" style={{fontSize: '14px', color: '#555'}}>Please select options to view stock</span>
                         ) : selectedSizeVariant?.stock <= 0 ? (
                             <span className="stock-out" style={{fontSize: '14px', color: '#b12704'}}>Out of Stock</span>
                         ) : (
                             <span className="stock" style={{fontSize: '14px', color: '#007600'}}>In Stock : {selectedSizeVariant?.stock}</span>
-                        )}
+                        ))}
                     </div>
 
                     <div className="sigle_product_cart-buy">

@@ -340,11 +340,13 @@ const Checkout = () => {
 
                                             </h4>
 
-                                            <p>
+                                            {item.variant_size !== null && (
+                                                <p>
 
-                                                {item.unit_type || "Variant Option"} : {item.size}
+                                                    {item.unit_type || "Variant Option"} : {item.size}
 
-                                            </p>
+                                                </p>
+                                            )}
 
                                             <p>
 

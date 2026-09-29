@@ -283,9 +283,11 @@ function Cart_page() {
                                                 Color : {cart.color}
                                             </p>
 
-                                            <p>
-                                                {cart.unit_type || "Variant Option"} : {cart.size}
-                                            </p>
+                                            {cart.variant_size !== null && (
+                                                <p>
+                                                    {cart.unit_type || "Variant Option"} : {cart.size}
+                                                </p>
+                                            )}
 
                                             <div className="quantity-box">
 
