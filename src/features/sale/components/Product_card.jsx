@@ -113,11 +113,11 @@ function Product_card({
                 product.variants?.[0];
 
             const firstVariantSize =
-                firstVariant?.sizes?.[0];
+                firstVariant?.price_type === 'single' ? null : firstVariant?.sizes?.[0];
 
             if (
                 !firstVariant ||
-                !firstVariantSize
+                (firstVariant.price_type !== 'single' && !firstVariantSize)
             ) {
 
                 showToast.error(
@@ -131,8 +131,8 @@ function Product_card({
             const wishlistItem =
                 wishdata.find(
                     item =>
-                        item.variant_size ===
-                        firstVariantSize.id
+                        item.variant === firstVariant.id &&
+                        item.variant_size === (firstVariantSize ? firstVariantSize.id : null)
                 );
 
             if (wishlistItem) {
@@ -157,7 +157,7 @@ function Product_card({
                     firstVariant.id,
 
                 variant_size:
-                    firstVariantSize.id
+                    firstVariantSize ? firstVariantSize.id : null
 
             });
 
@@ -243,13 +243,13 @@ function Product_card({
                                     product.variants?.[0];
 
                                 const firstVariantSize =
-                                    firstVariant?.sizes?.[0];
+                                    firstVariant?.price_type === 'single' ? null : firstVariant?.sizes?.[0];
 
                                 const wishlistItem =
                                     wishdata.find(
                                         item =>
-                                            item.variant_size ===
-                                            firstVariantSize?.id
+                                            item.variant === firstVariant?.id &&
+                                            item.variant_size === (firstVariantSize ? firstVariantSize.id : null)
                                     );
 
                                 const isWishlisted =

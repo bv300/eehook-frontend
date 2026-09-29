@@ -236,7 +236,7 @@
 
 
 .product-tag {
-    color: #FF9000;
+    color: #4B636D;
     font-size: 0.7rem;
     font-family: Inter, Arial, Helvetica, sans-serif;
     font-weight: 600;
@@ -248,13 +248,13 @@
 
 .newHome-product-title {
     font-family: Inter, Arial, Helvetica, sans-serif;
-    line-height: 1.4;
-    font-size: 1rem;
-    font-weight: 600;
-    color: #4B636D;
+    line-height: 1.5;
+    font-size: 0.9rem;
+    font-weight: 400;
+    color: #000000;
     margin: 10px 0;
     
-    height: 67px;
+    height: 65px;
     display: -webkit-box;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;

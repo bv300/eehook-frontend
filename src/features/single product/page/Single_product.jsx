@@ -47,9 +47,44 @@ function Single_product() {
 
     const [selectedSize, setSelectedSize] = useState(null);
 
-    const [selectedRegion, setSelectedRegion] = useState(null);
-
     const [activeImage, setActiveImage] = useState(null);
+
+    const [couponCode, setCouponCode] = useState("");
+    const [appliedCoupon, setAppliedCoupon] = useState(null);
+    const [couponError, setCouponError] = useState("");
+
+    const handleApplyCoupon = async () => {
+        setCouponError("");
+        if (!couponCode) {
+            setCouponError("Please enter a coupon code");
+            return;
+        }
+        
+        try {
+            const token = localStorage.getItem("access");
+            const response = await fetch("http://127.0.0.1:8000/validate-coupon/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    ...(token && { Authorization: `Bearer ${token}` }),
+                },
+                body: JSON.stringify({
+                    code: couponCode,
+                    product_id: data.id,
+                }),
+            });
+            const resData = await response.json();
+            
+            if (response.ok) {
+                setAppliedCoupon(resData);
+                showToast.success(resData.message || "Coupon applied successfully!");
+            } else {
+                setCouponError(resData.message || "Failed to apply coupon");
+            }
+        } catch (err) {
+            setCouponError("An error occurred while validating coupon");
+        }
+    };
 
     const {
         data: cart = [],
@@ -75,24 +110,11 @@ function Single_product() {
         ).values()
     ];
 
-    const regions = [
-        ...new Map(
-            (data?.variants || [])
-                .flatMap(variant => variant.regions || [])
-                .map(region => [region.id, region])
-        ).values()
-    ];
-
     /*
         SELECTED VARIANT
     */
 
     const selectedVariant =
-        data?.variants?.find(
-            variant =>
-                variant.color?.id === selectedColor?.id &&
-                (selectedRegion ? variant.regions?.some(r => r.id === selectedRegion.id) : true)
-        ) ||
         data?.variants?.find(
             variant =>
                 variant.color?.id === selectedColor?.id
@@ -113,10 +135,6 @@ function Single_product() {
             if (variant) {
                 setSelectedColor(
                     variant.color
-                );
-
-                setSelectedRegion(
-                    variant.regions?.[0] || null
                 );
 
                 const size =
@@ -149,10 +167,6 @@ function Single_product() {
 
         setSelectedColor(
             firstVariant.color
-        );
-
-        setSelectedRegion(
-            null
         );
 
         setSelectedSize(
@@ -199,7 +213,7 @@ function Single_product() {
 
 
 
-        if (!selectedColor) {
+        if (colors.length > 0 && !selectedColor) {
             showToast.warning("Please select a color");
             return;
         }
@@ -218,7 +232,8 @@ function Single_product() {
                 return;
             }
         } else {
-            if (selectedVariant?.stock <= 0) {
+            const singleStock = selectedVariant?.sizes?.[0]?.stock || 0;
+            if (singleStock <= 0) {
                 showToast.info("Out of stock");
                 return;
             }
@@ -276,9 +291,14 @@ function Single_product() {
             return;
         }
 
+        if (colors.length > 0 && !selectedColor) {
+            showToast.warning("Please select a color");
+            return;
+        }
+
         if (selectedVariant?.price_type === 'multiple') {
             if (!selectedSizeVariant || !selectedSize) {
-                showToast.warning("Please select color and size");
+                showToast.warning("Please select a size/unit");
                 return;
             }
         }
@@ -287,7 +307,7 @@ function Single_product() {
             const wishlistItem = wishdata.find(
                 item =>
                     item.variant === selectedVariant.id &&
-                    item.variant_size === (selectedVariant?.price_type === 'single' ? null : selectedSizeVariant?.id)
+                    (selectedVariant?.price_type === 'single' || item.variant_size === selectedSizeVariant?.id)
             );
 
             if (wishlistItem) {
@@ -328,7 +348,7 @@ function Single_product() {
     const isWishlisted = wishdata.some(
         item =>
             item.variant === selectedVariant?.id &&
-            item.variant_size === (selectedVariant?.price_type === 'single' ? null : selectedSizeVariant?.id)
+            (selectedVariant?.price_type === 'single' || item.variant_size === selectedSizeVariant?.id)
     );
 
     return (
@@ -367,7 +387,7 @@ function Single_product() {
                         <div className="viewers-count-badge">
                             <div className="eye-wrapper">
                                 <AiOutlineEye size={18} color="#007185" />
-                                <span><strong style={{color:"#007185"}}>{data.current_viewers_count} person{data.current_viewers_count > 1 ? "s" : ""}</strong> is watching this product now.</span>
+                                <span><strong style={{ color: "#007185" }}>{data.current_viewers_count} person{data.current_viewers_count > 1 ? "s" : ""}</strong> is watching this product now.</span>
                             </div>
                             <span className="close-badge-btn">×</span>
                         </div>
@@ -398,63 +418,33 @@ function Single_product() {
                 {/* CENTER: PRODUCT INFORMATION */}
                 <div className="info-section">
                     <h1>{data.name}</h1>
-                    
+
                     <div className="option-block color-selection-block">
-                        <h4>Color: <span className="selected-option-label" style={{fontWeight: 'bold', color: '#111'}}>{selectedColor?.name || "Select color"}</span></h4>
+                        <h4>Color: <span className="selected-option-label" style={{ fontWeight: 'bold', color: '#111' }}>{selectedColor?.name || "Select color"}</span></h4>
                         <div className="colors image-colors">
                             {colors.map((color) => {
-                                const variant = data.variants.find(item => item.color?.id === color.id && (selectedRegion ? item.regions?.some(r => r.id === selectedRegion.id) : true)) || data.variants.find(item => item.color?.id === color.id);
+                                const variant = data.variants.find(item => item.color?.id === color.id);
                                 const img = variant?.images?.find(i => i.is_primary)?.image || variant?.images?.[0]?.image;
-                                
+
                                 return (
-                                <button
-                                    key={color.id}
-                                    className={selectedColor?.id === color.id ? "color-img-btn active-color-img" : "color-img-btn"}
-                                    title={color.name}
-                                    onClick={() => {
-                                        const variant = data.variants.find(item => item.color?.id === color.id && (selectedRegion ? item.regions?.some(r => r.id === selectedRegion.id) : true)) || data.variants.find(item => item.color?.id === color.id);
-                                        setSelectedColor(color);
-                                        // Only keep the region if the new variant still supports it
-                                        if (selectedRegion && (!variant?.regions || !variant.regions.some(r => r.id === selectedRegion.id))) {
-                                            setSelectedRegion(null);
-                                        }
-                                        setSelectedSize(null);
-                                        const image = variant?.images?.find(img => img.is_primary) || variant?.images?.[0];
-                                        setActiveImage(image?.image || null);
-                                    }}
-                                >
-                                    {img ? <img src={getImageUrl(img)} alt={color.name} /> : <div className="fallback-color" style={{ background: color.code }} />}
-                                </button>
+                                    <button
+                                        key={color.id}
+                                        className={selectedColor?.id === color.id ? "color-img-btn active-color-img" : "color-img-btn"}
+                                        title={color.name}
+                                        onClick={() => {
+                                            const variant = data.variants.find(item => item.color?.id === color.id);
+                                            setSelectedColor(color);
+                                            setSelectedSize(null);
+                                            const image = variant?.images?.find(img => img.is_primary) || variant?.images?.[0];
+                                            setActiveImage(image?.image || null);
+                                        }}
+                                    >
+                                        {img ? <img src={getImageUrl(img)} alt={color.name} /> : <div className="fallback-color" style={{ background: color.code }} />}
+                                    </button>
                                 );
                             })}
                         </div>
                     </div>
-
-                    {regions.length > 0 && (
-                        <div className="option-block">
-                            <h4>Region: <span className="selected-option-label">{selectedRegion?.name}</span></h4>
-                            <div className="sizes">
-                                {regions.map((region) => (
-                                    <button
-                                        key={region.id}
-                                        className={selectedRegion?.id === region.id ? "size-btn active-size" : "size-btn"}
-                                        onClick={() => {
-                                            const variant = data.variants.find(item => item.regions?.some(r => r.id === region.id) && item.color?.id === selectedColor?.id) || data.variants.find(item => item.regions?.some(r => r.id === region.id));
-                                            setSelectedRegion(region);
-                                            if (variant) {
-                                                if (!selectedColor && variant.color) setSelectedColor(variant.color);
-                                                setSelectedSize(null);
-                                                const image = variant?.images?.find(img => img.is_primary) || variant?.images?.[0];
-                                                setActiveImage(image?.image || null);
-                                            }
-                                        }}
-                                    >
-                                        {region.name}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    )}
 
                     {selectedVariant?.price_type === 'multiple' && availableSizes?.some(item => item.unit || item.size) && (
                         <div className="option-block">
@@ -482,27 +472,62 @@ function Single_product() {
                             let itemPriceInfo = selectedVariant?.price_type === 'single'
                                 ? selectedVariant
                                 : (selectedSizeVariant || availableSizes?.[0]);
-                                
+
                             if (!itemPriceInfo) return null;
 
-                            return itemPriceInfo.discounted_price ? (
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                    <span style={{ fontFamily: 'Inter, Arial, sans-serif', fontSize: '28px', fontWeight: '800', color: '#B12704' }}>
-                                        AED {Number(itemPriceInfo.discounted_price).toFixed(2)}
-                                    </span>
-                                    <span style={{ fontFamily: 'Inter, Arial, sans-serif', fontSize: '16px', color: '#565959', textDecoration: 'line-through' }}>
-                                        AED {Number(itemPriceInfo.price).toFixed(2)}
-                                    </span>
-                                    <span style={{ background: '#CC0C39', color: '#fff', padding: '4px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold' }}>
-                                        Save AED {Number(itemPriceInfo.price - itemPriceInfo.discounted_price).toFixed(2)}
-                                    </span>
-                                </div>
-                            ) : (
-                                <div style={{ fontFamily: 'Inter, Arial, sans-serif', fontSize: '28px', fontWeight: '800', color: '#B12704' }}>
-                                    AED {Number(itemPriceInfo.price || 0).toFixed(2)}
+                            let currentPrice = Number(itemPriceInfo.discounted_price || itemPriceInfo.price || 0);
+                            let originalPrice = Number(itemPriceInfo.price || 0);
+                            let finalPrice = currentPrice;
+
+                            if (appliedCoupon) {
+                                finalPrice = currentPrice * (1 - appliedCoupon.discount_percentage / 100);
+                            }
+
+                            return (
+                                <div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                        <span style={{ fontFamily: 'Inter, Arial, sans-serif', fontSize: '28px', fontWeight: '800', color: '#B12704' }}>
+                                            AED {finalPrice.toFixed(2)}
+                                        </span>
+                                        {originalPrice > finalPrice && (
+                                            <>
+                                                <span style={{ fontFamily: 'Inter, Arial, sans-serif', fontSize: '16px', color: '#565959', textDecoration: 'line-through' }}>
+                                                    AED {originalPrice.toFixed(2)}
+                                                </span>
+                                                <span style={{ background: '#CC0C39', color: '#fff', padding: '4px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold' }}>
+                                                    Save AED {(originalPrice - finalPrice).toFixed(2)}
+                                                </span>
+                                            </>
+                                        )}
+                                    </div>
+                                    {appliedCoupon && (
+                                        <div style={{ color: 'green', fontSize: '14px', marginTop: '5px', fontWeight: 'bold' }}>
+                                            Coupon applied: {appliedCoupon.discount_percentage}% OFF!
+                                        </div>
+                                    )}
                                 </div>
                             );
                         })()}
+                    </div>
+
+                    <div className="coupon-section" style={{ margin: '10px 0 20px', padding: '15px', backgroundColor: '#f9f9f9', borderRadius: '8px', border: '1px solid #ddd' }}>
+                        <div style={{ fontWeight: 'bold', marginBottom: '10px' }}>Apply Discount Coupon:</div>
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                            <input 
+                                type="text" 
+                                value={couponCode} 
+                                onChange={(e) => setCouponCode(e.target.value)} 
+                                placeholder="Enter Coupon Code" 
+                                style={{ flex: 1, padding: '8px 12px', border: '1px solid #ccc', borderRadius: '4px' }} 
+                            />
+                            <button 
+                                onClick={handleApplyCoupon} 
+                                style={{ padding: '8px 16px', backgroundColor: '#4B636D', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                            >
+                                Apply Coupon
+                            </button>
+                        </div>
+                        {couponError && <div style={{ color: 'red', fontSize: '13px', marginTop: '8px' }}>{couponError}</div>}
                     </div>
 
                     <p className="description">{data.description}</p>
@@ -516,11 +541,31 @@ function Single_product() {
                             </ul>
                         </div>
                     )}
+
+                    {data?.promotional_banner_image && (
+                        <div style={{ display: 'flex', justifyContent: 'center', margin: '20px 0' }}>
+                            {data?.promotional_banner_link ? (
+                                <a href={data.promotional_banner_link} target="_blank" rel="noopener noreferrer" style={{ display: 'block' }}>
+                                    <img 
+                                        src={getImageUrl(data.promotional_banner_image)} 
+                                        alt="Promotion" 
+                                        style={{ width: '100%', maxWidth: '500px', height: 'auto', borderRadius: '8px', objectFit: 'contain' }} 
+                                    />
+                                </a>
+                            ) : (
+                                <img 
+                                    src={getImageUrl(data.promotional_banner_image)} 
+                                    alt="Promotion" 
+                                    style={{ width: '100%', maxWidth: '500px', height: 'auto', borderRadius: '8px', objectFit: 'contain' }} 
+                                />
+                            )}
+                        </div>
+                    )}
                 </div>
 
                 {/* RIGHT: PURCHASE PANEL */}
                 <div className="purchase-panel eehook-purchase-panel">
-                    
+
                     {data.emi_available && (
                         <div className="emi-block-right">
                             <div className="emi-icon-wrapper">
@@ -528,10 +573,10 @@ function Single_product() {
                             </div>
                             <div className="emi-details-wrapper">
                                 <div className="emi-top-row">
-                                    <span style={{fontWeight: 600, color: '#111'}}>Easy Payment Plans</span>
+                                    <span style={{ fontWeight: 600, color: '#111' }}>Easy Payment Plans</span>
                                     <a href="#" className="details-link">Details &gt;</a>
                                 </div>
-                                <div style={{fontSize: '12px', color: '#555', marginTop: '4px'}}>
+                                <div style={{ fontSize: '12px', color: '#555', marginTop: '4px' }}>
                                     Starting from AED {data.emi_starting_price}/month
                                 </div>
                             </div>
@@ -543,23 +588,23 @@ function Single_product() {
                         <div className="delivery-date">Delivery <strong>{data.estimated_delivery_time || "09 Sep - 10 Sep"}</strong></div>
                     </div>
 
-                    <div className="price-right-section" style={{marginBottom: '15px'}}>
+                    <div className="price-right-section" style={{ marginBottom: '15px' }}>
                         <span className="price-value">AED {Number(selectedVariant?.price_type === 'single' ? (selectedVariant?.discounted_price || selectedVariant?.price || 0) : ((selectedSizeVariant || availableSizes?.[0])?.discounted_price || (selectedSizeVariant || availableSizes?.[0])?.price || 0)).toFixed(2)}</span>
                     </div>
 
                     <div className="stock-status">
                         {selectedVariant?.price_type === 'single' ? (
                             (selectedVariant?.stock <= 0 ? (
-                                <span className="stock-out" style={{fontSize: '14px', color: '#b12704'}}>Out of Stock</span>
+                                <span className="stock-out" style={{ fontSize: '14px', color: '#b12704' }}>Out of Stock</span>
                             ) : (
-                                <span className="stock" style={{fontSize: '14px', color: '#007600'}}>In Stock : {selectedVariant?.stock || 0}</span>
+                                <span className="stock" style={{ fontSize: '14px', color: '#007600' }}>In Stock : {selectedVariant?.stock || 0}</span>
                             ))
                         ) : (!selectedSizeVariant ? (
-                            <span className="stock" style={{fontSize: '14px', color: '#555'}}>Please select options to view stock</span>
+                            <span className="stock" style={{ fontSize: '14px', color: '#555' }}>Please select options to view stock</span>
                         ) : selectedSizeVariant?.stock <= 0 ? (
-                            <span className="stock-out" style={{fontSize: '14px', color: '#b12704'}}>Out of Stock</span>
+                            <span className="stock-out" style={{ fontSize: '14px', color: '#b12704' }}>Out of Stock</span>
                         ) : (
-                            <span className="stock" style={{fontSize: '14px', color: '#007600'}}>In Stock : {selectedSizeVariant?.stock}</span>
+                            <span className="stock" style={{ fontSize: '14px', color: '#007600' }}>In Stock : {selectedSizeVariant?.stock}</span>
                         ))}
                     </div>
 
@@ -570,16 +615,16 @@ function Single_product() {
                     <div className="sold-by">
                         Sold by <a href="#">{data.seller_name || "ALAREESH MPT"}</a>
                     </div>
-                    
+
                     <hr className="divider" />
-                    
+
                     <div className="warranty-section">
                         <AiOutlineCheckCircle size={20} color="#555" />
                         <span>{data.warranty_info || "One Year Warranty"}</span>
                     </div>
-                    
+
                     <hr className="divider" />
-                    
+
                     <div className="secure-transaction">
                         <AiOutlineLock size={20} color="#555" />
                         <span>Secure Transaction</span>
