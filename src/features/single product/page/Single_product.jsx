@@ -207,6 +207,16 @@ function Single_product() {
     const displayImages =
         selectedVariant?.images || [];
 
+    const cartItem = cart?.items?.find(item => 
+        item.variant === selectedVariant?.id && 
+        (selectedVariant?.price_type === 'single' || item.variant_size === selectedSizeVariant?.id)
+    );
+    const cartQuantity = cartItem ? cartItem.quantity : 0;
+
+    const availableStock = selectedVariant?.price_type === 'single'
+        ? (selectedVariant?.stock || 0) - cartQuantity
+        : (selectedSizeVariant?.stock || 0) - cartQuantity;
+
     const addTocart = async () => {
 
         const token = localStorage.getItem("access");
@@ -233,13 +243,12 @@ function Single_product() {
                 showToast.warning("This combination is not available");
                 return;
             }
-            if (selectedSizeVariant.stock <= 0) {
+            if (availableStock <= 0) {
                 showToast.info("Out of stock");
                 return;
             }
         } else {
-            const singleStock = selectedVariant?.sizes?.[0]?.stock || 0;
-            if (singleStock <= 0) {
+            if (availableStock <= 0) {
                 showToast.info("Out of stock");
                 return;
             }
@@ -600,17 +609,17 @@ function Single_product() {
 
                     <div className="stock-status">
                         {selectedVariant?.price_type === 'single' ? (
-                            (selectedVariant?.stock <= 0 ? (
+                            (availableStock <= 0 ? (
                                 <span className="stock-out" style={{ fontSize: '14px', color: '#b12704' }}>Out of Stock</span>
                             ) : (
-                                <span className="stock" style={{ fontSize: '14px', color: '#007600' }}>In Stock : {selectedVariant?.stock || 0}</span>
+                                <span className="stock" style={{ fontSize: '14px', color: '#007600' }}>In Stock : {availableStock}</span>
                             ))
                         ) : (!selectedSizeVariant ? (
                             <span className="stock" style={{ fontSize: '14px', color: '#555' }}>Please select options to view stock</span>
-                        ) : selectedSizeVariant?.stock <= 0 ? (
+                        ) : availableStock <= 0 ? (
                             <span className="stock-out" style={{ fontSize: '14px', color: '#b12704' }}>Out of Stock</span>
                         ) : (
-                            <span className="stock" style={{ fontSize: '14px', color: '#007600' }}>In Stock : {selectedSizeVariant?.stock}</span>
+                            <span className="stock" style={{ fontSize: '14px', color: '#007600' }}>In Stock : {availableStock}</span>
                         ))}
                     </div>
 
