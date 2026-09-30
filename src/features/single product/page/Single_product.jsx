@@ -49,6 +49,9 @@ function Single_product() {
 
     const [activeImage, setActiveImage] = useState(null);
 
+    const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+    const [modalImageIndex, setModalImageIndex] = useState(0);
+
     const [couponCode, setCouponCode] = useState("");
     const [appliedCoupon, setAppliedCoupon] = useState(null);
     const [couponError, setCouponError] = useState("");
@@ -380,11 +383,16 @@ function Single_product() {
                 {/* LEFT: IMAGE GALLERY */}
                 <div className="gallery-section">
                     <div className="main-image-wrapper">
-                        <div className="main-image">
-                            <button className="wishlist-icon" onClick={addToWishlist}>
+                        <div className="main-image" style={{ cursor: 'pointer' }}>
+                            <button className="wishlist-icon" onClick={(e) => { e.stopPropagation(); addToWishlist(); }}>
                                 {isWishlisted ? <FaHeart color="#fd0707ff" /> : <FaRegHeart color="#4B636D" />}
                             </button>
                             <img
+                                onClick={() => {
+                                    const index = displayImages.findIndex(img => img.image === activeImage);
+                                    setModalImageIndex(index >= 0 ? index : 0);
+                                    setIsImageModalOpen(true);
+                                }}
                                 src={
                                     activeImage
                                         ? getImageUrl(activeImage)
@@ -395,7 +403,7 @@ function Single_product() {
                                 alt={data.name}
                             />
                         </div>
-                        <p className="zoom-text">Roll over image to zoom in</p>
+                        <p className="zoom-text">Click image to view in full screen</p>
                     </div>
 
                     {data.current_viewers_count != null && (
@@ -657,6 +665,35 @@ function Single_product() {
                         </a>
                     ) : (
                         <img src={data.promotional_banner_url} alt="Promotion" style={{ width: '100%', display: 'block', objectFit: 'cover' }} />
+                    )}
+                </div>
+            )}
+
+            {isImageModalOpen && (
+                <div className="image-popup-modal" style={{
+                    position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', 
+                    backgroundColor: 'rgba(0,0,0,0.85)', zIndex: 9999, 
+                    display: 'flex', justifyContent: 'center', alignItems: 'center'
+                }} onClick={() => setIsImageModalOpen(false)}>
+                    <button onClick={(e) => { e.stopPropagation(); setIsImageModalOpen(false); }} style={{
+                        position: 'absolute', top: '20px', right: '30px', background: 'none', border: 'none',
+                        color: 'white', fontSize: '40px', cursor: 'pointer', zIndex: 10000
+                    }}>&times;</button>
+                    
+                    {displayImages.length > 1 && (
+                        <button onClick={(e) => { e.stopPropagation(); setModalImageIndex((prev) => (prev > 0 ? prev - 1 : displayImages.length - 1)); }} style={{
+                            position: 'absolute', left: '30px', background: 'none', border: 'none',
+                            color: 'white', fontSize: '60px', cursor: 'pointer', zIndex: 10000
+                        }}>&#10094;</button>
+                    )}
+
+                    <img onClick={(e) => e.stopPropagation()} src={getImageUrl(displayImages[modalImageIndex]?.image)} style={{ maxWidth: '90%', maxHeight: '90%', objectFit: 'contain' }} alt="Popup" />
+
+                    {displayImages.length > 1 && (
+                        <button onClick={(e) => { e.stopPropagation(); setModalImageIndex((prev) => (prev < displayImages.length - 1 ? prev + 1 : 0)); }} style={{
+                            position: 'absolute', right: '30px', background: 'none', border: 'none',
+                            color: 'white', fontSize: '60px', cursor: 'pointer', zIndex: 10000
+                        }}>&#10095;</button>
                     )}
                 </div>
             )}
