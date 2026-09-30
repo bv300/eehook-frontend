@@ -426,7 +426,7 @@ export default function OrderDashboard() {
 
                         <h2>
 
-                            NZ$
+                            AED
 
                             {
 
@@ -545,6 +545,8 @@ export default function OrderDashboard() {
                                     <th>DATE</th>
 
                                     <th>AMOUNT</th>
+
+                                    <th>PAYMENT</th>
 
                                     <th>STATUS</th>
 
@@ -680,7 +682,7 @@ export default function OrderDashboard() {
 
                                                         <strong>
 
-                                                            NZ$
+                                                            AED
 
                                                             {
 
