@@ -11,3 +11,18 @@ export function saveAuthUser(user = {}) {
     localStorage.setItem("is_superuser", String(isSuperAdminUser(user)));
     if (user.role || user.user_role || user.user_type || user.role_name) localStorage.setItem("role", user.role || user.user_role || user.user_type || user.role_name);
 }
+
+export function saveAuthSession(data = {}) {
+    const user = data.user || data;
+    localStorage.setItem("access", data.access || "");
+    localStorage.setItem("refresh", data.refresh || "");
+    localStorage.setItem("access_token", data.access || "");
+    localStorage.setItem("refresh_token", data.refresh || "");
+    localStorage.setItem("admin_user", JSON.stringify(user));
+    saveAuthUser(user);
+    return user;
+}
+
+export function clearAuthSession() {
+    ["access", "refresh", "access_token", "refresh_token", "admin_user", "email", "first_name", "is_staff", "is_superuser", "role"].forEach((key) => localStorage.removeItem(key));
+}

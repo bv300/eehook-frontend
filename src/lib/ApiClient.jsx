@@ -1,4 +1,5 @@
 import axios from "axios";
+import { clearAuthSession } from "../features/auth/authUtils";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -7,7 +8,7 @@ const client = axios.create({
 });
 
 client.interceptors.request.use((config) => {
-    const token = localStorage.getItem("access");
+    const token = localStorage.getItem("access_token") || localStorage.getItem("access");
 
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
@@ -26,7 +27,7 @@ client.interceptors.response.use(
         if (
             error.response?.status === 401 &&
             !originalRequest._retry &&
-            localStorage.getItem("refresh")
+            localStorage.getItem("refresh_token") || localStorage.getItem("refresh")
         ) {
 
             originalRequest._retry = true;
@@ -36,7 +37,7 @@ client.interceptors.response.use(
                 const response = await axios.post(
                     `${API_URL}/token/refresh/`,
                     {
-                        refresh: localStorage.getItem("refresh"),
+                        refresh: localStorage.getItem("refresh_token") || localStorage.getItem("refresh"),
                     }
                 );
 
@@ -44,6 +45,7 @@ client.interceptors.response.use(
                     "access",
                     response.data.access
                 );
+                localStorage.setItem("access_token", response.data.access);
 
                 originalRequest.headers.Authorization =
                     `Bearer ${response.data.access}`;
@@ -52,8 +54,8 @@ client.interceptors.response.use(
 
             } catch {
 
-                localStorage.clear();
-                window.location.href = "/login";
+                clearAuthSession();
+                window.location.href = window.location.pathname.startsWith("/order-dashboard") ? "/admin-login" : "/login";
             }
         }
 
@@ -62,8 +64,9 @@ client.interceptors.response.use(
         }
 
         if (error.response?.status === 401) {
-            localStorage.clear();
-            if (window.location.pathname !== "/login") window.location.href = "/login";
+            clearAuthSession();
+            const loginPath = window.location.pathname.startsWith("/order-dashboard") ? "/admin-login" : "/login";
+            if (window.location.pathname !== loginPath) window.location.href = loginPath;
         }
 
         return Promise.reject(error);

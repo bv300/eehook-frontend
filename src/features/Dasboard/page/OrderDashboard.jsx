@@ -1,27 +1,146 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link, Outlet, useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
-import { FiArchive, FiBarChart2, FiBox, FiChevronDown, FiChevronLeft, FiChevronRight, FiClock, FiCreditCard, FiDownload, FiEdit3, FiGrid, FiLogOut, FiMenu, FiPackage, FiRefreshCw, FiSearch, FiSettings, FiShoppingBag, FiTag, FiTruck, FiUsers, FiX } from "react-icons/fi";
-import client from "../../../lib/ApiClient";
-import { isSuperAdminUser } from "../../auth/authUtils";
-import "../styles/Dashboard.css";
+import { FiActivity, FiArchive, FiBox, FiChevronDown, FiClipboard, FiCreditCard, FiCopy, FiEdit3, FiEye, FiGrid, FiImage, FiLayers, FiLogOut, FiMenu, FiPackage, FiPlus, FiRefreshCw, FiSettings, FiShoppingBag, FiTag, FiTrash2, FiTruck, FiUsers, FiX } from "react-icons/fi";
+import { ConfirmDialog, DataTable, DebouncedSearch, EmptyState, FilterBar, FormField, LoadingState, Modal, PageHeader, Pagination, Skeleton, StatusPill } from "../components/AdminPrimitives";
+import useAdminResource from "../hooks/useAdminResource";
+import OverviewGraphs from "../components/OverviewGraphs";
+import useFormErrors from "../hooks/useFormErrors";
+import { createResource, deleteResource, getErrorMessage, getFieldSchema, getResource, listResource, updateResource } from "../services/adminApi";
+import ProductView from "./ProductView";
+import ProductEditor from "./ProductEditor";
+import HeroBannerEditor from "./HeroBannerEditor";
+import PromoBannerEditor from "./PromoBannerEditor";
+import HeroSideBannerEditor from "./HeroSideBannerEditor";
+import CouponEditor from "./CouponEditor";
+import CouponUsageEditor from "./CouponUsageEditor";
+import navbarLogo from "../../../assets/navbar-logo.png";
+import { getImageUrl } from "../../../utils/imageUrl";
+import "../styles/AdminDashboard.css";
+import "../styles/LogoutTheme.css";
+import "../styles/AdminPolish.css";
 
-const STATUSES = ["Pending", "Processing", "Shipped", "Delivered", "Cancelled"];
-const PAYMENTS = ["Pending", "Paid", "Failed", "Refunded"];
-const FALLBACK_STATS = { total_orders: 128, pending_orders: 18, processing_orders: 27, shipped_orders: 32, delivered_orders: 46, cancelled_orders: 5, revenue: 24890 };
+const resources = {
+    users: { label: "Users", group: "Customers", fields: ["email", "password", "first_name", "last_name", "role", "is_staff", "is_active"], columns: ["email", "first_name", "last_name", "role", "last_login", "is_active"] },
+    categories: { label: "Categories", group: "Catalog", fields: ["name", "image", "is_active"], columns: ["name", "image", "is_active"] },
+    subcategories: { label: "Subcategories", group: "Catalog", fields: ["category", "name", "image", "is_active"], columns: ["id", "category", "name", "image", "is_active"] },
+    offers: { label: "Offers", group: "Catalog", fields: ["title", "description", "image", "discount_percentage", "start_date", "end_date", "is_active"], columns: ["title", "discount_percentage", "start_date", "end_date", "is_active"] },
+    colors: { label: "Colors", group: "Catalog", fields: ["name", "code"], columns: ["name", "code"] },
+    "unit-types": { label: "Unit Types", group: "Catalog", fields: ["name"], columns: ["name"] },
+    units: { label: "Units", group: "Catalog", fields: ["unit_type", "name"], columns: ["unit_type", "name"] },
+    products: { label: "Products", group: "Catalog", fields: ["name", "description", "key_features", "category", "subcategory", "offer", "seller_name", "shipping_fee", "estimated_delivery_time", "warranty_info", "current_viewers_count", "promotional_banner_image", "promotional_banner_link", "is_active"], columns: ["id", "name", "category", "subcategory", "product_image", "seller_name", "is_active"] },
+    "product-variants": { label: "Product Variants", group: "Catalog", fields: ["product", "color", "price_type", "price", "stock"], columns: ["product", "color", "price_type", "price", "stock"] },
+    "product-variant-units": { label: "Variant Sizes / Units", group: "Catalog", fields: ["variant", "unit_type", "unit", "price", "stock"], columns: ["variant", "unit_type", "unit", "price", "stock"] },
+    "product-images": { label: "Product Images", group: "Catalog", fields: ["variant", "image", "is_primary"], columns: ["variant", "image", "is_primary"] },
+    wishlists: { label: "Wishlists", group: "Customers", fields: ["user", "variant", "variant_unit"], columns: ["user", "variant", "variant_unit"] },
+    carts: { label: "Carts", group: "Customers", fields: ["user", "variant", "variant_unit", "quantity", "coupon"], columns: ["user", "variant", "variant_unit", "quantity"] },
+    addresses: { label: "Addresses", group: "Customers", fields: ["user", "full_name", "phone", "address_line", "city", "postal_code", "country", "is_default"], columns: ["user", "full_name", "phone", "city", "postal_code", "is_default"] },
+    "user-profiles": { label: "User Profiles", group: "Customers", fields: ["user", "phone", "date_of_birth", "gender"], columns: ["user", "phone", "date_of_birth", "gender"] },
+    orders: { label: "Orders", group: "Orders", fields: ["user", "address", "subtotal", "discount_amount", "shipping_charge", "total_amount", "payment_status", "status", "created_at"], columns: ["user", "total_amount", "payment_status", "status", "created_at"] },
+    "order-items": { label: "Order Items", group: "Orders", fields: ["order", "product", "color", "unit", "quantity", "original_price", "variant_unit", "discount_amount", "price", "total_price"], columns: ["order", "product", "quantity", "price", "total_price"] },
+    "hero-banners": { label: "Hero Banners", group: "Marketing", fields: ["subtitle", "title", "description", "image", "button_text", "display_order", "is_active"], columns: ["subtitle", "title", "button_text", "display_order", "is_active"] },
+    "promo-banners": { label: "Promotional Banners", group: "Marketing", fields: ["title", "image", "link", "is_active", "sort_order"], columns: ["title", "link", "is_active", "sort_order"] },
+    "hero-side-banners": { label: "Hero Side Banners", group: "Marketing", fields: ["title", "image", "link", "is_active", "sort_order"], columns: ["title", "link", "is_active", "sort_order"] },
+    coupons: { label: "Coupons", group: "Marketing", fields: ["code", "products", "discount_percentage", "start_date", "end_date", "is_active"], columns: ["code", "discount_percentage", "start_date", "end_date", "is_active"] },
+    "coupon-usages": { label: "Coupon Usage History", group: "Marketing", fields: ["coupon", "user", "product", "used_at"], columns: ["user", "coupon", "product", "used_at"] },
+};
+
+const navGroups = [
+    { title: "Workspace", items: [{ key: "overview", label: "Overview", icon: FiGrid }] },
+    { title: "Orders", items: [{ key: "orders", label: "Orders", icon: FiShoppingBag }, { key: "order-items", label: "Order Items", icon: FiClipboard }] },
+    { title: "Catalog", items: ["categories", "subcategories", "products", "colors", "unit-types", "units", "offers"].map((key) => ({ key, label: key === "products" ? "Products & Variants" : resources[key].label, icon: key === "products" ? FiPackage : FiLayers })) },
+    { title: "Customers", items: ["users", "user-profiles", "addresses", "wishlists", "carts"].map((key) => ({ key, label: resources[key].label, icon: key === "users" ? FiUsers : FiArchive })) },
+    { title: "Marketing", items: ["hero-banners", "promo-banners", "hero-side-banners", "coupons", "coupon-usages"].map((key) => ({ key, label: resources[key].label, icon: key.includes("banner") ? FiImage : FiTag })) },
+];
+
 const money = (value) => `AED ${Number(value || 0).toLocaleString("en-AE", { minimumFractionDigits: 2 })}`;
-const displayDate = (value) => value ? new Date(value).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "—";
-const getItems = (data) => Array.isArray(data) ? data : data?.results || data?.orders || [];
-const getInitials = (name = "Admin") => name.split(" ").map((word) => word[0]).slice(0, 2).join("").toUpperCase();
+const date = (value) => value ? new Date(value).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "—";
+const titleize = (value = "") => value.replaceAll("_", " ").replaceAll("-", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+const columnLabel = (resource, key) => ({
+    subcategories: { id: "Subcategory ID", category: "Category Name", name: "Subcategory Name" },
+    products: { id: "Product ID", name: "Product Name", category: "Category Name", subcategory: "Subcategory Name", product_image: "Product Image" },
+}[resource]?.[key] || titleize(key));
+const fallbackFields = (resource, fieldNames) => fieldNames.map((name) => ({ name, type: name.includes("description") ? "textarea" : name.includes("active") ? "boolean" : resource === "offers" && ["start_date", "end_date"].includes(name) ? "date" : resource === "offers" && name === "discount" ? "number" : "text", label: resource === "offers" && name === "discount" ? "Discount (%)" : titleize(name), ...(resource === "offers" && name === "discount" ? { min: 0, max: 100, step: 0.01 } : {}) }));
+const recordId = (row) => row?.id ?? row?.pk ?? row?.uuid;
+const recordLabel = (value) => typeof value === "object" ? value?.name || value?.title || value?.email || value?.id || "—" : value;
+
+function fieldsFromSchema(schema, resource) {
+    const raw = getFieldSchema(schema, resource);
+    const fieldList = Array.isArray(raw) ? raw : raw?.fields || Object.entries(raw || {}).map(([name, config]) => ({ name, ...(typeof config === "object" ? config : { type: config }) }));
+    return fieldList.filter((field) => {
+        const name = field.name || field.key;
+        if (resource === "products" && ["emi_available", "emi_starting_price"].includes(name)) return false;
+        if (resource === "products" && ["product_type", "has_variants"].includes(name)) return false;
+        if (resource === "users" && ["last_login", "date_joined", "groups", "user_permissions"].includes(name)) return false;
+        if (resource === "categories" && !["name", "image", "is_active"].includes(name)) return false;
+        if (resource === "subcategories" && !["category", "name", "image", "is_active"].includes(name)) return false;
+        if (resource === "unit-types" && name !== "name") return false;
+        if (resource === "units" && !["unit_type", "name"].includes(name)) return false;
+        if (resource === "product-variants" && !["product", "color", "price_type", "price", "stock"].includes(name)) return false;
+        if (resource === "product-variant-units" && !["variant", "unit_type", "unit", "price", "stock"].includes(name)) return false;
+        return name && !["id", "pk", "created_at", "updated_at", "created", "updated"].includes(name) && !field.read_only;
+    });
+}
+
+function displayValue(row, key, references = []) {
+    const value = row?.[key];
+    if (value === null || value === undefined || value === "") return "—";
+    if (key === "unit_type" && references.length) {
+        const reference = references.find((item) => String(recordId(item)) === String(value?.id ?? value));
+        return reference ? recordLabel(reference) : recordLabel(value);
+    }
+    if (key.includes("image")) return typeof value === "string" ? <img className="table-image-thumb" src={value} alt="" /> : recordLabel(value);
+    if (key.includes("percentage")) return `${value}%`;
+    if (key.includes("amount") || key.includes("price") || key.includes("discount_value") || key.includes("shipping_fee") || key.includes("shipping_charge")) return money(value);
+    if (key.includes("date") || key.endsWith("_at") || key === "valid_until" || key === "valid_from") return date(value);
+    if (key.includes("status") || key === "is_active" || key === "is_staff" || key === "is_default") return <StatusPill value={typeof value === "boolean" ? (value ? "Active" : "Inactive") : value} />;
+    return recordLabel(value);
+}
+
+function resolveTableValue(row, key, references) {
+    const referenceName = { user: "users", customer: "users", product: "products", variant: "product-variants", variant_unit: "product-variant-units", category: "categories", subcategory: "subcategories", offer: "offers", color: "colors", unit_type: "unit-types", unit: "units", coupon: "coupons", order: "orders", address: "addresses", cancelled_by: "users" }[key];
+    if (!referenceName) return displayValue(row, key);
+    const value = row?.[key];
+    const reference = (references[referenceName] || []).find((item) => String(recordId(item)) === String(value?.id ?? value));
+    return displayValue({ [key]: reference || value }, key);
+}
+
+function relatedProductImageMap(variants, images) {
+    const variantById = new Map(variants.map((variant) => [String(recordId(variant)), variant]));
+    const productImages = new Map();
+    images.forEach((image) => {
+        const variantId = image?.variant?.id ?? image?.variant;
+        const variant = variantById.get(String(variantId));
+        const productId = variant?.product?.id ?? variant?.product;
+        const imageUrl = typeof image?.image === "string" ? getImageUrl(image.image) : typeof image?.url === "string" ? getImageUrl(image.url) : null;
+        if (!productId || !imageUrl) return;
+        if (!productImages.has(String(productId)) || image.is_primary) productImages.set(String(productId), imageUrl);
+    });
+    return productImages;
+}
 
 export default function OrderDashboard() {
     const location = useLocation();
     const navigate = useNavigate();
+    const { id: detailId, mode: routeMode } = useParams();
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [schema, setSchema] = useState({});
+    const [overview, setOverview] = useState({});
+    const [overviewLoading, setOverviewLoading] = useState(true);
     const [forbidden, setForbidden] = useState(false);
-    const isOrders = location.pathname.includes("/orders");
-    const userName = localStorage.getItem("first_name") || "Super Admin";
-    const logout = () => { localStorage.clear(); navigate("/login", { replace: true }); };
+    const [refreshing, setRefreshing] = useState(false);
+    const pathKey = location.pathname.split("/")[2] || "overview";
+    const isEditRoute = routeMode === "edit" || location.pathname.endsWith("/edit");
+    const isProductEditor = pathKey === "products" && isEditRoute;
+    const isProductView = pathKey === "products" && Boolean(detailId) && !isProductEditor;
+    const isHeroBannerEditor = pathKey === "hero-banners" && (location.pathname.endsWith("/new") || isEditRoute);
+    const isPromoBannerEditor = pathKey === "promo-banners" && (location.pathname.endsWith("/new") || isEditRoute);
+    const isHeroSideBannerEditor = pathKey === "hero-side-banners" && (location.pathname.endsWith("/new") || isEditRoute);
+    const isCouponEditor = pathKey === "coupons" && (location.pathname.endsWith("/new") || isEditRoute);
+    const isCouponUsageEditor = pathKey === "coupon-usages" && (location.pathname.endsWith("/new") || isEditRoute);
+    const isOrderEditor = pathKey === "orders" && Boolean(detailId) && isEditRoute;
+    const isGenericEditPage = Boolean(detailId) && isEditRoute && Boolean(resources[pathKey]) && !["products", "orders", "hero-banners", "promo-banners", "hero-side-banners", "coupons", "coupon-usages"].includes(pathKey);
+    const isReadOnlyResourceView = Boolean(detailId) && !isEditRoute && pathKey !== "products" && pathKey !== "orders" && Boolean(resources[pathKey]);
 
     useEffect(() => {
         const onForbidden = () => setForbidden(true);
@@ -29,54 +148,447 @@ export default function OrderDashboard() {
         return () => window.removeEventListener("api:forbidden", onForbidden);
     }, []);
 
-    return <div className="admin-shell">
-        <aside className={`admin-sidebar ${sidebarOpen ? "open" : ""}`}><div className="brand"><span className="brand-mark">e</span><span>Order Dashboard <small>SUPER ADMIN</small></span><button className="mobile-close" onClick={() => setSidebarOpen(false)}><FiX /></button></div><div className="sidebar-label">WORKSPACE</div><nav><SideLink to="/order-dashboard" icon={<FiGrid />} label="Overview" onClick={() => setSidebarOpen(false)} /><SideLink to="/order-dashboard/orders" icon={<FiShoppingBag />} label="Orders" active={isOrders} onClick={() => setSidebarOpen(false)} /><SideLink to="/order-dashboard/customers" icon={<FiUsers />} label="Customers" onClick={() => setSidebarOpen(false)} /><SideLink to="/order-dashboard/products" icon={<FiPackage />} label="Products" onClick={() => setSidebarOpen(false)} /><SideLink to="/order-dashboard/coupons" icon={<FiTag />} label="Coupons" onClick={() => setSidebarOpen(false)} /><SideLink to="/order-dashboard/settings" icon={<FiSettings />} label="Settings" onClick={() => setSidebarOpen(false)} /></nav><div className="sidebar-footer"><div className="admin-profile"><span className="avatar">{getInitials(userName)}</span><span><strong>{userName}</strong><small>Super Admin</small></span></div><button className="logout" onClick={logout}><FiLogOut /> Sign out</button></div></aside>
-        {sidebarOpen && <button className="sidebar-scrim" aria-label="Close navigation" onClick={() => setSidebarOpen(false)} />}
-        <main className="admin-main"><header className="topbar"><button className="mobile-menu" onClick={() => setSidebarOpen(true)}><FiMenu /></button><div><p className="eyebrow">SUPER ADMIN / OPERATIONS</p><h1>Order Dashboard</h1><p className="dashboard-greeting">Manage orders, customers, products, and fulfillment from one place.</p></div><div className="topbar-actions"><button className="icon-button" title="Refresh page" onClick={() => window.location.reload()}><FiRefreshCw /></button><button className="export-button" onClick={() => toast.info("Use the Orders page to export filtered order data")}><FiDownload /> Export</button></div></header>{forbidden && <div className="access-alert" role="alert"><FiCreditCard /><span><strong>Super Admin access required</strong><small>Your account does not have permission to access this resource.</small></span><button onClick={() => setForbidden(false)}><FiX /></button></div>}{location.pathname === "/order-dashboard" || location.pathname === "/order-dashboard/" ? <Overview /> : isOrders ? <Orders /> : <AdminSection type={location.pathname.split("/").pop()} />}</main>
+    useEffect(() => {
+        let active = true;
+        Promise.allSettled([listResource("schema"), listResource("overview")]).then(([schemaResult, overviewResult]) => {
+            if (!active) return;
+            if (schemaResult.status === "fulfilled") setSchema(schemaResult.value.data);
+            if (overviewResult.status === "fulfilled") setOverview(overviewResult.value.data || {});
+            setOverviewLoading(false);
+        });
+        return () => { active = false; };
+    }, []);
+
+    const go = (key) => { setSidebarOpen(false); navigate(key === "overview" ? "/order-dashboard" : `/order-dashboard/${key}`); };
+    const logout = () => { localStorage.clear(); navigate("/login", { replace: true }); };
+    const refreshDashboard = () => { if (refreshing) return; setRefreshing(true); window.setTimeout(() => window.location.reload(), 220); };
+    const currentTitle = pathKey === "overview" ? "Overview" : resources[pathKey]?.label || "Admin Dashboard";
+
+    return <div className="admin-app">
+        <aside className={`admin-sidebar ${sidebarOpen ? "open" : ""}`}>
+            <div className="admin-brand"><span className="admin-brand-logo" aria-label="eehook"><img src={navbarLogo} alt="" /></span><button type="button" className="admin-close" onClick={() => setSidebarOpen(false)} aria-label="Close navigation"><FiX aria-hidden="true" /></button></div>
+            <nav className="admin-nav">{navGroups.map((group) => <div key={group.title}><p className="admin-nav-label">{group.title}</p>{group.items.map(({ key, label, icon: Icon }) => <button key={key} className={`admin-nav-item ${pathKey === key ? "active" : ""}`} onClick={() => go(key)}><Icon /><span>{label}</span></button>)}</div>)}</nav>
+            <div className="admin-sidebar-footer"><div className="admin-user"><span>{(localStorage.getItem("first_name") || "S").slice(0, 1).toUpperCase()}</span><div><strong>{localStorage.getItem("first_name") || "Super Admin"}</strong><small>Super Admin</small></div></div><button className="admin-nav-item admin-logout-button" onClick={logout}><FiLogOut /><span>Sign out</span></button></div>
+        </aside>
+        {sidebarOpen && <button className="admin-scrim" onClick={() => setSidebarOpen(false)} aria-label="Close menu" />}
+        <main className="admin-content"><header className="admin-topbar"><button type="button" className="admin-menu" onClick={() => setSidebarOpen(true)} aria-label="Open navigation"><FiMenu /></button><div><p className="admin-eyebrow">SUPER ADMIN / {currentTitle.toUpperCase()}</p><h1>{currentTitle}</h1></div><div className="admin-top-actions"><button type="button" className={`admin-button secondary refresh-action ${refreshing ? "is-refreshing" : ""}`} onClick={refreshDashboard} disabled={refreshing} aria-label="Refresh dashboard"><FiRefreshCw aria-hidden="true" /> <span>{refreshing ? "Refreshing..." : "Refresh"}</span></button><FiActivity className="admin-live" title="Live admin workspace" aria-label="Live admin workspace" /></div></header>{forbidden && <div className="admin-access-alert" role="alert"><FiSettings /><span><strong>Super Admin access required</strong><small>Your account does not have permission to access this resource.</small></span><button type="button" onClick={() => setForbidden(false)} aria-label="Dismiss access alert"><FiX /></button></div>}{isProductEditor ? <ProductEditor /> : isProductView ? <ProductView /> : isHeroBannerEditor ? <HeroBannerEditor schema={schema} /> : isPromoBannerEditor ? <PromoBannerEditor /> : isHeroSideBannerEditor ? <HeroSideBannerEditor /> : isCouponEditor ? <CouponEditor /> : isCouponUsageEditor ? <CouponUsageEditor /> : isOrderEditor ? <OrderEditPage id={detailId} /> : detailId && pathKey === "orders" ? <OrderDetail id={detailId} /> : isGenericEditPage ? <ResourceEditorPage resource={pathKey} id={detailId} schema={schema} /> : isReadOnlyResourceView ? <ReadOnlyResourcePage resource={pathKey} id={detailId} schema={schema} /> : pathKey === "overview" ? <Overview data={overview} loading={overviewLoading} /> : resources[pathKey] ? <ResourcePage key={pathKey} resource={pathKey} schema={schema} /> : <Overview data={overview} loading={overviewLoading} />}</main>
     </div>;
 }
 
-function SideLink({ to, icon, label, active, onClick }) { return <Link to={to} onClick={onClick} className={`nav-item ${active ? "active" : ""}`}>{icon}<span>{label}</span></Link>; }
-
-function Overview() {
-    const [stats, setStats] = useState(FALLBACK_STATS); const [loading, setLoading] = useState(true);
-    useEffect(() => { client.get("/admin-dashboard-cards/").then((response) => setStats({ ...FALLBACK_STATS, ...response.data })).catch(() => toast.error("Could not load live summary data")).finally(() => setLoading(false)); }, []);
-    const cards = [{ label: "Total Orders", value: stats.total_orders, icon: <FiShoppingBag />, tone: "pink" }, { label: "Pending Orders", value: stats.pending_orders, icon: <FiClock />, tone: "amber" }, { label: "Processing Orders", value: stats.processing_orders, icon: <FiPackage />, tone: "purple" }, { label: "Shipped Orders", value: stats.shipped_orders, icon: <FiTruck />, tone: "blue" }, { label: "Delivered Orders", value: stats.delivered_orders, icon: <FiBox />, tone: "green" }, { label: "Cancelled Orders", value: stats.cancelled_orders, icon: <FiX />, tone: "red" }, { label: "Total Revenue", value: money(stats.revenue), icon: <FiCreditCard />, tone: "gold" }];
-    return <><section className="page-title-row"><div><p className="eyebrow">OVERVIEW</p><h2>Welcome back</h2><p>Here is your store performance at a glance.</p></div></section><section className="overview-grid">{cards.map((card) => <article className="stat-card" key={card.label}><span className={`stat-icon ${card.tone}`}>{card.icon}</span><div><p>{card.label}</p><h2>{loading ? <span className="skeleton-value" /> : card.value || 0}</h2><small>Updated just now</small></div></article>)}</section><section className="quick-actions"><div><FiBarChart2 /><div><h3>Keep your operations moving</h3><p>Review pending orders and update their status as they progress.</p></div></div><Link className="primary-button" to="/order-dashboard/orders">View orders <FiChevronRight /></Link></section></>;
+function Overview({ data, loading }) {
+    const count = (...candidates) => {
+        for (const candidate of candidates) {
+            if (candidate === null || candidate === undefined || candidate === "") continue;
+            const raw = Array.isArray(candidate) ? candidate.length : typeof candidate === "object" ? candidate.count ?? candidate.total ?? candidate.value : candidate;
+            if (raw === undefined || raw === null) continue;
+            const number = Number(raw);
+            if (Number.isFinite(number) && number >= 0) return number;
+        }
+        return null;
+    };
+    const resourceCount = (key) => count(data?.resources?.[key], data?.[`total_${key}`], data?.[`${key}_count`], data?.[key]);
+    const statuses = data?.orders_by_status || data?.order_status_counts || data?.orders || {};
+    const statusRows = [
+        ["Pending", "pending", "#b87813"],
+        ["Processing", "processing", "#7956b5"],
+        ["Shipped", "shipped", "#337cb6"],
+        ["Delivered", "delivered", "#25845a"],
+        ["Cancelled", "cancelled", "#bb4350"],
+    ].map(([label, key, color]) => ({
+        label, color,
+        count: count(statuses[key], statuses[label], data?.[`${key}_orders`], data?.[`${key}_count`]),
+    }));
+    const catalogRows = [
+        ["Products", "products", "#d17a08"],
+        ["Categories", "categories", "#337cb6"],
+        ["Subcategories", "subcategories", "#397c80"],
+        ["Offers", "offers", "#7956b5"],
+    ].map(([label, key, color]) => ({ label, color, count: resourceCount(key) }));
+    const cards = [
+        ["Total products", resourceCount("products"), FiPackage, "orange"],
+        ["Total users", resourceCount("users"), FiUsers, "blue"],
+        ["Total orders", resourceCount("orders"), FiShoppingBag, "purple"],
+        ["Total coupons", resourceCount("coupons"), FiTag, "green"],
+    ];
+    const lowStock = count(data?.low_stock_count, data?.low_stock, data?.products_low_stock);
+    return <div className="admin-page">
+        <PageHeader eyebrow="OVERVIEW" title="Store overview" description="Your store at a glance — products, customers, and order progress." />
+        <section className="admin-stat-grid" aria-label="Store totals" aria-busy={loading}>
+            {cards.map(([label, number, Icon, tone]) => <article className="admin-stat-card" key={label}>
+                <span className={`admin-stat-icon ${tone}`}><Icon aria-hidden="true" /></span>
+                <div><small>{label}</small><strong>{loading ? <Skeleton className="overview-skeleton-value" /> : number === null ? "Unavailable" : number.toLocaleString()}</strong></div>
+            </article>)}
+        </section>
+        <OverviewGraphs statusRows={statusRows} catalogRows={catalogRows} loading={loading} />
+        {lowStock !== null && !loading && <p className="admin-muted">Low stock: <strong>{lowStock.toLocaleString()}</strong> items need attention.</p>}
+    </div>;
 }
 
-function Orders() {
-    const [params, setParams] = useSearchParams(); const [orders, setOrders] = useState([]); const [meta, setMeta] = useState({}); const [loading, setLoading] = useState(true); const [error, setError] = useState(""); const [searchInput, setSearchInput] = useState(params.get("search") || ""); const [editing, setEditing] = useState(null);
-    const page = Number(params.get("page") || 1); const pageSize = Number(params.get("page_size") || 20); const search = params.get("search") || ""; const status = params.get("status") || ""; const paymentStatus = params.get("payment_status") || ""; const dateFrom = params.get("date_from") || ""; const dateTo = params.get("date_to") || ""; const ordering = params.get("ordering") || "-created_at";
-    const updateParam = (key, value) => { const next = new URLSearchParams(params); if (value) next.set(key, value); else next.delete(key); if (key !== "page") next.set("page", "1"); setParams(next); };
-    const loadOrders = useCallback(async () => { setLoading(true); setError(""); try { const query = new URLSearchParams({ page, page_size: pageSize, ...(search && { search }), ...(status && { status }), ...(paymentStatus && { payment_status: paymentStatus }), ...(dateFrom && { date_from: dateFrom }), ...(dateTo && { date_to: dateTo }), ordering }); const response = await client.get(`/orders/?${query}`); setOrders(getItems(response.data)); setMeta(response.data || {}); } catch (requestError) { setError(requestError.response?.status === 403 ? "Super Admin access required" : "We could not load orders. Please try again."); setOrders([]); } finally { setLoading(false); } }, [dateFrom, dateTo, ordering, page, pageSize, paymentStatus, search, status]);
-    useEffect(() => { const timer = setTimeout(() => updateParam("search", searchInput.trim()), 350); return () => clearTimeout(timer); }, [searchInput]); useEffect(() => { loadOrders(); }, [loadOrders]);
-    const total = meta.count ?? meta.total ?? orders.length; const totalPages = Math.max(1, Math.ceil(total / pageSize));
-    const cancelOrder = async (order) => { if (!window.confirm("Are you sure you want to cancel this order?")) return; try { await client.delete(`/orders/${order.id}/`); toast.success("Order cancelled successfully"); loadOrders(); } catch { toast.error("Could not cancel this order"); } };
-    const saveStatus = async (order, changes) => { if (!window.confirm("Save these order changes?")) return; try { await client.patch(`/orders/${order.id}/`, changes); toast.success("Order updated successfully"); setEditing(null); loadOrders(); } catch (requestError) { toast.error(requestError.response?.status === 403 ? "Super Admin access required" : "Could not update this order"); } };
-    const clearFilters = () => { setSearchInput(""); setParams({ page: "1", page_size: String(pageSize) }); };
-    return <section className="orders-panel"><div className="panel-heading"><div><p className="eyebrow">MANAGEMENT</p><h2>Orders</h2><p>Search, filter, and update customer orders.</p></div><button className="filter-button" onClick={loadOrders}><FiRefreshCw /> Refresh</button></div><div className="filters order-filters"><label className="search-field"><FiSearch /><input aria-label="Search orders" value={searchInput} onChange={(event) => setSearchInput(event.target.value)} placeholder="Order ID, customer, email, Stripe session…" /></label><Select label="Status" value={status} options={STATUSES} onChange={(value) => updateParam("status", value)} /><Select label="Payment" value={paymentStatus} options={PAYMENTS} onChange={(value) => updateParam("payment_status", value)} /><label className="date-field"><span>Date from</span><input aria-label="Date from" type="date" value={dateFrom} onChange={(event) => updateParam("date_from", event.target.value)} /></label><label className="date-field"><span>Date to</span><input aria-label="Date to" type="date" value={dateTo} onChange={(event) => updateParam("date_to", event.target.value)} /></label><Select label="Sort" value={ordering} values={["-created_at", "created_at", "-total_amount", "total_amount"]} options={["Newest", "Oldest", "Highest amount", "Lowest amount"]} onChange={(value) => updateParam("ordering", value)} /><button className="filter-button" onClick={clearFilters}>Clear</button></div>{error && <div className="inline-error" role="alert">{error}</div>}<OrderTable orders={orders} loading={loading} onEdit={setEditing} onCancel={cancelOrder} />{!loading && !error && <footer className="pagination"><span>Showing <strong>{total ? (page - 1) * pageSize + 1 : 0}–{Math.min(page * pageSize, total)}</strong> of <strong>{total}</strong> orders</span><div><label className="page-size">Rows <select value={pageSize} onChange={(event) => updateParam("page_size", event.target.value)}><option value="10">10</option><option value="20">20</option><option value="50">50</option></select></label><button disabled={page <= 1} onClick={() => updateParam("page", page - 1)}><FiChevronLeft /></button><span className="page-number">{page} / {totalPages}</span><button disabled={page >= totalPages} onClick={() => updateParam("page", page + 1)}><FiChevronRight /></button></div></footer>}{editing && <EditOrder order={editing} onClose={() => setEditing(null)} onSave={saveStatus} />}</section>;
+function ResourcePage({ resource, schema }) {
+    const config = resources[resource];
+    const navigate = useNavigate();
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+    const [search, setSearch] = useState("");
+    const defaultOrdering = resource === "products" ? "-id" : "";
+    const [ordering, setOrdering] = useState(defaultOrdering);
+    const [status, setStatus] = useState("");
+    const [paymentStatus, setPaymentStatus] = useState("");
+    const [dateFrom, setDateFrom] = useState("");
+    const [dateTo, setDateTo] = useState("");
+    const [modal, setModal] = useState(null);
+    const [deleteTarget, setDeleteTarget] = useState(null);
+    const [unitTypeRows, setUnitTypeRows] = useState([]);
+    const [usageReferences, setUsageReferences] = useState({ coupons: [], users: [], products: [] });
+    const [tableReferences, setTableReferences] = useState({});
+    const params = useMemo(() => ({ page, page_size: pageSize, ...(search && { search }), ...(ordering && { ordering }), ...(resource === "orders" && status && { status }), ...(resource === "orders" && paymentStatus && { payment_status: paymentStatus }), ...(resource === "orders" && dateFrom && { date_from: dateFrom }), ...(resource === "orders" && dateTo && { date_to: dateTo }) }), [page, pageSize, search, ordering, resource, status, paymentStatus, dateFrom, dateTo]);
+    const state = useAdminResource(resource, params);
+    const relationshipParams = useMemo(() => ({ page_size: 500 }), []);
+    const productVariantsState = useAdminResource("product-variants", relationshipParams, resource === "products");
+    const productImagesState = useAdminResource("product-images", relationshipParams, resource === "products");
+    const productImageMap = useMemo(() => relatedProductImageMap(productVariantsState.rows, productImagesState.rows), [productVariantsState.rows, productImagesState.rows]);
+
+    useEffect(() => {
+        if (resource !== "units") return undefined;
+        let active = true;
+        listResource("unit-types", { page_size: 500 }).then((response) => { if (active) setUnitTypeRows(unwrapListForReference(response.data)); }).catch(() => { if (active) setUnitTypeRows([]); });
+        return () => { active = false; };
+    }, [resource]);
+    useEffect(() => {
+        if (resource !== "coupon-usages") return undefined;
+        let active = true;
+        Promise.all([listResource("coupons", { page_size: 500 }), listResource("users", { page_size: 500 }), listResource("products", { page_size: 500 })]).then(([coupons, users, products]) => {
+            if (!active) return;
+            setUsageReferences({ coupons: unwrapListForReference(coupons.data), users: unwrapListForReference(users.data), products: unwrapListForReference(products.data) });
+        }).catch(() => { if (active) setUsageReferences({ coupons: [], users: [], products: [] }); });
+        return () => { active = false; };
+    }, [resource]);
+    useEffect(() => {
+        const referenceByColumn = { user: "users", customer: "users", product: "products", variant: "product-variants", variant_unit: "product-variant-units", category: "categories", subcategory: "subcategories", offer: "offers", color: "colors", unit_type: "unit-types", unit: "units", coupon: "coupons", order: "orders", address: "addresses", cancelled_by: "users" };
+        const names = [...new Set((resources[resource]?.columns || []).map((key) => referenceByColumn[key]).filter(Boolean))];
+        if (!names.length) return undefined;
+        let active = true;
+        Promise.all(names.map((name) => listResource(name, { page_size: 500 }).then((response) => [name, unwrapListForReference(response.data)]).catch(() => [name, []]))).then((entries) => { if (active) setTableReferences(Object.fromEntries(entries)); });
+        return () => { active = false; };
+    }, [resource]);
+
+    const fields = fieldsFromSchema(schema, resource);
+    const columnKeys = config.columns || (fields.length ? fields.map((field) => field.name || field.key).slice(0, 6) : ["id"]);
+    const columns = columnKeys.map((key) => ({
+        key,
+        label: resource === "coupon-usages" && key === "user" ? "Used By" : columnLabel(resource, key),
+        render: (row) => {
+            if (resource === "products" && key === "product_image") {
+                const image = productImageMap.get(String(recordId(row))) || row.product_image || row.image;
+                const imagePath = typeof image === "object" ? image?.url || image?.image : image;
+                return imagePath ? <img className="table-image-thumb product-table-image" src={getImageUrl(imagePath)} alt={`${row.name || "Product"} image`} /> : "—";
+            }
+            if (resource === "coupon-usages" && ["user", "coupon", "product"].includes(key)) return recordLabel(usageReferences[{ user: "users", coupon: "coupons", product: "products" }[key]].find((item) => String(recordId(item)) === String(row?.[key]?.id ?? row?.[key])) || row?.[key]);
+            return resolveTableValue(row, key, resource === "units" ? { ...tableReferences, "unit-types": unitTypeRows } : tableReferences);
+        },
+    }));
+    if (resource === "coupons") columns.unshift({ key: "copy_code", label: "Copy", render: (row) => <button className="table-copy-button" title="Copy coupon code" onClick={async () => { const code = row?.code; if (!code) return; try { await navigator.clipboard.writeText(code); toast.success("Coupon code copied"); } catch { toast.error("Could not copy coupon code"); } }}><FiCopy /> Copy</button> });
+    const clearFilters = () => { setSearch(""); setOrdering(defaultOrdering); setStatus(""); setPaymentStatus(""); setDateFrom(""); setDateTo(""); setPage(1); };
+    const openView = (row) => navigate(`/order-dashboard/${resource}/${recordId(row)}/view`);
+    const openEdit = (row) => navigate(`/order-dashboard/${resource}/${recordId(row)}/edit`);
+    const addAction = resource === "products" ? () => navigate("/order-dashboard/products/new") : ["hero-banners", "promo-banners", "hero-side-banners", "coupons", "coupon-usages"].includes(resource) ? () => navigate(`/order-dashboard/${resource}/new`) : () => setModal({ mode: "create" });
+    const remove = async () => { try { await deleteResource(resource, recordId(deleteTarget)); toast.success(`${config.label.slice(0, -1)} deleted`); setDeleteTarget(null); state.reload(); } catch (error) { toast.error(getErrorMessage(error, "Could not delete record")); } };
+    const closeAndReload = () => { setModal(null); state.reload(); };
+
+    return <div className="admin-page"><PageHeader title={config.label} description={`Create, review, update, and remove ${config.label.toLowerCase()} records.`} action={<button className="admin-button primary" onClick={addAction}><FiPlus /> Add {config.label.slice(0, -1)}</button>} /><div className="admin-panel"><FilterBar onClear={clearFilters}><DebouncedSearch value={search} onChange={(value) => { setSearch(value); setPage(1); }} placeholder={`Search ${config.label.toLowerCase()}...`} /><label className="admin-select"><span>Order</span><select value={ordering} onChange={(event) => { setOrdering(event.target.value); setPage(1); }}><option value="">Default</option><option value="-created_at">Newest</option><option value="created_at">Oldest</option><option value="name">Name A-Z</option><option value="-name">Name Z-A</option></select><FiChevronDown /></label>{resource === "orders" && <><label className="admin-select"><span>Status</span><select value={status} onChange={(event) => { setStatus(event.target.value); setPage(1); }}><option value="">All statuses</option>{["Pending", "Processing", "Shipped", "Delivered", "Cancelled"].map((item) => <option key={item}>{item}</option>)}</select></label><label className="admin-select"><span>Payment</span><select value={paymentStatus} onChange={(event) => { setPaymentStatus(event.target.value); setPage(1); }}><option value="">All payments</option>{["Pending", "Paid", "Failed", "Refunded"].map((item) => <option key={item}>{item}</option>)}</select></label><label className="admin-date"><span>From</span><input type="date" value={dateFrom} onChange={(event) => { setDateFrom(event.target.value); setPage(1); }} /></label><label className="admin-date"><span>To</span><input type="date" value={dateTo} onChange={(event) => { setDateTo(event.target.value); setPage(1); }} /></label></> }</FilterBar><DataTable columns={columns} rows={state.rows} loading={state.loading} error={state.error} onRetry={state.reload} actions={(row) => <><button className="table-icon" title="View details" aria-label={`View ${config.label.slice(0, -1)}`} onClick={() => openView(row)}><FiEye /></button><button className="table-icon" title="Edit" aria-label={`Edit ${config.label.slice(0, -1)}`} onClick={() => openEdit(row)}><FiEdit3 /></button><button className="table-icon danger" title="Delete" aria-label={`Delete ${config.label.slice(0, -1)}`} onClick={() => setDeleteTarget(row)}><FiTrash2 /></button></>} /><Pagination page={page} pageSize={pageSize} count={state.count} onPageChange={setPage} onPageSizeChange={(size) => { setPageSize(size); setPage(1); }} /></div>{modal && <ResourceModal resource={resource} schema={schema} mode={modal.mode} onClose={() => setModal(null)} onSaved={closeAndReload} />}{deleteTarget && <ConfirmDialog message={`Delete this ${config.label.slice(0, -1).toLowerCase()} permanently?`} onCancel={() => setDeleteTarget(null)} onConfirm={remove} />}</div>;
 }
 
-function Select({ label, value, options, values, onChange }) { return <label className="select-field"><span>{label}</span><select aria-label={label} value={value} onChange={(event) => onChange(event.target.value)}><option value="">All</option>{options.map((option, index) => <option key={option} value={values?.[index] || option}>{option}</option>)}</select><FiChevronDown /></label>; }
-function OrderTable({ orders, loading, onEdit, onCancel }) { if (loading) return <div className="skeleton-table">{Array.from({ length: 6 }, (_, index) => <div key={index} className="skeleton-row" />)}</div>; if (!orders.length) return <div className="empty-row"><FiSearch /><strong>No orders found</strong><span>Try changing your search or filters.</span></div>; return <div className="table-wrap"><table><thead><tr><th>ORDER</th><th>CUSTOMER</th><th>AMOUNT</th><th>PAYMENT</th><th>STATUS</th><th>CREATED</th><th>ACTIONS</th></tr></thead><tbody>{orders.map((order) => <tr key={order.id}><td><Link className="order-link" to={`/order-dashboard/orders/${order.id}`}>{order.order_number || order.order_id || order.id}</Link><small>{order.stripe_session_id || ""}</small></td><td><strong>{order.customer_name || order.user_name || order.customer?.name || "Guest customer"}</strong><small>{order.customer_email || order.user_email || order.customer?.email || "—"}</small></td><td><strong>{money(order.total_amount)}</strong></td><td><StatusBadge value={order.payment_status || "Pending"} /></td><td><StatusBadge value={order.status || "Pending"} /></td><td>{displayDate(order.created_at || order.date)}</td><td><div className="row-actions"><Link className="action-link" to={`/order-dashboard/orders/${order.id}`}>View</Link><button className="action-link" onClick={() => onEdit(order)}>Edit</button><button className="action-link danger" onClick={() => onCancel(order)}>Cancel</button></div></td></tr>)}</tbody></table></div>; }
-function StatusBadge({ value }) { return <span className={`status-badge ${String(value).toLowerCase()}`}>{value}</span>; }
-function EditOrder({ order, onClose, onSave }) { const [status, setStatus] = useState(order.status || "Pending"); const [paymentStatus, setPaymentStatus] = useState(order.payment_status || "Pending"); const [address, setAddress] = useState(order.shipping_address || ""); return <div className="modal-backdrop"><form className="edit-modal" onSubmit={(event) => { event.preventDefault(); onSave(order, { status, payment_status: paymentStatus, ...(address && { shipping_address: address }) }); }}><div className="modal-header"><div><p className="eyebrow">UPDATE ORDER</p><h2>{order.order_number || order.order_id || order.id}</h2></div><button type="button" onClick={onClose}><FiX /></button></div><label>Order status<select value={status} onChange={(event) => setStatus(event.target.value)}>{STATUSES.map((value) => <option key={value}>{value}</option>)}</select></label><label>Payment status<select value={paymentStatus} onChange={(event) => setPaymentStatus(event.target.value)}>{PAYMENTS.map((value) => <option key={value}>{value}</option>)}</select></label><label>Shipping address<textarea value={address} onChange={(event) => setAddress(event.target.value)} rows="3" placeholder="Enter a valid shipping address" /></label><div className="modal-actions"><button type="button" className="filter-button" onClick={onClose}>Cancel</button><button className="primary-button">Save changes</button></div></form></div>; }
-const RESOURCE_CONFIG = {
-    customers: { title: "Customers", subtitle: "Manage customer accounts and their order history.", endpoint: "/customers/", columns: ["NAME", "EMAIL", "ORDERS", "SPEND", "STATUS"], fallback: [{ id: "c1", name: "Amelia Rose", email: "amelia@example.com", orders: 12, spend: 3490, status: "Active" }, { id: "c2", name: "Liam Carter", email: "liam@example.com", orders: 8, spend: 1820, status: "Active" }] },
-    products: { title: "Products", subtitle: "Keep your catalog, inventory, and product visibility under control.", endpoint: "/products/", columns: ["PRODUCT", "CATEGORY", "PRICE", "STOCK", "STATUS"], fallback: [{ id: "p1", name: "Essential Hoodie", category: "Apparel", price: 129, stock: 42, status: "Published" }, { id: "p2", name: "Everyday Tote", category: "Accessories", price: 89, stock: 8, status: "Low stock" }] },
-    coupons: { title: "Coupons", subtitle: "Create and monitor promotional codes for your customers.", endpoint: "/coupons/", columns: ["CODE", "DISCOUNT", "USES", "EXPIRES", "STATUS"], fallback: [{ id: "cp1", code: "WELCOME10", discount: "10%", uses: 82, expires: "31 Dec 2026", status: "Active" }] },
-};
-
-function AdminSection({ type }) {
-    if (type === "settings") return <Settings />;
-    const config = RESOURCE_CONFIG[type] || RESOURCE_CONFIG.customers;
-    const [rows, setRows] = useState([]); const [loading, setLoading] = useState(true); const [search, setSearch] = useState(""); const [showForm, setShowForm] = useState(false);
-    const load = useCallback(async () => { setLoading(true); try { const response = await client.get(config.endpoint); setRows(getItems(response.data)); } catch { setRows(config.fallback); } finally { setLoading(false); } }, [config.endpoint]);
-    useEffect(() => { load(); }, [load]);
-    const filtered = rows.filter((row) => JSON.stringify(row).toLowerCase().includes(search.toLowerCase()));
-    const createItem = async (event) => { event.preventDefault(); const data = Object.fromEntries(new FormData(event.currentTarget)); const local = { id: `local-${Date.now()}`, ...data }; setRows((current) => [local, ...current]); setShowForm(false); try { await client.post(config.endpoint, data); toast.success(`${config.title.slice(0, -1)} created`); } catch { toast.info("Saved in this session; connect the API to persist it"); } };
-    return <section className="resource-page"><div className="resource-heading"><div><p className="eyebrow">ADMINISTRATION</p><h2>{config.title}</h2><p>{config.subtitle}</p></div><button className="primary-button" onClick={() => setShowForm(true)}>+ Add {config.title.slice(0, -1)}</button></div><div className="resource-toolbar"><label className="search-field"><FiSearch /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder={`Search ${config.title.toLowerCase()}…`} /></label><button className="filter-button" onClick={load}><FiRefreshCw /> Refresh</button></div><div className="resource-table">{loading ? <div className="skeleton-table"><div className="skeleton-row" /><div className="skeleton-row" /><div className="skeleton-row" /></div> : filtered.length ? <table><thead><tr>{config.columns.map((column) => <th key={column}>{column}</th>)}<th /></tr></thead><tbody>{filtered.map((row) => <tr key={row.id}><td><strong>{row.name || row.code || row.product_name || "—"}</strong>{row.email && <small>{row.email}</small>}</td><td>{row.category || row.email || row.discount || "—"}</td><td>{row.orders ?? row.price ? (row.price ? money(row.price) : row.orders) : row.uses ?? "—"}</td><td>{row.spend ? money(row.spend) : row.stock ?? row.expires ?? "—"}</td><td><StatusBadge value={row.status || "Active"} /></td><td><button className="action-link" onClick={() => toast.info("Use the edit workflow to update this record")}>Edit</button><button className="action-link danger" onClick={() => setRows((current) => current.filter((item) => item.id !== row.id))}>Delete</button></td></tr>)}</tbody></table> : <div className="empty-row"><FiSearch /><strong>No {config.title.toLowerCase()} found</strong><span>Create a new record or adjust your search.</span></div>}</div>{showForm && <div className="modal-backdrop"><form className="edit-modal" onSubmit={createItem}><div className="modal-header"><div><p className="eyebrow">NEW RECORD</p><h2>Add {config.title.slice(0, -1)}</h2></div><button type="button" onClick={() => setShowForm(false)}><FiX /></button></div><label>Name / code<input name={type === "coupons" ? "code" : "name"} required placeholder={`Enter ${config.title.slice(0, -1).toLowerCase()} name`} /></label><label>{type === "products" ? "Price" : type === "coupons" ? "Discount" : "Email"}<input name={type === "products" ? "price" : type === "coupons" ? "discount" : "email"} required /></label><div className="modal-actions"><button type="button" className="filter-button" onClick={() => setShowForm(false)}>Cancel</button><button className="primary-button">Create</button></div></form></div>}</section>;
+function ReadOnlyResourcePage({ resource, id, schema }) {
+    const navigate = useNavigate();
+    const config = resources[resource];
+    const [row, setRow] = useState(null);
+    const [references, setReferences] = useState({});
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+    const fields = useMemo(() => { const schemaFields = fieldsFromSchema(schema, resource); return schemaFields.length ? schemaFields : fallbackFields(resource, config.fields); }, [schema, resource, config.fields]);
+    useEffect(() => {
+        let active = true;
+        getResource(resource, id).then((response) => { if (active) setRow(response.data); }).catch((requestError) => { if (active) setError(getErrorMessage(requestError, "Could not load record.")); }).finally(() => { if (active) setLoading(false); });
+        return () => { active = false; };
+    }, [resource, id]);
+    useEffect(() => {
+        const referenceByField = { user: "users", customer: "users", product: "products", variant: "product-variants", variant_unit: "product-variant-units", category: "categories", subcategory: "subcategories", offer: "offers", color: "colors", unit_type: "unit-types", unit: "units", coupon: "coupons", order: "orders", address: "addresses", cancelled_by: "users" };
+        const names = [...new Set(fields.map((field) => referenceByField[field.name || field.key]).filter(Boolean))];
+        if (!names.length) return undefined;
+        let active = true;
+        Promise.all(names.map((name) => listResource(name, { page_size: 500 }).then((response) => [name, unwrapListForReference(response.data)]).catch(() => [name, []]))).then((entries) => { if (active) setReferences(Object.fromEntries(entries)); });
+        return () => { active = false; };
+    }, [fields]);
+    if (loading) return <div className="admin-page"><LoadingState label="Loading record details..." /></div>;
+    if (error || !row) return <div className="admin-page"><button className="admin-back-link" onClick={() => navigate(`/order-dashboard/${resource}`)}>Back to {config.label}</button><div className="admin-form-error">{error || "Record not found."}</div></div>;
+    return <div className="admin-page"><button className="admin-back-link" onClick={() => navigate(`/order-dashboard/${resource}`)}>Back to {config.label}</button><PageHeader eyebrow="VIEW RECORD" title={`${config.label.slice(0, -1)} details`} description="Read-only record details." /><section className="admin-panel resource-view-panel"><div className="resource-view-grid">{fields.map((field) => { const name = field.name || field.key; return <div className="resource-view-field" key={name}><small>{field.label || titleize(name)}</small><div>{resolveTableValue(row, name, references)}</div></div>; })}</div></section></div>;
 }
 
-function Settings() { const [saved, setSaved] = useState(false); return <section className="resource-page"><div className="resource-heading"><div><p className="eyebrow">ADMINISTRATION</p><h2>Settings</h2><p>Control store preferences and your Super Admin workspace.</p></div></div><form className="settings-grid" onSubmit={(event) => { event.preventDefault(); setSaved(true); toast.success("Settings saved"); }}><div className="detail-card"><h3>Store preferences</h3><label>Store name<input defaultValue="eehook" /></label><label>Currency<select defaultValue="AED"><option>AED</option><option>USD</option><option>EUR</option></select></label><label>Order notifications<select defaultValue="enabled"><option value="enabled">Enabled</option><option value="disabled">Disabled</option></select></label></div><div className="detail-card"><h3>Admin security</h3><p className="setting-note">Only users with the Super Admin role can access the Order Dashboard.</p><label>Session timeout<select defaultValue="30"><option value="15">15 minutes</option><option value="30">30 minutes</option><option value="60">60 minutes</option></select></label><label>Two-factor authentication<select defaultValue="recommended"><option value="recommended">Recommended</option><option value="required">Required</option></select></label></div><div className="settings-save"><button className="primary-button">{saved ? "Saved" : "Save settings"}</button></div></form></section>; }
+function ResourceEditorPage({ resource, id, schema }) {
+    const config = resources[resource];
+    const navigate = useNavigate();
+    const editing = Boolean(id);
+    const [values, setValues] = useState({});
+    const [references, setReferences] = useState({});
+    const [loading, setLoading] = useState(editing);
+    const [saving, setSaving] = useState(false);
+    const [requestError, setRequestError] = useState(null);
+    const fallback = useMemo(() => { const schemaFields = fieldsFromSchema(schema, resource); return schemaFields.length ? schemaFields : fallbackFields(resource, config.fields); }, [schema, resource, config.fields]);
+    const errors = useFormErrors(requestError);
+    useEffect(() => {
+        let active = true;
+        if (!editing) return () => { active = false; };
+        getResource(resource, id).then((response) => { if (active) setValues(response.data || {}); }).catch((error) => { if (active) setRequestError(error); }).finally(() => { if (active) setLoading(false); });
+        return () => { active = false; };
+    }, [editing, id, resource, fallback]);
+    useEffect(() => {
+        const referenceByField = { user: "users", customer: "users", product: "products", variant: "product-variants", variant_unit: "product-variant-units", category: "categories", subcategory: "subcategories", offer: "offers", color: "colors", unit_type: "unit-types", unit: "units", coupon: "coupons", order: "orders", address: "addresses", cancelled_by: "users" };
+        const names = [...new Set(fallback.map((field) => referenceByField[field.name || field.key]).filter(Boolean))];
+        if (!names.length) return undefined;
+        let active = true;
+        Promise.all(names.map((name) => listResource(name, { page_size: 500 }).then((response) => [name, unwrapReferenceRows(response.data)]).catch(() => [name, []]))).then((entries) => { if (active) setReferences(Object.fromEntries(entries)); });
+        return () => { active = false; };
+    }, [fallback]);
+    const setValue = (name, value) => setValues((current) => ({ ...current, [name]: value }));
+    const save = async (event) => {
+        event.preventDefault();
+        setSaving(true);
+        setRequestError(null);
+        try {
+            await validateUniqueUnit(resource, values, editing ? values : null);
+            const payload = cleanPayload(values, resource);
+            if (editing) await updateResource(resource, id, payload, payload instanceof FormData);
+            else await createResource(resource, payload, payload instanceof FormData);
+            toast.success(`${config.label.slice(0, -1)} ${editing ? "updated" : "created"}`);
+            navigate(`/order-dashboard/${resource}`);
+        } catch (error) {
+            setRequestError(error);
+            toast.error(getErrorMessage(error, "Please correct the form errors"));
+        } finally { setSaving(false); }
+    };
+    if (loading) return <div className="admin-page"><LoadingState label="Loading record editor..." /></div>;
+    return <div className="admin-page resource-editor-page"><button className="admin-back-link" onClick={() => navigate(`/order-dashboard/${resource}`)}>Back to {config.label}</button><PageHeader eyebrow={editing ? "EDIT RECORD" : "NEW RECORD"} title={`${editing ? "Edit" : "Add"} ${config.label.slice(0, -1)}`} description="Update the record and save your changes." /><section className="admin-panel resource-editor-panel"><form className="admin-form" onSubmit={save}><div className="admin-form-grid">{fallback.map((field) => { const name = field.name || field.key; const refName = { user: "users", customer: "users", product: "products", variant: "product-variants", variant_unit: "product-variant-units", category: "categories", subcategory: "subcategories", offer: "offers", color: "colors", unit_type: "unit-types", unit: "units", coupon: "coupons", order: "orders", address: "addresses" }[name] || ""; return <FormField key={name} field={field} options={references[refName] || []} value={values[name]} onChange={setValue} error={errors[name]} readOnly={false} />; })}</div>{requestError && !Object.keys(errors).length && <p className="admin-form-error">{getErrorMessage(requestError)}</p>}<div className="admin-modal-actions"><button type="button" className="admin-button secondary" onClick={() => navigate(`/order-dashboard/${resource}`)}>Cancel</button><button type="submit" className="admin-button primary" disabled={saving}>{saving ? "Saving..." : "Save changes"}</button></div></form></section></div>;
+}
+
+function OrderEditPage({ id }) {
+    const navigate = useNavigate();
+    const [order, setOrder] = useState(null);
+    const [status, setStatus] = useState("");
+    const [paymentStatus, setPaymentStatus] = useState("");
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
+    const [error, setError] = useState("");
+    useEffect(() => { let active = true; getResource("orders", id).then((response) => { if (!active) return; setOrder(response.data); setStatus(response.data.status || ""); setPaymentStatus(response.data.payment_status || ""); }).catch((requestError) => { if (active) setError(getErrorMessage(requestError, "Could not load order.")); }).finally(() => { if (active) setLoading(false); }); return () => { active = false; }; }, [id]);
+    const save = async (event) => { event.preventDefault(); setSaving(true); setError(""); try { await updateResource("orders", id, { status, payment_status: paymentStatus }); toast.success("Order updated"); navigate(`/order-dashboard/orders/${id}`); } catch (requestError) { setError(getErrorMessage(requestError, "Could not update order.")); } finally { setSaving(false); } };
+    if (loading) return <div className="admin-page"><LoadingState label="Loading order editor..." /></div>;
+    if (!order) return <div className="admin-page"><button className="admin-back-link" onClick={() => navigate("/order-dashboard/orders")}>Back to orders</button><div className="admin-form-error">{error || "Order not found."}</div></div>;
+    return <div className="admin-page resource-editor-page"><button className="admin-back-link" onClick={() => navigate(`/order-dashboard/orders/${id}`)}>Back to order</button><PageHeader eyebrow="EDIT ORDER" title={order.order_number || order.order_id || `Order #${id}`} description="Update order and payment status." /><section className="admin-panel resource-editor-panel"><form className="admin-form" onSubmit={save}><div className="admin-form-grid"><label className="admin-form-field"><span>Order status</span><select value={status} onChange={(event) => setStatus(event.target.value)}>{["Pending", "Processing", "Shipped", "Delivered", "Cancelled"].map((option) => <option key={option}>{option}</option>)}</select></label><label className="admin-form-field"><span>Payment status</span><select value={paymentStatus} onChange={(event) => setPaymentStatus(event.target.value)}>{["Pending", "Paid", "Failed", "Refunded"].map((option) => <option key={option}>{option}</option>)}</select></label></div>{error && <p className="admin-form-error">{error}</p>}<div className="admin-modal-actions"><button type="button" className="admin-button secondary" onClick={() => navigate(`/order-dashboard/orders/${id}`)}>Cancel</button><button type="submit" className="admin-button primary" disabled={saving}>{saving ? "Saving..." : "Save changes"}</button></div></form></section></div>;
+}
+
+/* function LegacyResourcePage({ resource, schema }) {
+    const config = resources[resource];
+    const navigate = useNavigate();
+    const [deleteTarget, setDeleteTarget] = useState(null);
+    const [editTarget, setEditTarget] = useState(null);
+    const addAction = () => {};
+    const beginEdit = () => {};
+    const remove = async () => {};
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+    const [search, setSearch] = useState("");
+    const defaultOrdering = resource === "products" ? "-id" : "";
+    const [ordering, setOrdering] = useState(defaultOrdering);
+    const [status, setStatus] = useState("");
+    const [paymentStatus, setPaymentStatus] = useState("");
+    const [dateFrom, setDateFrom] = useState("");
+    const [dateTo, setDateTo] = useState("");
+    const [modal, setModal] = useState(null);
+    const [unitTypeRows, setUnitTypeRows] = useState([]);
+    const [usageReferences, setUsageReferences] = useState({ coupons: [], users: [], products: [] });
+    const [tableReferences, setTableReferences] = useState({});
+    const params = useMemo(() => ({ page, page_size: pageSize, ...(search && { search }), ...(ordering && { ordering }), ...(resource === "orders" && status && { status }), ...(resource === "orders" && paymentStatus && { payment_status: paymentStatus }), ...(resource === "orders" && dateFrom && { date_from: dateFrom }), ...(resource === "orders" && dateTo && { date_to: dateTo }) }), [page, pageSize, search, ordering, resource, status, paymentStatus, dateFrom, dateTo]);
+    const state = useAdminResource(resource, params);
+    useEffect(() => {
+        if (resource !== "units") return undefined;
+        let active = true;
+        listResource("unit-types", { page_size: 500 }).then((response) => { if (active) setUnitTypeRows(unwrapListForReference(response.data)); }).catch(() => { if (active) setUnitTypeRows([]); });
+        return () => { active = false; };
+    }, [resource]);
+    useEffect(() => {
+        if (resource !== "coupon-usages") return undefined;
+        let active = true;
+        Promise.all([listResource("coupons", { page_size: 500 }), listResource("users", { page_size: 500 }), listResource("products", { page_size: 500 })]).then(([coupons, users, products]) => {
+            if (!active) return;
+            setUsageReferences({ coupons: unwrapListForReference(coupons.data), users: unwrapListForReference(users.data), products: unwrapListForReference(products.data) });
+        }).catch(() => { if (active) setUsageReferences({ coupons: [], users: [], products: [] }); });
+        return () => { active = false; };
+    }, [resource]);
+    useEffect(() => {
+        const referenceByColumn = { user: "users", customer: "users", product: "products", variant: "product-variants", variant_unit: "product-variant-units", category: "categories", subcategory: "subcategories", offer: "offers", color: "colors", unit_type: "unit-types", unit: "units", coupon: "coupons", order: "orders", address: "addresses", cancelled_by: "users" };
+        const names = [...new Set((resources[resource]?.columns || []).map((key) => referenceByColumn[key]).filter(Boolean))];
+        if (!names.length) return undefined;
+        let active = true;
+        Promise.all(names.map((name) => listResource(name, { page_size: 500 }).then((response) => [name, unwrapListForReference(response.data)]).catch(() => [name, []]))).then((entries) => { if (active) setTableReferences(Object.fromEntries(entries)); });
+        return () => { active = false; };
+    }, [resource]);
+    const reload = () => state.reload();
+    const fields = fieldsFromSchema(schema, resource);
+    const columnKeys = config.columns || (fields.length ? fields.map((field) => field.name || field.key).slice(0, 6) : ["id"]);
+    const columns = columnKeys.map((key) => ({ key, label: resource === "coupon-usages" && key === "user" ? "Used By" : titleize(key), render: (row) => resource === "coupon-usages" && ["user", "coupon", "product"].includes(key) ? recordLabel(usageReferences[{ user: "users", coupon: "coupons", product: "products" }[key]].find((item) => String(recordId(item)) === String(row?.[key]?.id ?? row?.[key])) || row?.[key]) : resolveTableValue(row, key, resource === "units" ? { ...tableReferences, "unit-types": unitTypeRows } : tableReferences) }));
+    const clearFilters = () => { setSearch(""); setOrdering(defaultOrdering); setStatus(""); setPaymentStatus(""); setDateFrom(""); setDateTo(""); setPage(1); };
+    const openView = (row) => resource === "products" ? navigate(`/order-dashboard/products/${recordId(row)}`) : resource === "orders" ? navigate(`/order-dashboard/orders/${recordId(row)}`) : setModal({ mode: "view", row });
+    const modalContent = modal && <ResourceModal resource={resource} schema={schema} mode="view" row={modal.row} onClose={() => setModal(null)} />;
+    return <div className="admin-page"><PageHeader title={config.label} description={`Create, review, update, and remove ${config.label.toLowerCase()} records.`} action={<button className="admin-button primary" onClick={addAction}><FiPlus /> Add {config.label.slice(0, -1)}</button>} /><div className="admin-panel"><FilterBar onClear={clearFilters}><DebouncedSearch value={search} onChange={(value) => { setSearch(value); setPage(1); }} placeholder={`Search ${config.label.toLowerCase()}…`} /><label className="admin-select"><span>Order</span><select value={ordering} onChange={(event) => { setOrdering(event.target.value); setPage(1); }}><option value="">Default</option><option value="-created_at">Newest</option><option value="created_at">Oldest</option><option value="name">Name A–Z</option><option value="-name">Name Z–A</option></select><FiChevronDown /></label>{resource === "orders" && <><label className="admin-select"><span>Status</span><select value={status} onChange={(event) => { setStatus(event.target.value); setPage(1); }}><option value="">All statuses</option>{["Pending", "Processing", "Shipped", "Delivered", "Cancelled"].map((item) => <option key={item}>{item}</option>)}</select></label><label className="admin-select"><span>Payment</span><select value={paymentStatus} onChange={(event) => { setPaymentStatus(event.target.value); setPage(1); }}><option value="">All payments</option>{["Pending", "Paid", "Failed", "Refunded"].map((item) => <option key={item}>{item}</option>)}</select></label><label className="admin-date"><span>From</span><input type="date" value={dateFrom} onChange={(event) => { setDateFrom(event.target.value); setPage(1); }} /></label><label className="admin-date"><span>To</span><input type="date" value={dateTo} onChange={(event) => { setDateTo(event.target.value); setPage(1); }} /></label></> }</FilterBar><DataTable columns={columns} rows={state.rows} loading={state.loading} error={state.error} onRetry={state.reload} actions={(row) => (<><button className="table-icon" title="View" onClick={() => openView(row)}><FiEye /></button><button className="table-icon" title="Edit" onClick={() => beginEdit(row)}><FiEdit3 /></button><button className="table-icon danger" title="Delete" onClick={() => setDeleteTarget(row)}><FiTrash2 /></button></>)} /><Pagination page={page} pageSize={pageSize} count={state.count} onPageChange={setPage} onPageSizeChange={(size) => { setPageSize(size); setPage(1); }} /></div>{modalContent}{deleteTarget && <ConfirmDialog message={`Delete this ${config.label.slice(0, -1).toLowerCase()} permanently?`} onCancel={() => setDeleteTarget(null)} onConfirm={remove} />}{editTarget && <ConfirmDialog title="Confirm order edit" message="Open this order for editing? Changes will be saved to the backend." onCancel={() => setEditTarget(null)} onConfirm={() => { setModal({ mode: "edit", row: editTarget }); setEditTarget(null); }} />}</div>;
+}
+*/
+
+function ResourceModal({ resource, schema, mode, row, initialValues = {}, onClose, onSaved }) {
+    const config = resources[resource];
+    const [values, setValues] = useState(() => ({ ...(row || {}), ...initialValues }));
+    const [saving, setSaving] = useState(false);
+    const [requestError, setRequestError] = useState(null);
+    const [references, setReferences] = useState({});
+    const [productMode, setProductMode] = useState(row?.product_type || (row?.has_variants ? "multiple" : "single"));
+    const fallback = useMemo(() => { const fields = fieldsFromSchema(schema, resource); return fields.length ? fields.map((field) => { const name = field.name || field.key; if (resource === "offers" && ["discount", "discount_percentage"].includes(name)) return { ...field, type: "number", label: "Discount (%)", min: 0, max: 100, step: 0.01 }; if (resource === "offers" && ["start_date", "end_date"].includes(name)) return { ...field, type: "datetime-local" }; return field; }) : fallbackFields(resource, config.fields); }, [schema, resource, config.fields]);
+    const errors = useFormErrors(requestError);
+    const readOnly = mode === "view";
+    useEffect(() => {
+        if (mode === "view" && recordId(row)) getResource(resource, recordId(row)).then((response) => setValues((current) => ({ ...current, ...response.data }))).catch(() => {});
+    }, [mode, resource, row]);
+    useEffect(() => {
+        const referenceNames = [...new Set(fallback.flatMap((field) => {
+            const name = field.name || field.key || "";
+            if (name.includes("category")) return ["categories", "subcategories"];
+            if (name.includes("offer")) return ["offers"];
+            if (name.includes("product")) return ["products"];
+            if (name.includes("variant")) return ["product-variants"];
+            if (name.includes("color")) return ["colors"];
+            if (name.includes("unit_type")) return ["unit-types"];
+            if (name === "unit") return ["units"];
+            if (name.includes("region")) return ["regions"];
+            if (["user", "customer"].includes(name)) return ["users"];
+            if (name.includes("coupon")) return ["coupons"];
+            if (name.includes("order")) return ["orders"];
+            return [];
+        }))];
+        if (!referenceNames.length) return;
+        Promise.all(referenceNames.map((name) => listResource(name, { page_size: 100 })).map((request, index) => request.then((response) => [referenceNames[index], unwrapReferenceRows(response.data)]).catch(() => [referenceNames[index], []]))).then((entries) => setReferences(Object.fromEntries(entries)));
+    }, [fallback, resource]);
+    const setValue = (name, value) => setValues((current) => ({ ...current, [name]: value }));
+    const submit = async (event) => { event.preventDefault(); if (readOnly) return onClose(); setSaving(true); setRequestError(null); try { await validateUniqueUnit(resource, values, row); const productTypeFields = fallback.map((field) => field.name || field.key); const productValues = resource === "products" ? { ...values, ...(productTypeFields.includes("product_type") ? { product_type: productMode } : {}), ...(productTypeFields.includes("has_variants") ? { has_variants: productMode === "multiple" } : {}) } : values; const payload = cleanPayload(productValues, resource); if (mode === "edit") await updateResource(resource, recordId(row), payload, payload instanceof FormData); else await createResource(resource, payload, payload instanceof FormData); toast.success(`${config.label.slice(0, -1)} ${mode === "edit" ? "updated" : "created"}`); onSaved(); } catch (error) { setRequestError(error); toast.error(getErrorMessage(error, "Please correct the form errors")); } finally { setSaving(false); } };
+    return <Modal wide={fallback.length > 8} onClose={onClose} title={`${readOnly ? "View" : mode === "edit" ? "Edit" : "Create"} ${config.label.slice(0, -1)}`}><div className="admin-form"><form onSubmit={submit}>{resource === "products" && <fieldset className="product-type-field"><legend>Product Type</legend><label><input type="radio" name="product_mode" checked={productMode === "single"} onChange={() => setProductMode("single")} /> Single Product</label><label><input type="radio" name="product_mode" checked={productMode === "multiple"} onChange={() => setProductMode("multiple")} /> Multiple Product</label><small>Use product variants to add colors and manage multiple images for this product.</small></fieldset>}<div className="admin-form-grid">{fallback.map((field) => { const name = field.name || field.key; const refName = name.includes("category") ? (name.includes("sub") ? "subcategories" : "categories") : name.includes("offer") ? "offers" : name.includes("product") ? "products" : name.includes("variant") ? "product-variants" : name.includes("color") ? "colors" : name.includes("unit_type") ? "unit-types" : name === "unit" ? "units" : name.includes("region") ? "regions" : ["user", "customer"].includes(name) ? "users" : name.includes("coupon") ? "coupons" : name.includes("order") ? "orders" : ""; return <FormField key={name} field={field} options={references[refName] || []} value={values[name]} onChange={setValue} error={errors[name]} />; })}</div>{requestError && !Object.keys(errors).length && <p className="admin-form-error">{getErrorMessage(requestError)}</p>}<div className="admin-modal-actions"><button type="button" className="admin-button secondary" onClick={onClose}>{readOnly ? "Close" : "Cancel"}</button>{!readOnly && <button className="admin-button primary" disabled={saving}>{saving ? "Saving…" : "Save changes"}</button>}</div></form>{resource === "products" && mode === "edit" && recordId(row) && <ProductTools productId={recordId(row)} />}</div></Modal>;
+}
+
+async function validateUniqueUnit(resource, values, row) {
+    if (!['unit-types', 'units'].includes(resource)) return;
+    const name = String(values.name || '').trim().toLowerCase();
+    if (!name) return;
+    const response = await listResource(resource, { page_size: 500 });
+    const existing = unwrapListForReference(response.data);
+    const currentId = String(recordId(row) || '');
+    const duplicate = existing.some((item) => {
+        if (String(recordId(item) || '') === currentId) return false;
+        if (String(item.name || '').trim().toLowerCase() !== name) return false;
+        return true;
+    });
+    if (duplicate) {
+        const message = resource === 'units' ? 'A Unit with this name already exists for the selected Unit Type.' : 'A Unit Type with this name already exists.';
+        throw { response: { data: { name: [message] } } };
+    }
+}
+
+function unwrapReferenceRows(payload) {
+    const result = unwrapListForReference(payload);
+    return result.map((row) => ({ value: row.id ?? row.pk, label: row.name || row.title || row.email || row.code || `#${row.id ?? row.pk}` }));
+}
+
+function unwrapListForReference(payload) {
+    if (Array.isArray(payload)) return payload;
+    return payload?.results || payload?.items || payload?.data || [];
+}
+
+function cleanPayload(values, resource) {
+    const isFileField = (key) => key === "image" || key.includes("_image") || key.includes("logo");
+    const entries = Object.entries(values).filter(([key, value]) => !["id", "pk", "created_at", "updated_at"].includes(key) && value !== undefined && value !== null && value !== "" && !(isFileField(key) && !(value instanceof File)));
+    const hasFile = entries.some(([, value]) => value instanceof File);
+    if (!hasFile) return resource === "products" ? { ...Object.fromEntries(entries), emi_available: false, emi_starting_price: null } : Object.fromEntries(entries);
+    const form = new FormData(); entries.forEach(([key, value]) => { if (Array.isArray(value)) value.forEach((item) => form.append(key, item)); else form.append(key, value); });
+    if (resource === "products") { form.set("emi_available", "false"); form.set("emi_starting_price", "null"); }
+    return form;
+}
+
+function ProductTools({ productId }) {
+    const schema = {};
+    const variants = useAdminResource("product-variants", { page_size: 100 });
+    const images = useAdminResource("product-images", { page_size: 100 });
+    const [modal, setModal] = useState(null);
+    const [deleting, setDeleting] = useState(null);
+    const belongsToProduct = (row) => String(row.product?.id ?? row.product_id ?? row.product) === String(productId);
+    const productVariants = variants.rows.filter(belongsToProduct);
+    const productImages = images.rows.filter(belongsToProduct);
+    const remove = async () => { try { await deleteResource(deleting.resource, recordId(deleting.row)); toast.success("Record deleted"); setDeleting(null); variants.reload(); images.reload(); } catch (error) { toast.error(getErrorMessage(error, "Could not delete record")); } };
+    return <div className="product-tools"><div className="product-tools-heading"><h3>Product management</h3><span>Manage variants, single/multiple prices, sizes, units, and images.</span></div><div className="product-tool-section"><div className="product-tool-title"><strong>Variants</strong><button type="button" className="admin-button secondary" onClick={() => setModal({ type: "variant", mode: "create", initialValues: { product: productId } })}><FiPlus /> Add variant</button></div>{variants.loading ? <LoadingState label="Loading variants…" /> : productVariants.length ? <div className="nested-table">{productVariants.map((variant) => <div className="nested-row-wrap" key={recordId(variant)}><div className="nested-row"><span><strong>{recordLabel(variant.color) || "Variant"}</strong><small>{variant.price_type === "multiple" ? "Multiple Price" : `Single Price · ${variant.price ? money(variant.price) : "Price not set"} · Stock ${variant.stock ?? 0}`}</small></span><span><button type="button" className="table-icon" onClick={() => setModal({ type: "variant", mode: "edit", row: variant })}><FiEdit3 /></button><button type="button" className="table-icon danger" onClick={() => setDeleting({ resource: "product-variants", row: variant })}><FiTrash2 /></button></span></div></div>)}</div> : <p className="admin-muted product-empty">No variants linked to this product.</p>}</div><div className="product-tool-section"><div className="product-tool-title"><strong>Product images</strong><button type="button" className="admin-button secondary" onClick={() => setModal({ type: "image", resource: "product-images", mode: "create", initialValues: { product: productId } })}><FiPlus /> Upload image</button></div>{images.loading ? <LoadingState label="Loading images…" /> : productImages.length ? <div className="image-thumb-grid">{productImages.map((image) => <div className="image-thumb" key={recordId(image)}><img src={image.image || image.url} alt={image.alt_text || "Product"} /><button type="button" onClick={() => setDeleting({ resource: "product-images", row: image })}><FiTrash2 /></button></div>)}</div> : <p className="admin-muted product-empty">No images uploaded for this product.</p>}</div>{modal?.type === "variant" && <VariantEditorModal productId={productId} schema={schema} mode={modal.mode} row={modal.row} onClose={() => setModal(null)} onSaved={() => { setModal(null); variants.reload(); }} />}{modal?.type === "image" && <ResourceModal resource={modal.resource} schema={schema} mode={modal.mode} row={modal.row} initialValues={modal.initialValues} onClose={() => setModal(null)} onSaved={() => { setModal(null); images.reload(); }} />}{deleting && <ConfirmDialog message="Delete this product record permanently?" onCancel={() => setDeleting(null)} onConfirm={remove} />}</div>;
+}
+
+function VariantEditorModal({ productId, mode, row, onClose, onSaved }) {
+    const [values, setValues] = useState(() => ({ product: productId || row?.product?.id || row?.product || "", color: row?.color?.id ?? row?.color ?? "", price_type: row?.price_type || "single", price: row?.price ?? "", stock: row?.stock ?? 0 }));
+    const [units, setUnits] = useState([]);
+    const [deletedUnitIds, setDeletedUnitIds] = useState([]);
+    const [options, setOptions] = useState({ products: [], colors: [], unitTypes: [], units: [] });
+    const [loading, setLoading] = useState(mode === "edit");
+    const [saving, setSaving] = useState(false);
+    const [error, setError] = useState("");
+    const variantId = recordId(row);
+
+    useEffect(() => {
+        Promise.all([listResource("products", { page_size: 100 }), listResource("colors", { page_size: 100 }), listResource("unit-types", { page_size: 100 }), listResource("units", { page_size: 100 })]).then(([products, colors, unitTypes, unitRows]) => setOptions({ products: rowsForOptions(products.data), colors: rowsForOptions(colors.data), unitTypes: rowsForOptions(unitTypes.data), units: rowsForOptions(unitRows.data) })).catch(() => setError("Could not load variant dropdown options."));
+        if (variantId) listResource("product-variant-units", { variant: variantId, page_size: 100 }).then((response) => setUnits(rowsFromPayload(response.data).map((unit) => ({ ...unit, unit_type: unit.unit_type?.id ?? unit.unit_type ?? "", unit: unit.unit?.id ?? unit.unit ?? "" })))).catch((requestError) => setError(getErrorMessage(requestError, "Could not load variant units."))).finally(() => setLoading(false));
+    }, [variantId]);
+
+    const changeType = (nextType) => { if (nextType === values.price_type) return; if (mode === "edit" && !window.confirm(`Switch this variant to ${nextType === "single" ? "Single Price" : "Multiple Price"}?`)) return; if (nextType === "single" && units.length && !window.confirm("Switching to Single Price will clear all existing size/unit rows. Continue?")) return; if (nextType === "single") { setDeletedUnitIds((current) => [...current, ...units.map((unit) => recordId(unit)).filter(Boolean)]); setUnits([]); } setValues((current) => ({ ...current, price_type: nextType, ...(nextType === "multiple" ? { price: "", stock: 0 } : {}) })); };
+    const updateUnit = (index, key, value) => setUnits((current) => current.map((unit, unitIndex) => unitIndex === index ? { ...unit, [key]: value } : unit));
+    const addUnit = () => setUnits((current) => [...current, { unit_type: "", unit: "", price: "", stock: "" }]);
+    const removeUnit = (index) => { const unit = units[index]; if (recordId(unit)) setDeletedUnitIds((current) => [...current, recordId(unit)]); setUnits((current) => current.filter((_, unitIndex) => unitIndex !== index)); };
+    const validate = () => { if (!values.product) return "Product is required."; if (values.price_type === "single") { if (values.price === "" || Number(values.price) < 0) return "Single Price requires a non-negative price."; if (values.stock === "" || Number(values.stock) < 0) return "Single Price requires a non-negative stock value."; } else { if (!units.length) return "Multiple Price requires at least one size/unit row."; for (const unit of units) if (!unit.unit_type || !unit.unit || unit.price === "" || unit.stock === "" || Number(unit.price) < 0 || Number(unit.stock) < 0) return "Every size/unit row requires unit type, unit, price, and non-negative stock."; } return ""; };
+    const save = async (event) => { event.preventDefault(); const validation = validate(); if (validation) return setError(validation); setSaving(true); setError(""); try { const payload = { product: values.product, color: values.color || null, price_type: values.price_type, price: values.price_type === "single" ? Number(values.price) : null, stock: values.price_type === "single" ? Number(values.stock) : 0 }; const response = mode === "edit" ? await updateResource("product-variants", variantId, payload) : await createResource("product-variants", payload); const savedVariantId = variantId || recordId(response.data); if (values.price_type === "single") { for (const unitId of deletedUnitIds) await deleteResource("product-variant-units", unitId); } else { for (const unitId of deletedUnitIds) await deleteResource("product-variant-units", unitId); for (const unit of units) { const unitPayload = { variant: savedVariantId, unit_type: unit.unit_type, unit: unit.unit, price: Number(unit.price), stock: Number(unit.stock) }; if (recordId(unit)) await updateResource("product-variant-units", recordId(unit), unitPayload); else await createResource("product-variant-units", unitPayload); } } toast.success(`Variant ${mode === "edit" ? "updated" : "created"}`); onSaved(); } catch (requestError) { setError(getErrorMessage(requestError, "Could not save variant.")); toast.error(getErrorMessage(requestError, "Could not save variant.")); } finally { setSaving(false); } };
+    const optionList = (name) => options[name] || [];
+    return <Modal wide onClose={onClose} title={`${mode === "edit" ? "Edit" : "Create"} Product Variant`}><form className="admin-form variant-editor" onSubmit={save}>{loading ? <LoadingState label="Loading variant units…" /> : <><div className="admin-form-grid"><label className="admin-form-field"><span>Product</span><select value={values.product} disabled={Boolean(productId)} onChange={(event) => setValues((current) => ({ ...current, product: event.target.value }))}><option value="">Select product</option>{optionList("products").map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label><label className="admin-form-field"><span>Color</span><select value={values.color} onChange={(event) => setValues((current) => ({ ...current, color: event.target.value }))}><option value="">Select color</option>{optionList("colors").map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label></div><fieldset className="price-type-field"><legend>Price Type</legend><label><input type="radio" name="price_type" checked={values.price_type === "single"} onChange={() => changeType("single")} /> Single Price</label><label><input type="radio" name="price_type" checked={values.price_type === "multiple"} onChange={() => changeType("multiple")} /> Multiple Price</label></fieldset>{values.price_type === "single" ? <div className="admin-form-grid"><label className="admin-form-field"><span>Price</span><input type="number" min="0" step="0.01" value={values.price} onChange={(event) => setValues((current) => ({ ...current, price: event.target.value }))} /></label><label className="admin-form-field"><span>Stock</span><input type="number" min="0" step="1" value={values.stock} onChange={(event) => setValues((current) => ({ ...current, stock: event.target.value }))} /></label></div> : <div className="unit-editor"><div className="product-tool-title"><strong>Sizes / Units</strong><button type="button" className="admin-button secondary" onClick={addUnit}><FiPlus /> Add size/unit</button></div>{units.map((unit, index) => <div className="unit-editor-row" key={recordId(unit) || index}><select value={unit.unit_type} onChange={(event) => updateUnit(index, "unit_type", event.target.value)}><option value="">Unit type</option>{optionList("unitTypes").map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select><select value={unit.unit} onChange={(event) => updateUnit(index, "unit", event.target.value)}><option value="">Unit</option>{optionList("units").map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select><input type="number" min="0" step="0.01" placeholder="Price" value={unit.price} onChange={(event) => updateUnit(index, "price", event.target.value)} /><input type="number" min="0" step="1" placeholder="Stock" value={unit.stock} onChange={(event) => updateUnit(index, "stock", event.target.value)} /><button type="button" className="table-icon danger" onClick={() => removeUnit(index)}><FiTrash2 /></button></div>)}</div>}{error && <p className="admin-form-error">{error}</p>}<div className="admin-modal-actions"><button type="button" className="admin-button secondary" onClick={onClose}>Cancel</button><button className="admin-button primary" disabled={saving}>{saving ? "Saving…" : "Save variant"}</button></div></>}</form></Modal>;
+}
+
+function rowsFromPayload(payload) { return Array.isArray(payload) ? payload : payload?.results || payload?.items || payload?.data || []; }
+function rowsForOptions(payload) { return rowsFromPayload(payload).map((row) => ({ value: row.id ?? row.pk, label: row.name || row.title || row.email || row.code || `#${row.id ?? row.pk}` })); }
+
+function OrderDetail({ id }) {
+    const navigate = useNavigate();
+    const [order, setOrder] = useState(null);
+    const [loading, setLoading] = useState(true);
+    useEffect(() => {
+        let active = true;
+        getResource("orders", id).then((response) => { if (active) setOrder(response.data); }).catch(() => { if (active) setOrder(null); }).finally(() => { if (active) setLoading(false); });
+        return () => { active = false; };
+    }, [id]);
+    if (loading) return <div className="admin-page"><LoadingState label="Loading order details..." /></div>;
+    if (!order) return <div className="admin-page"><button className="admin-back-link" onClick={() => navigate("/order-dashboard/orders")}>Back to orders</button><EmptyState title="Order not found" /></div>;
+    const items = order.items || order.order_items || [];
+    return <div className="admin-page"><button className="admin-back-link" onClick={() => navigate("/order-dashboard/orders")}>Back to orders</button><PageHeader eyebrow="ORDER DETAILS" title={order.order_number || order.order_id || `Order #${id}`} description={`Created ${date(order.created_at || order.date)}. Read-only order details.`} /><div className="admin-detail-grid"><DetailCard title="Customer" icon={<FiUsers />}><strong>{recordLabel(order.user) || order.customer_name || order.user_name || "Guest customer"}</strong><span>{order.customer_email || order.user_email || order.user?.email || "-"}</span></DetailCard><DetailCard title="Shipping address" icon={<FiTruck />}><span>{typeof order.shipping_address === "object" ? Object.values(order.shipping_address).filter(Boolean).join(", ") : order.shipping_address || "No address provided"}</span></DetailCard><DetailCard title="Status & payment" icon={<FiCreditCard />}><span>Order <StatusPill value={order.status} /></span><span>Payment <StatusPill value={order.payment_status} /></span></DetailCard></div><div className="admin-panel order-items-panel"><div className="admin-panel-heading"><div><h3>Order items</h3><p>Quantity, price, and product details</p></div><FiBox /></div>{items.length ? <div className="order-item-list">{items.map((item, index) => <div className="order-item" key={item.id || index}><div className="order-item-image">{item.product_image || item.image ? <img src={item.product_image || item.image} alt="" /> : <FiBox />}</div><div><strong>{recordLabel(item.product) || item.product_name || item.name || "Product"}</strong><span>Qty {item.quantity || 1}{item.color ? ` · ${recordLabel(item.color)}` : ""}{item.size || item.unit ? ` · ${recordLabel(item.size || item.unit)}` : ""}</span></div><strong>{money((item.price || 0) * (item.quantity || 1))}</strong></div>)}</div> : <EmptyState title="No order items" />}<div className="order-total"><span>Subtotal <strong>{money(order.subtotal || order.total_amount)}</strong></span><span>Discount <strong>- {money(order.discount)}</strong></span><span>Shipping <strong>{money(order.shipping_charge || order.shipping_fee)}</strong></span><span className="total"><b>Total</b><strong>{money(order.total_amount)}</strong></span></div></div></div>;
+}
+
+/* function LegacyOrderDetail({ id }) {
+    const navigate = useNavigate();
+    const [order, setOrder] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
+    const [status, setStatus] = useState("");
+    const [paymentStatus, setPaymentStatus] = useState("");
+    const [edit, setEdit] = useState(false);
+    const [confirmEdit, setConfirmEdit] = useState(false);
+    useEffect(() => { getResource("orders", id).then((response) => { setOrder(response.data); setStatus(response.data.status || ""); setPaymentStatus(response.data.payment_status || ""); }).catch(() => toast.error("Could not load order details")).finally(() => setLoading(false)); }, [id]);
+    if (loading) return <div className="admin-page"><LoadingState label="Loading order details…" /></div>;
+    if (!order) return <div className="admin-page"><EmptyState title="Order not found" /></div>;
+    const items = order.items || order.order_items || [];
+    const save = async () => { setSaving(true); try { await updateResource("orders", id, { status, payment_status: paymentStatus }); toast.success("Order updated"); setEdit(false); const response = await getResource("orders", id); setOrder(response.data); } catch (error) { toast.error(getErrorMessage(error, "Could not update order")); } finally { setSaving(false); } };
+    return <div className="admin-page"><button className="admin-back-link" onClick={() => navigate("/order-dashboard/orders")}>← Back to orders</button><PageHeader eyebrow="ORDER DETAILS" title={order.order_number || order.order_id || `Order #${id}`} description={`Created ${date(order.created_at || order.date)}`} action={<button className="admin-button primary" onClick={() => setConfirmEdit(true)}><FiEdit3 /> Edit order</button>} /><div className="admin-detail-grid"><DetailCard title="Customer" icon={<FiUsers />}><strong>{recordLabel(order.user) || order.customer_name || order.user_name || "Guest customer"}</strong><span>{order.customer_email || order.user_email || order.user?.email || "—"}</span></DetailCard><DetailCard title="Shipping address" icon={<FiTruck />}><span>{typeof order.shipping_address === "object" ? Object.values(order.shipping_address).filter(Boolean).join(", ") : order.shipping_address || "No address provided"}</span></DetailCard><DetailCard title="Status & payment" icon={<FiCreditCard />}><span>Order <StatusPill value={order.status} /></span><span>Payment <StatusPill value={order.payment_status} /></span></DetailCard></div><div className="admin-panel order-items-panel"><div className="admin-panel-heading"><div><h3>Order items</h3><p>Quantity, price, and product details</p></div><FiBox /></div>{items.length ? <div className="order-item-list">{items.map((item, index) => <div className="order-item" key={item.id || index}><div className="order-item-image">{item.product_image || item.image ? <img src={item.product_image || item.image} alt="" /> : <FiBox />}</div><div><strong>{recordLabel(item.product) || item.product_name || item.name || "Product"}</strong><span>Qty {item.quantity || 1}{item.color ? ` · ${recordLabel(item.color)}` : ""}{item.size || item.unit ? ` · ${recordLabel(item.size || item.unit)}` : ""}</span></div><strong>{money((item.price || 0) * (item.quantity || 1))}</strong></div>)}</div> : <EmptyState title="No order items" />}<div className="order-total"><span>Subtotal <strong>{money(order.subtotal || order.total_amount)}</strong></span><span>Discount <strong>- {money(order.discount)}</strong></span><span>Shipping <strong>{money(order.shipping_charge || order.shipping_fee)}</strong></span><span className="total"><b>Total</b><strong>{money(order.total_amount)}</strong></span></div></div>{confirmEdit && <ConfirmDialog title="Confirm order edit" message="Open this order for editing? Changes will be saved to the backend." onCancel={() => setConfirmEdit(false)} onConfirm={() => { setConfirmEdit(false); setEdit(true); }} />}{edit && <Modal onClose={() => setEdit(false)} title="Update order"><div className="admin-form"><label className="admin-form-field"><span>Order status</span><select value={status} onChange={(event) => setStatus(event.target.value)}>{["Pending", "Processing", "Shipped", "Delivered", "Cancelled"].map((option) => <option key={option}>{option}</option>)}</select></label><label className="admin-form-field"><span>Payment status</span><select value={paymentStatus} onChange={(event) => setPaymentStatus(event.target.value)}>{["Pending", "Paid", "Failed", "Refunded"].map((option) => <option key={option}>{option}</option>)}</select></label><div className="admin-modal-actions"><button className="admin-button secondary" onClick={() => setEdit(false)}>Cancel</button><button className="admin-button primary" onClick={save} disabled={saving}>{saving ? "Saving…" : "Save changes"}</button></div></div></Modal>}</div>;
+}
+*/
+
+function DetailCard({ title, icon, children }) { return <div className="admin-detail-card"><h3>{icon}{title}</h3><div>{children}</div></div>; }

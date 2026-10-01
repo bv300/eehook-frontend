@@ -259,7 +259,7 @@ function Product_card({
                                     firstVariant?.images?.find(
                                         img =>
                                             img.is_primary
-                                    )?.image;
+                                    )?.image || firstVariant?.images?.[0]?.image;
 
                                 const primaryImage =
                                     primaryImageRelative

@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { GoogleLogin } from "@react-oauth/google";
 import client from "../../../lib/ApiClient";
-import { isSuperAdminUser, saveAuthUser } from "../authUtils";
+import { isSuperAdminUser, saveAuthSession } from "../authUtils";
 import "./Login.css";
 
 function Login() {
@@ -37,13 +37,7 @@ function Login() {
         try {
 
             const response = await client.post("login/", formData);
-            const user = response.data.user || response.data;
-
-            localStorage.setItem("access", response.data.access);
-            localStorage.setItem("refresh", response.data.refresh);
-            console.log(localStorage.getItem("access"))
-            console.log(localStorage.getItem("refresh"))
-            saveAuthUser(user);
+            const user = saveAuthSession(response.data);
 
             if (isSuperAdminUser(user)) {
 
@@ -81,10 +75,7 @@ function Login() {
             });
             const user = response.data.user || response.data;
 
-            localStorage.setItem("access", response.data.access);
-            localStorage.setItem("refresh", response.data.refresh);
-
-            saveAuthUser(user);
+            saveAuthSession(response.data);
 
             if (isSuperAdminUser(user)) {
 

@@ -9,6 +9,7 @@ body{
   background: #F8F9F3;
   /* padding-top:80px; */
 }
+.admin-login-error{color:#c62828;background:#fff0f1;border:1px solid #efb8be;border-radius:8px;padding:10px;margin:12px 0;font-size:13px;}
 
 .login-container{
   width:100%;
@@ -17,7 +18,7 @@ body{
   justify-content:center;
   align-items:center;
   padding: 91px 20px;
-  background:linear-gradient(135deg,#FFF9FA,#FDF2F5);
+  background:linear-gradient(135deg,var(--background,#F8F9F3),var(--primary-orange-light,#FFF3E0));
 }
 
 .login-wrapper{
@@ -30,10 +31,12 @@ body{
 .login-box{
   width:100%;
   max-width:450px;
-  background: #F8F9F3;
-  border-radius:20px;
+  background: var(--surface-card,#FFFFFF);
+  border:1px solid var(--border-light,#EEEFE9);
+  border-top:4px solid var(--primary-orange,#FF9000);
+  border-radius:14px;
   padding:40px;
-  box-shadow:0 15px 45px rgba(0,0,0,.08);
+  box-shadow:0 15px 45px rgba(75,99,109,.12);
 }
 
 .auth-header{
@@ -43,7 +46,7 @@ body{
 
 .auth-header h1{
   font-size:32px;
-  color:#B11F4D;
+  color:var(--primary-orange,#FF9000);
   margin-bottom:10px;
   font-weight:700;
 }
@@ -78,8 +81,8 @@ body{
 }
 
 .input-group input:focus{
-  border-color:#B11F4D;
-  box-shadow:0 0 0 3px rgba(177,31,77,.15);
+  border-color:var(--primary-orange,#FF9000);
+  box-shadow:0 0 0 3px rgba(255,144,0,.16);
 }
 
 .password-group{
@@ -108,7 +111,7 @@ body{
 
 .forgot-link a{
   text-decoration:none;
-  color:#B11F4D;
+  color:var(--primary-orange,#FF9000);
   font-size:14px;
   font-weight:600;
 }
@@ -122,7 +125,7 @@ body{
   height:52px;
   border:none;
   border-radius:10px;
-  background:#B11F4D;
+  background:var(--primary-orange,#FF9000);
   color: #FFFFFF;
   font-size:16px;
   font-weight:600;
@@ -131,7 +134,7 @@ body{
 }
 
 .login-btn:hover{
-  background:#95163F;
+  background:var(--primary-orange-hover,#D97F00);
 }
 
 .login-btn:disabled{
@@ -200,12 +203,13 @@ body{
 }
 
 .signup-link a{
-  color:#B11F4D;
+  color:#FF9000 !important;
   font-weight:600;
   text-decoration:none;
 }
 
 .signup-link a:hover{
+  color:#D97700 !important;
   text-decoration:underline;
 }
 

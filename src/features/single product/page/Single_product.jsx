@@ -7,7 +7,6 @@ import {
     useNavigate
 } from "react-router-dom";
 import { AiOutlineDoubleRight, AiOutlineEye, AiOutlineCheckCircle, AiOutlineLock, AiOutlineLeft, AiOutlineRight } from "react-icons/ai";
-import { BsBoxSeam } from "react-icons/bs";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
 import GetSingle_product_Query from "../queries/GetSingle_product_Query";
 import Cart_query from "../../cart/queries/Cart_query";
@@ -20,6 +19,7 @@ import {
 } from "../../wishlist/api/Wishlisht_Api";
 import showToast from "../../../utils/toast";
 import { getImageUrl } from "../../../utils/imageUrl";
+import defaultImage from "../../../assets/image_not_available.png";
 
 function Single_product() {
 
@@ -156,11 +156,7 @@ function Single_product() {
                     size ? (size.unit || size.size) : null
                 );
 
-                const image =
-                    variant.images.find(
-                        img => img.is_primary
-                    ) ||
-                    variant.images[0];
+                const image = variant.images.find(img => img.is_primary) || variant.images[0];
 
                 setActiveImage(
                     image?.image
@@ -182,11 +178,7 @@ function Single_product() {
             null
         );
 
-        const image =
-            firstVariant.images.find(
-                img => img.is_primary
-            ) ||
-            firstVariant.images[0];
+        const image = firstVariant.images.find(img => img.is_primary) || firstVariant.images[0];
 
         setActiveImage(
             image?.image || null
@@ -314,18 +306,12 @@ function Single_product() {
             return;
         }
 
-        if (selectedVariant?.price_type === 'multiple') {
-            if (!selectedSizeVariant || !selectedSize) {
-                showToast.warning("Please select a size/unit");
-                return;
-            }
-        }
-
         try {
+            const wishlistVariantSize = selectedVariant?.price_type === 'multiple' ? selectedSizeVariant?.id ?? null : null;
             const wishlistItem = wishdata.find(
                 item =>
                     item.variant === selectedVariant.id &&
-                    (selectedVariant?.price_type === 'single' || item.variant_size === selectedSizeVariant?.id)
+                    (item.variant_size ?? null) === wishlistVariantSize
             );
 
             if (wishlistItem) {
@@ -341,7 +327,7 @@ function Single_product() {
 
             await Wishlist_post({
                 variant: selectedVariant.id,
-                variant_size: selectedVariant?.price_type === 'single' ? null : selectedSizeVariant?.id
+                variant_size: wishlistVariantSize
             });
 
             await refetchWishlist();
@@ -396,9 +382,9 @@ function Single_product() {
                                 src={
                                     activeImage
                                         ? getImageUrl(activeImage)
-                                        : getImageUrl(selectedVariant?.images?.find(
-                                            img => img.is_primary
-                                        )?.image)
+                                        : (selectedVariant?.images?.find(img => img.is_primary)?.image || selectedVariant?.images?.[0]?.image)
+                                            ? getImageUrl(selectedVariant.images.find(img => img.is_primary)?.image || selectedVariant.images[0].image)
+                                            : defaultImage
                                 }
                                 alt={data.name}
                             />
@@ -442,7 +428,7 @@ function Single_product() {
                 <div className="info-section">
                     <h1>{data.name}</h1>
 
-                    <div className="option-block color-selection-block">
+                    {colors.length > 0 && <div className="option-block color-selection-block">
                         <h4>Color: <span className="selected-option-label" style={{ fontWeight: 'bold', color: '#111' }}>{selectedColor?.name || "Select color"}</span></h4>
                         <div className="colors image-colors">
                             {colors.map((color) => {
@@ -467,7 +453,7 @@ function Single_product() {
                                 );
                             })}
                         </div>
-                    </div>
+                    </div>}
 
                     {selectedVariant?.price_type === 'multiple' && availableSizes?.some(item => item.unit || item.size) && (
                         <div className="option-block">
@@ -587,23 +573,6 @@ function Single_product() {
                 {/* RIGHT: PURCHASE PANEL */}
                 <div className="purchase-panel eehook-purchase-panel">
 
-                    {data.emi_available && (
-                        <div className="emi-block-right">
-                            <div className="emi-icon-wrapper">
-                                <BsBoxSeam size={20} color="#c47a16" />
-                            </div>
-                            <div className="emi-details-wrapper">
-                                <div className="emi-top-row">
-                                    <span style={{ fontWeight: 600, color: '#111' }}>Easy Payment Plans</span>
-                                    <a href="#" className="details-link">Details &gt;</a>
-                                </div>
-                                <div style={{ fontSize: '12px', color: '#555', marginTop: '4px' }}>
-                                    Starting from AED {data.emi_starting_price}/month
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
                     <div className="delivery-time-section">
                         <div className="shipping-fee">+ AED {data.shipping_fee || "13.00"} Shipping</div>
                         <div className="delivery-date">Delivery <strong>{data.estimated_delivery_time || "09 Sep - 10 Sep"}</strong></div>
@@ -637,14 +606,16 @@ function Single_product() {
                         Sold by <a href="#">{data.seller_name || "ALAREESH MPT"}</a>
                     </div>
 
-                    <hr className="divider" />
-
-                    <div className="warranty-section">
-                        <AiOutlineCheckCircle size={20} color="#555" />
-                        <span>{data.warranty_info || "One Year Warranty"}</span>
-                    </div>
-
-                    <hr className="divider" />
+                    {data.warranty_info && (
+                        <>
+                            <hr className="divider" />
+                            <div className="warranty-section">
+                                <AiOutlineCheckCircle size={20} color="#555" />
+                                <span>{data.warranty_info}</span>
+                            </div>
+                            <hr className="divider" />
+                        </>
+                    )}
 
                     <div className="secure-transaction">
                         <AiOutlineLock size={20} color="#555" />
@@ -668,31 +639,20 @@ function Single_product() {
             )}
 
             {isImageModalOpen && (
-                <div className="image-popup-modal" style={{
-                    position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', 
-                    backgroundColor: 'rgba(0,0,0,0.85)', zIndex: 9999, 
-                    display: 'flex', justifyContent: 'center', alignItems: 'center'
-                }} onClick={() => setIsImageModalOpen(false)}>
-                    <button onClick={(e) => { e.stopPropagation(); setIsImageModalOpen(false); }} style={{
-                        position: 'absolute', top: '20px', right: '30px', background: 'none', border: 'none',
-                        color: 'white', fontSize: '40px', cursor: 'pointer', zIndex: 10000
-                    }}>&times;</button>
+                <div className="image-popup-modal" role="dialog" aria-modal="true">
+                    <button type="button" className="image-popup-close" onClick={() => setIsImageModalOpen(false)} aria-label="Close image preview">&times;</button>
+                    <div className="image-popup-stage">
                     
                     {displayImages.length > 1 && (
-                        <button onClick={(e) => { e.stopPropagation(); setModalImageIndex((prev) => (prev > 0 ? prev - 1 : displayImages.length - 1)); }} style={{
-                            position: 'absolute', left: '30px', background: 'none', border: 'none',
-                            color: 'white', fontSize: '60px', cursor: 'pointer', zIndex: 10000
-                        }}>&#10094;</button>
+                        <button type="button" className="image-popup-arrow image-popup-arrow-left" onClick={() => setModalImageIndex((prev) => (prev > 0 ? prev - 1 : displayImages.length - 1))} aria-label="Previous image">&#10094;</button>
                     )}
 
-                    <img onClick={(e) => e.stopPropagation()} src={getImageUrl(displayImages[modalImageIndex]?.image)} style={{ maxWidth: '90%', maxHeight: '90%', objectFit: 'contain' }} alt="Popup" />
+                    <img src={getImageUrl(displayImages[modalImageIndex]?.image)} alt="Product preview" />
 
                     {displayImages.length > 1 && (
-                        <button onClick={(e) => { e.stopPropagation(); setModalImageIndex((prev) => (prev < displayImages.length - 1 ? prev + 1 : 0)); }} style={{
-                            position: 'absolute', right: '30px', background: 'none', border: 'none',
-                            color: 'white', fontSize: '60px', cursor: 'pointer', zIndex: 10000
-                        }}>&#10095;</button>
+                        <button type="button" className="image-popup-arrow image-popup-arrow-right" onClick={() => setModalImageIndex((prev) => (prev < displayImages.length - 1 ? prev + 1 : 0))} aria-label="Next image">&#10095;</button>
                     )}
+                    </div>
                 </div>
             )}
 

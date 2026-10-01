@@ -3,12 +3,15 @@ import { isSuperAdminUser } from "../../auth/authUtils";
 
 export default function AdminRoute({ children }) {
     const location = useLocation();
-    const token = localStorage.getItem("access");
+    const token = localStorage.getItem("access_token") || localStorage.getItem("access");
+    let adminUser = {};
+    try { adminUser = JSON.parse(localStorage.getItem("admin_user") || "{}"); } catch { adminUser = {}; }
     const isSuperAdmin = isSuperAdminUser({
-        is_superuser: localStorage.getItem("is_superuser"),
-        role: localStorage.getItem("role"),
+        ...adminUser,
+        is_superuser: adminUser.is_superuser ?? localStorage.getItem("is_superuser"),
+        role: adminUser.role || localStorage.getItem("role"),
     });
-    if (!token) return <Navigate to="/login" state={{ from: location }} replace />;
+    if (!token) return <Navigate to="/admin-login" state={{ from: location }} replace />;
     if (!isSuperAdmin) return <Navigate to="/unauthorized" replace />;
     return children;
 }

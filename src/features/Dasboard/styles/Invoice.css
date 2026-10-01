@@ -52,6 +52,54 @@
     background:#4B636D;
 }
 
+/* Keep invoice navigation aligned with the Order Dashboard action system. */
+.invoice-page .invoice-back-btn,
+.invoice-page .invoice-print-btn {
+    min-height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 15px;
+    border: 1px solid #dce6e1;
+    border-radius: 10px;
+    font: 750 13px/1.2 Inter, ui-sans-serif, system-ui, sans-serif;
+    transition: background-color .18s ease, border-color .18s ease, color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+
+.invoice-page .invoice-back-btn {
+    background: #fff;
+    color: #293d45;
+}
+
+.invoice-page .invoice-back-btn:hover {
+    background: #fff8ed;
+    border-color: #f0c27b;
+    color: #a85f08;
+    box-shadow: 0 5px 12px rgba(40, 62, 66, .08);
+    transform: translateY(-1px);
+}
+
+.invoice-page .invoice-print-btn {
+    border-color: #f28a13;
+    background: #f28a13;
+    color: #fff;
+    box-shadow: 0 7px 15px rgba(242, 138, 19, .18);
+}
+
+.invoice-page .invoice-print-btn:hover {
+    border-color: #d97805;
+    background: #d97805;
+    box-shadow: 0 9px 18px rgba(217, 120, 5, .2);
+    transform: translateY(-1px);
+}
+
+.invoice-page .invoice-back-btn:focus-visible,
+.invoice-page .invoice-print-btn:focus-visible {
+    outline: 3px solid rgba(255, 144, 0, .28);
+    outline-offset: 2px;
+}
+
 .invoice-page .invoice-container{
     background: #F8F9F3;
     border:1px solid #e8e8e8;

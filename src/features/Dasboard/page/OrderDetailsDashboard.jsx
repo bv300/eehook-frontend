@@ -1,15 +1,16 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { toast } from "sonner";
-import { FiArrowLeft, FiBox, FiEdit3, FiMapPin, FiPackage, FiUser } from "react-icons/fi";
+import { FiArrowLeft, FiBox, FiMapPin, FiPackage, FiUser } from "react-icons/fi";
 import client from "../../../lib/ApiClient";
 import "../styles/Dashboard.css";
+import "../styles/LogoutTheme.css";
 
 const money = (value) => `AED ${Number(value || 0).toLocaleString("en-AE", { minimumFractionDigits: 2 })}`;
 const date = (value) => value ? new Date(value).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" }) : "—";
 
 export default function OrderDetailsDashboard() {
-    const { id } = useParams(); const navigate = useNavigate(); const [order, setOrder] = useState(null); const [loading, setLoading] = useState(true); const [error, setError] = useState("");
+    const { id } = useParams(); const [order, setOrder] = useState(null); const [loading, setLoading] = useState(true); const [error, setError] = useState("");
     useEffect(() => { client.get(`/orders/${id}/`).then((response) => setOrder(response.data)).catch((requestError) => setError(requestError.response?.status === 403 ? "Super Admin access required" : "We could not load this order.")).finally(() => setLoading(false)); }, [id]);
     if (loading) return <section className="detail-page"><div className="skeleton-table"><div className="skeleton-row" /><div className="skeleton-row" /><div className="skeleton-row" /></div></section>;
     if (error || !order) return <section className="detail-page"><Link className="back-link" to="/order-dashboard/orders"><FiArrowLeft /> Back to orders</Link><div className="inline-error">{error || "Order not found"}</div></section>;
