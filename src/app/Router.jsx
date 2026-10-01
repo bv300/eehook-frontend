@@ -1,5 +1,5 @@
 import React from 'react'
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import Home from '../features/home/Home'
 import Sale from '../features/sale/page/Sale'
 import Single_product from '../features/single product/page/Single_product'
@@ -24,6 +24,8 @@ import Checkout from '../features/cart/page/CheckOut'
 import OrderDetails from '../features/Dasboard/page/AdminOrderDetails'
 import Invoice from '../features/Dasboard/page/InvoicePrint'
 import ProtectedRoute from '../features/auth/page/ProtectedRoute'
+import Unauthorized from '../features/auth/page/Unauthorized'
+import OrderDetailsDashboard from '../features/Dasboard/page/OrderDetailsDashboard'
 function Router() {
     return (
         <div>
@@ -66,16 +68,20 @@ function Router() {
                 } />
 
                 <Route path='login' element={<Login />} />
+                <Route path='unauthorized' element={<Unauthorized />} />
                 <Route path='signup' element={<Signup />} />
                 <Route path='forgot-password' element={<ForgotPassword />} />
                 <Route path="/reset-password/:uidb64/:token" element={<ResetPassword />} />
 
 
-                <Route path="OrderDashboard" element={
+                <Route path="order-dashboard" element={
                     <AdminRoute>
                         <OrderDashboard />
                     </AdminRoute>
                 } />
+                <Route path="OrderDashboard" element={<Navigate to="/order-dashboard" replace />} />
+                <Route path="order-dashboard/orders" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
+                <Route path="order-dashboard/orders/:id" element={<AdminRoute><OrderDetailsDashboard /></AdminRoute>} />
                 <Route
                     path="/orderDashboard/details/:id"
                     element={

@@ -566,20 +566,18 @@ function Single_product() {
                     )}
 
                     {data?.promotional_banner_image && (
-                        <div style={{ display: 'flex', justifyContent: 'center', margin: '20px 0' }}>
+                        <div className="product-description-banner">
                             {data?.promotional_banner_link ? (
                                 <a href={data.promotional_banner_link} target="_blank" rel="noopener noreferrer" style={{ display: 'block' }}>
                                     <img 
                                         src={getImageUrl(data.promotional_banner_image)} 
                                         alt="Promotion" 
-                                        style={{ width: '100%', maxWidth: '500px', height: 'auto', borderRadius: '8px', objectFit: 'contain' }} 
                                     />
                                 </a>
                             ) : (
                                 <img 
                                     src={getImageUrl(data.promotional_banner_image)} 
                                     alt="Promotion" 
-                                    style={{ width: '100%', maxWidth: '500px', height: 'auto', borderRadius: '8px', objectFit: 'contain' }} 
                                 />
                             )}
                         </div>
@@ -658,13 +656,13 @@ function Single_product() {
 
             {/* PROMOTIONAL BANNER AT BOTTOM */}
             {data.promotional_banner_url && (
-                <div className="promotional-banner" style={{ marginTop: "40px", width: "100%", borderRadius: "12px", overflow: "hidden", boxShadow: "0 4px 12px rgba(0,0,0,0.05)" }}>
+                <div className="promotional-banner">
                     {data.promotional_banner_link ? (
-                        <a href={data.promotional_banner_link} target="_blank" rel="noopener noreferrer">
-                            <img src={data.promotional_banner_url} alt="Promotion" style={{ width: '100%', display: 'block', objectFit: 'cover' }} />
+                        <a className="promotional-banner-link" href={data.promotional_banner_link} target="_blank" rel="noopener noreferrer">
+                            <img src={data.promotional_banner_url} alt="Promotion" />
                         </a>
                     ) : (
-                        <img src={data.promotional_banner_url} alt="Promotion" style={{ width: '100%', display: 'block', objectFit: 'cover' }} />
+                        <img src={data.promotional_banner_url} alt="Promotion" />
                     )}
                 </div>
             )}

@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { GoogleLogin } from "@react-oauth/google";
 import client from "../../../lib/ApiClient";
+import { isSuperAdminUser, saveAuthUser } from "../authUtils";
 import "./SignUp.css";
 
 function Signup() {
@@ -76,14 +77,13 @@ function Signup() {
             const response = await client.post("google-login/", {
                 token: credentialResponse.credential
             });
+            const user = response.data.user || response.data;
 
             localStorage.setItem("access", response.data.access);
             localStorage.setItem("refresh", response.data.refresh);
-            localStorage.setItem("email", response.data.user.email);
-            localStorage.setItem("first_name", response.data.user.first_name);
-            localStorage.setItem("is_staff", response.data.user.is_staff);
+            saveAuthUser(user);
 
-            if (response.data.user.is_staff) {
+            if (isSuperAdminUser(user)) {
 
                 navigate("/OrderDashboard");
 

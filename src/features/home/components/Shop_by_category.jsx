@@ -44,6 +44,11 @@ function Shop_by_category() {
         right: true
     });
 
+    const { data: rawOffers, isLoading: offersLoading } = Offer_Query();
+    const offerAvailable = Array.isArray(rawOffers)
+        ? rawOffers.length > 0
+        : Boolean(rawOffers);
+
     const checkCategoryScroll = () => {
 
         const container = categorySliderRef.current;
@@ -119,14 +124,6 @@ function Shop_by_category() {
     };
 
 
-    // const { data: offers = [] } = Offer_Query();
-    // const offerActive = offers?.[0]?.is_active ?? false;
-
-    const { data: rawOfferAvail } = Offer_Query()
-    const offerAvail = Array.isArray(rawOfferAvail) ? rawOfferAvail : []
-
-    const offerAvailable = offerAvail.length >= 1;
-
     const offerCard = {
         id: "offer-id",
         name: "OFFERS",
@@ -140,7 +137,7 @@ function Shop_by_category() {
         (category) => category.subcategories?.length > 0
     );
 
-    const categoryItems = offerAvailable ? [offerCard, ...filteredCategories] : filteredCategories;
+    const categoryItems = [offerCard, ...filteredCategories];
 
 
 
@@ -225,6 +222,10 @@ function Shop_by_category() {
         }, 100);
 
     };
+
+    if (offersLoading || !offerAvailable) {
+        return null;
+    }
 
     if (isLoading) {
         return (

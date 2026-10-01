@@ -33,15 +33,18 @@ function Footer() {
 
                     <div className="footer-column brand">
                         <img src={footerlogo} alt="Logo" className="footer-logo" />
+                    </div>
 
-                        <p>
-                            Your ultimate destination for<br />
-                            Electronics, Lifestyle & more.
-                        </p>
+                    <div className="footer-column social-column">
+                        <h3>Follow Us</h3>
 
                         <div className="social-icons">
-                            <a href="#"> <FaInstagram /> </a>
-                            <a href="#"><FaFacebookF /></a>
+                            <a href="https://www.instagram.com/eehookuae/" target="_blank" rel="noreferrer" aria-label="eehook UAE on Instagram">
+                                <FaInstagram />
+                            </a>
+                            <a href="https://www.facebook.com/eehookuae/" target="_blank" rel="noreferrer" aria-label="eehook UAE on Facebook">
+                                <FaFacebookF />
+                            </a>
                         </div>
                     </div>
 

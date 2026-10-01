@@ -10,7 +10,8 @@ function App() {
 
     const location = useLocation();
 
-    const isAdminPage = location.pathname.startsWith("/orderDashboard");
+    const normalizedPath = location.pathname.toLowerCase();
+    const isAdminPage = normalizedPath.startsWith("/orderdashboard") || normalizedPath.startsWith("/order-dashboard");
 
     return (
         <>

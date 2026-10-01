@@ -1,19 +1,14 @@
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
+import { isSuperAdminUser } from "../../auth/authUtils";
 
-function AdminRoute({ children }) {
-
+export default function AdminRoute({ children }) {
+    const location = useLocation();
     const token = localStorage.getItem("access");
-    const isStaff = localStorage.getItem("is_staff");
-
-    if (!token) {
-        return <Navigate to="/login" replace />;
-    }
-
-    if (isStaff !== "true") {
-        return <Navigate to="/" replace />;
-    }
-
+    const isSuperAdmin = isSuperAdminUser({
+        is_superuser: localStorage.getItem("is_superuser"),
+        role: localStorage.getItem("role"),
+    });
+    if (!token) return <Navigate to="/login" state={{ from: location }} replace />;
+    if (!isSuperAdmin) return <Navigate to="/unauthorized" replace />;
     return children;
 }
-
-export default AdminRoute;
