@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { GoogleLogin } from "@react-oauth/google";
-import client from "../../../lib/ApiClient";
+import client, { getRetryAfterSeconds } from "../../../lib/ApiClient";
 import { isSuperAdminUser, saveAuthSession } from "../authUtils";
 import "./Login.css";
 
@@ -17,7 +17,17 @@ function Login() {
 
     const [loading, setLoading] = useState(false);
 
+    const [errorMessage, setErrorMessage] = useState("");
+
+    const [retryAfter, setRetryAfter] = useState(0);
+
     const [showPassword, setShowPassword] = useState(false);
+
+    useEffect(() => {
+        if (retryAfter <= 0) return undefined;
+        const timer = window.setInterval(() => setRetryAfter((seconds) => Math.max(0, seconds - 1)), 1000);
+        return () => window.clearInterval(timer);
+    }, [retryAfter]);
 
     const handleChange = (e) => {
 
@@ -33,6 +43,7 @@ function Login() {
         e.preventDefault();
 
         setLoading(true);
+        setErrorMessage("");
 
         try {
 
@@ -51,12 +62,13 @@ function Login() {
             }
 
         } catch (error) {
-
-            alert(
-                error.response?.data?.detail ||
-                error.response?.data?.error ||
-                "Invalid Email or Password"
-            );
+            if (error.response?.status === 429) {
+                const seconds = getRetryAfterSeconds(error);
+                setRetryAfter(seconds);
+                setErrorMessage(`Too many attempts. Try again after ${seconds} seconds.`);
+            } else {
+                setErrorMessage("Invalid email or password.");
+            }
 
         } finally {
 
@@ -88,11 +100,13 @@ function Login() {
             }
 
         } catch (error) {
-
-            alert(
-                error.response?.data?.error ||
-                "Google Login Failed"
-            );
+            if (error.response?.status === 429) {
+                const seconds = getRetryAfterSeconds(error);
+                setRetryAfter(seconds);
+                setErrorMessage(`Too many attempts. Try again after ${seconds} seconds.`);
+            } else {
+                setErrorMessage("Google login failed.");
+            }
 
         }
 
@@ -117,6 +131,8 @@ function Login() {
                         <h1>Welcome Back</h1>
 
                         <p>Login to your eehook account to continue shopping.</p>
+
+                        {errorMessage && <p className="admin-login-error" role="alert">{errorMessage}</p>}
 
                     </div>
 
@@ -189,10 +205,10 @@ function Login() {
                         <button
                             type="submit"
                             className="login-btn"
-                            disabled={loading}
+                            disabled={loading || retryAfter > 0}
                         >
 
-                            {loading ? "Signing In..." : "Login"}
+                            {loading ? "Signing In..." : retryAfter > 0 ? `Try again in ${retryAfter}s` : "Login"}
 
                         </button>
 

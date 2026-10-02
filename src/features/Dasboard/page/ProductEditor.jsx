@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
-import { FiChevronDown, FiEdit3, FiImage, FiLoader, FiPlus, FiSave, FiTrash2, FiX } from "react-icons/fi";
+import { FiChevronDown, FiImage, FiPlus, FiSave, FiTrash2, FiX } from "react-icons/fi";
 import { ConfirmDialog, EmptyState, LoadingState, StatusPill } from "../components/AdminPrimitives";
 import { createResource, deleteResource, getErrorMessage, getResource, listResource, updateResource } from "../services/adminApi";
 import "../styles/ProductEditor.css";
@@ -26,7 +26,7 @@ export default function ProductEditor({ readOnly = false }) {
     const [error, setError] = useState("");
     const [fieldErrors, setFieldErrors] = useState({});
     const [deleteTarget, setDeleteTarget] = useState(null);
-    const initialSnapshot = useRef("");
+    const [initialSnapshot, setInitialSnapshot] = useState(() => editing ? "" : JSON.stringify({ product: emptyProduct, variants: [] }));
     const [openSections, setOpenSections] = useState({ information: true, category: true, offer: true, sales: true, promotional: true, status: true, variants: true });
 
     useEffect(() => {
@@ -39,7 +39,8 @@ export default function ProductEditor({ readOnly = false }) {
         getResource("products", id).then(async (productResponse) => {
             if (!active) return;
             const productData = productResponse.data;
-            setProduct(normalizeProduct(productData));
+            const normalizedProduct = normalizeProduct(productData);
+            setProduct(normalizedProduct);
             setProductType(productData.product_type || (productData.has_variants ? "multiple" : "single"));
             const variantResponse = await listResource("product-variants", { product: id, page_size: 500 });
             const variantRows = rows(variantResponse.data);
@@ -50,15 +51,17 @@ export default function ProductEditor({ readOnly = false }) {
                 ]);
                 return { ...variant, product: valueOf(variant.product) || id, color: valueOf(variant.color), price_type: variant.price_type || "single", price: variant.price ?? "", stock: variant.stock ?? "", units: rows(unitResponse.data).map(normalizeUnit), images: rows(imageResponse.data).map((image) => ({ ...image, file: null })), deletedUnits: [], deletedImages: [] };
             }));
-            if (active) setVariants(loaded);
+            if (active) {
+                setVariants(loaded);
+                setInitialSnapshot(JSON.stringify({ product: normalizedProduct, variants: loaded }));
+            }
         }).catch((requestError) => { if (active) setError(getErrorMessage(requestError, "Could not load product.")); }).finally(() => { if (active) setLoading(false); });
         return () => { active = false; };
     }, [editing, id]);
 
     const filteredSubcategories = useMemo(() => dropdowns.subcategories.filter((item) => !product.category || String(item.category) === String(product.category)), [dropdowns.subcategories, product.category]);
     const currentSnapshot = JSON.stringify({ product, variants });
-    const hasUnsavedChanges = Boolean(initialSnapshot.current && initialSnapshot.current !== currentSnapshot);
-    useEffect(() => { if (!loading && !initialSnapshot.current) initialSnapshot.current = currentSnapshot; }, [loading, currentSnapshot]);
+    const hasUnsavedChanges = Boolean(initialSnapshot && initialSnapshot !== currentSnapshot);
     useEffect(() => { const warn = (event) => { if (!hasUnsavedChanges) return; event.preventDefault(); event.returnValue = ""; }; window.addEventListener("beforeunload", warn); return () => window.removeEventListener("beforeunload", warn); }, [hasUnsavedChanges]);
     const leaveEditor = () => { if (!hasUnsavedChanges || window.confirm("You have unsaved changes. Leave without saving?")) navigate("/order-dashboard/products"); };
     const updateProduct = (name, value) => setProduct((current) => ({ ...current, [name]: value }));
@@ -131,6 +134,10 @@ export default function ProductEditor({ readOnly = false }) {
 function normalizeProduct(data) { return { ...emptyProduct, ...data, category: valueOf(data.category), subcategory: valueOf(data.subcategory), offer: valueOf(data.offer), key_features: Array.isArray(data.key_features) ? data.key_features.join("\n") : data.key_features || "", promotional_banner_image: data.promotional_banner_image || null }; }
 function makeProductPayload(product) {
     const productFields = { ...product };
+    // These are UI-only controls. The backend stores variants separately and
+    // rejects unknown Product model fields during create/update.
+    delete productFields.product_type;
+    delete productFields.has_variants;
     delete productFields.emi_available;
     delete productFields.emi_starting_price;
     const values = { ...productFields, key_features: Array.isArray(product.key_features) ? product.key_features.join("\n") : String(product.key_features || ""), category: product.category || null, subcategory: product.subcategory || null, offer: product.offer || null, shipping_fee: product.shipping_fee === "" ? 0 : Number(product.shipping_fee), current_viewers_count: product.current_viewers_count === "" ? 0 : Number(product.current_viewers_count), emi_available: false, emi_starting_price: null };

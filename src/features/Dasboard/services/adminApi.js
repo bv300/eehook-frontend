@@ -20,6 +20,11 @@ export const updateResource = (resource, id, data) =>
 export const deleteResource = (resource, id) =>
     client.delete(resourceUrl(resource, id));
 
+// Detail/edit pages use the dedicated endpoint because generic admin CRUD
+// responses contain model fields only, not customer/address/line-item data.
+export const getOrderDetails = (id) => client.get(`/orders/${id}/`);
+export const updateOrderDetails = (id, data) => client.patch(`/orders/${id}/`, data);
+
 export const unwrapList = (payload) => {
     if (Array.isArray(payload)) return { rows: payload, count: payload.length };
     const rows = payload?.results || payload?.items || payload?.data || [];

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { FiAlertCircle, FiChevronLeft, FiChevronRight, FiLoader, FiSearch, FiX } from "react-icons/fi";
+import { getImageUrl } from "../../../utils/imageUrl";
 
 export function Skeleton({ className = "" }) {
     return <span className={`admin-skeleton ${className}`} aria-hidden="true" />;
@@ -103,7 +104,7 @@ export function FormField({ field, value, onChange, options = [], error, readOnl
     const isPassword = name === "password" || type.includes("password");
     const isMultiple = Boolean(field.multiple || field.many || field.many_to_many || type.includes("manytomany"));
     const isTextArea = type === "text" || type === "textarea" || name.includes("description") || name.includes("features");
-    const preview = useMemo(() => value instanceof File ? URL.createObjectURL(value) : typeof value === "string" ? value : "", [value]);
+    const preview = useMemo(() => value instanceof File ? URL.createObjectURL(value) : typeof value === "string" ? getImageUrl(value) : "", [value]);
     useEffect(() => () => { if (value instanceof File && preview) URL.revokeObjectURL(preview); }, [preview, value]);
     const selectValue = isMultiple ? (Array.isArray(value) ? value.map((item) => typeof item === "object" ? item.id ?? item.value : item) : []) : (typeof value === "object" && value !== null ? value.id ?? value.value ?? "" : value ?? "");
     return <label className={`admin-form-field ${error ? "has-error" : ""}`}><span>{label}{field.required && <em> *</em>}</span>{isBoolean ? <input type="checkbox" checked={Boolean(value)} onChange={(event) => onChange(name, event.target.checked)} disabled={readOnly} /> : isFile ? <><input type="file" accept="image/*" onChange={(event) => onChange(name, event.target.files?.[0] || null)} disabled={readOnly} />{preview && <img className="admin-image-preview" src={preview} alt={`${label} preview`} />}</> : choices.length ? <select aria-label={label} multiple={isMultiple} value={selectValue} onChange={(event) => onChange(name, isMultiple ? Array.from(event.target.selectedOptions, (option) => option.value) : event.target.value)} disabled={readOnly}>{!isMultiple && <option value="">Select {label}</option>}{choices.map((choice) => { const option = Array.isArray(choice) ? { value: choice[0], label: choice[1] } : typeof choice === "object" ? choice : { value: choice, label: choice }; return <option key={String(option.value ?? option.id)} value={option.value ?? option.id}>{option.label ?? option.name ?? option.value}</option>; })}</select> : isTextArea ? <textarea aria-label={label} rows={name.includes("description") ? 4 : 3} value={value ?? ""} onChange={(event) => onChange(name, event.target.value)} readOnly={readOnly} /> : <input aria-label={label} type={isPassword ? "password" : isDate ? (type.includes("time") ? "datetime-local" : "date") : isNumber ? "number" : "text"} value={value ?? ""} min={field.min} max={field.max} step={field.step} onChange={(event) => onChange(name, event.target.value)} readOnly={readOnly} />}{error && <small className="field-error">{error}</small>}</label>;

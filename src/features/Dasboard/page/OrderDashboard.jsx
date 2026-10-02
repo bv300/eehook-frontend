@@ -6,7 +6,7 @@ import { ConfirmDialog, DataTable, DebouncedSearch, EmptyState, FilterBar, FormF
 import useAdminResource from "../hooks/useAdminResource";
 import OverviewGraphs from "../components/OverviewGraphs";
 import useFormErrors from "../hooks/useFormErrors";
-import { createResource, deleteResource, getErrorMessage, getFieldSchema, getResource, listResource, updateResource } from "../services/adminApi";
+import { createResource, deleteResource, getErrorMessage, getFieldSchema, getOrderDetails, getResource, listResource, updateOrderDetails, updateResource } from "../services/adminApi";
 import ProductView from "./ProductView";
 import ProductEditor from "./ProductEditor";
 import HeroBannerEditor from "./HeroBannerEditor";
@@ -16,6 +16,7 @@ import CouponEditor from "./CouponEditor";
 import CouponUsageEditor from "./CouponUsageEditor";
 import navbarLogo from "../../../assets/navbar-logo.png";
 import { getImageUrl } from "../../../utils/imageUrl";
+import { logoutSession } from "../../../lib/ApiClient";
 import "../styles/AdminDashboard.css";
 import "../styles/LogoutTheme.css";
 import "../styles/AdminPolish.css";
@@ -36,11 +37,11 @@ const resources = {
     carts: { label: "Carts", group: "Customers", fields: ["user", "variant", "variant_unit", "quantity", "coupon"], columns: ["user", "variant", "variant_unit", "quantity"] },
     addresses: { label: "Addresses", group: "Customers", fields: ["user", "full_name", "phone", "address_line", "city", "postal_code", "country", "is_default"], columns: ["user", "full_name", "phone", "city", "postal_code", "is_default"] },
     "user-profiles": { label: "User Profiles", group: "Customers", fields: ["user", "phone", "date_of_birth", "gender"], columns: ["user", "phone", "date_of_birth", "gender"] },
-    orders: { label: "Orders", group: "Orders", fields: ["user", "address", "subtotal", "discount_amount", "shipping_charge", "total_amount", "payment_status", "status", "created_at"], columns: ["user", "total_amount", "payment_status", "status", "created_at"] },
+    orders: { label: "Orders", group: "Orders", fields: ["user", "address", "customer_name", "subtotal", "discount_amount", "shipping_charge", "total_amount", "payment_status", "status", "created_at"], columns: ["customer_name", "total_amount", "payment_status", "status", "created_at"] },
     "order-items": { label: "Order Items", group: "Orders", fields: ["order", "product", "color", "unit", "quantity", "original_price", "variant_unit", "discount_amount", "price", "total_price"], columns: ["order", "product", "quantity", "price", "total_price"] },
     "hero-banners": { label: "Hero Banners", group: "Marketing", fields: ["subtitle", "title", "description", "image", "button_text", "display_order", "is_active"], columns: ["subtitle", "title", "button_text", "display_order", "is_active"] },
-    "promo-banners": { label: "Promotional Banners", group: "Marketing", fields: ["title", "image", "link", "is_active", "sort_order"], columns: ["title", "link", "is_active", "sort_order"] },
-    "hero-side-banners": { label: "Hero Side Banners", group: "Marketing", fields: ["title", "image", "link", "is_active", "sort_order"], columns: ["title", "link", "is_active", "sort_order"] },
+    "promo-banners": { label: "Promotional Banners", group: "Marketing", fields: ["image", "link", "is_active"], columns: ["image", "link", "is_active"] },
+    "hero-side-banners": { label: "Hero Side Banners", group: "Marketing", fields: ["image", "link", "is_active"], columns: ["image", "link", "is_active"] },
     coupons: { label: "Coupons", group: "Marketing", fields: ["code", "products", "discount_percentage", "start_date", "end_date", "is_active"], columns: ["code", "discount_percentage", "start_date", "end_date", "is_active"] },
     "coupon-usages": { label: "Coupon Usage History", group: "Marketing", fields: ["coupon", "user", "product", "used_at"], columns: ["user", "coupon", "product", "used_at"] },
 };
@@ -59,6 +60,7 @@ const titleize = (value = "") => value.replaceAll("_", " ").replaceAll("-", " ")
 const columnLabel = (resource, key) => ({
     subcategories: { id: "Subcategory ID", category: "Category Name", name: "Subcategory Name" },
     products: { id: "Product ID", name: "Product Name", category: "Category Name", subcategory: "Subcategory Name", product_image: "Product Image" },
+    orders: { customer_name: "Customer" },
 }[resource]?.[key] || titleize(key));
 const fallbackFields = (resource, fieldNames) => fieldNames.map((name) => ({ name, type: name.includes("description") ? "textarea" : name.includes("active") ? "boolean" : resource === "offers" && ["start_date", "end_date"].includes(name) ? "date" : resource === "offers" && name === "discount" ? "number" : "text", label: resource === "offers" && name === "discount" ? "Discount (%)" : titleize(name), ...(resource === "offers" && name === "discount" ? { min: 0, max: 100, step: 0.01 } : {}) }));
 const recordId = (row) => row?.id ?? row?.pk ?? row?.uuid;
@@ -89,7 +91,7 @@ function displayValue(row, key, references = []) {
         const reference = references.find((item) => String(recordId(item)) === String(value?.id ?? value));
         return reference ? recordLabel(reference) : recordLabel(value);
     }
-    if (key.includes("image")) return typeof value === "string" ? <img className="table-image-thumb" src={value} alt="" /> : recordLabel(value);
+    if (key.includes("image")) return typeof value === "string" ? <img className="table-image-thumb" src={getImageUrl(value)} alt="" /> : recordLabel(value);
     if (key.includes("percentage")) return `${value}%`;
     if (key.includes("amount") || key.includes("price") || key.includes("discount_value") || key.includes("shipping_fee") || key.includes("shipping_charge")) return money(value);
     if (key.includes("date") || key.endsWith("_at") || key === "valid_until" || key === "valid_from") return date(value);
@@ -160,7 +162,7 @@ export default function OrderDashboard() {
     }, []);
 
     const go = (key) => { setSidebarOpen(false); navigate(key === "overview" ? "/order-dashboard" : `/order-dashboard/${key}`); };
-    const logout = () => { localStorage.clear(); navigate("/login", { replace: true }); };
+    const logout = async () => { await logoutSession(); navigate("/login", { replace: true }); };
     const refreshDashboard = () => { if (refreshing) return; setRefreshing(true); window.setTimeout(() => window.location.reload(), 220); };
     const currentTitle = pathKey === "overview" ? "Overview" : resources[pathKey]?.label || "Admin Dashboard";
 
@@ -378,8 +380,8 @@ function OrderEditPage({ id }) {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState("");
-    useEffect(() => { let active = true; getResource("orders", id).then((response) => { if (!active) return; setOrder(response.data); setStatus(response.data.status || ""); setPaymentStatus(response.data.payment_status || ""); }).catch((requestError) => { if (active) setError(getErrorMessage(requestError, "Could not load order.")); }).finally(() => { if (active) setLoading(false); }); return () => { active = false; }; }, [id]);
-    const save = async (event) => { event.preventDefault(); setSaving(true); setError(""); try { await updateResource("orders", id, { status, payment_status: paymentStatus }); toast.success("Order updated"); navigate(`/order-dashboard/orders/${id}`); } catch (requestError) { setError(getErrorMessage(requestError, "Could not update order.")); } finally { setSaving(false); } };
+    useEffect(() => { let active = true; getOrderDetails(id).then((response) => { if (!active) return; setOrder(response.data); setStatus(response.data.status || ""); setPaymentStatus(response.data.payment_status || ""); }).catch((requestError) => { if (active) setError(getErrorMessage(requestError, "Could not load order.")); }).finally(() => { if (active) setLoading(false); }); return () => { active = false; }; }, [id]);
+    const save = async (event) => { event.preventDefault(); setSaving(true); setError(""); try { await updateOrderDetails(id, { status, payment_status: paymentStatus }); toast.success("Order updated"); navigate(`/order-dashboard/orders/${id}`); } catch (requestError) { setError(getErrorMessage(requestError, "Could not update order.")); } finally { setSaving(false); } };
     if (loading) return <div className="admin-page"><LoadingState label="Loading order editor..." /></div>;
     if (!order) return <div className="admin-page"><button className="admin-back-link" onClick={() => navigate("/order-dashboard/orders")}>Back to orders</button><div className="admin-form-error">{error || "Order not found."}</div></div>;
     return <div className="admin-page resource-editor-page"><button className="admin-back-link" onClick={() => navigate(`/order-dashboard/orders/${id}`)}>Back to order</button><PageHeader eyebrow="EDIT ORDER" title={order.order_number || order.order_id || `Order #${id}`} description="Update order and payment status." /><section className="admin-panel resource-editor-panel"><form className="admin-form" onSubmit={save}><div className="admin-form-grid"><label className="admin-form-field"><span>Order status</span><select value={status} onChange={(event) => setStatus(event.target.value)}>{["Pending", "Processing", "Shipped", "Delivered", "Cancelled"].map((option) => <option key={option}>{option}</option>)}</select></label><label className="admin-form-field"><span>Payment status</span><select value={paymentStatus} onChange={(event) => setPaymentStatus(event.target.value)}>{["Pending", "Paid", "Failed", "Refunded"].map((option) => <option key={option}>{option}</option>)}</select></label></div>{error && <p className="admin-form-error">{error}</p>}<div className="admin-modal-actions"><button type="button" className="admin-button secondary" onClick={() => navigate(`/order-dashboard/orders/${id}`)}>Cancel</button><button type="submit" className="admin-button primary" disabled={saving}>{saving ? "Saving..." : "Save changes"}</button></div></form></section></div>;
@@ -564,13 +566,36 @@ function OrderDetail({ id }) {
     const [loading, setLoading] = useState(true);
     useEffect(() => {
         let active = true;
-        getResource("orders", id).then((response) => { if (active) setOrder(response.data); }).catch(() => { if (active) setOrder(null); }).finally(() => { if (active) setLoading(false); });
+        getOrderDetails(id).then((response) => { if (active) setOrder(response.data); }).catch(() => { if (active) setOrder(null); }).finally(() => { if (active) setLoading(false); });
         return () => { active = false; };
     }, [id]);
     if (loading) return <div className="admin-page"><LoadingState label="Loading order details..." /></div>;
     if (!order) return <div className="admin-page"><button className="admin-back-link" onClick={() => navigate("/order-dashboard/orders")}>Back to orders</button><EmptyState title="Order not found" /></div>;
+    return <OrderDetailContent order={order} id={id} navigate={navigate} />;
+}
+
+function OrderDetailContent({ order, id, navigate }) {
     const items = order.items || order.order_items || [];
-    return <div className="admin-page"><button className="admin-back-link" onClick={() => navigate("/order-dashboard/orders")}>Back to orders</button><PageHeader eyebrow="ORDER DETAILS" title={order.order_number || order.order_id || `Order #${id}`} description={`Created ${date(order.created_at || order.date)}. Read-only order details.`} /><div className="admin-detail-grid"><DetailCard title="Customer" icon={<FiUsers />}><strong>{recordLabel(order.user) || order.customer_name || order.user_name || "Guest customer"}</strong><span>{order.customer_email || order.user_email || order.user?.email || "-"}</span></DetailCard><DetailCard title="Shipping address" icon={<FiTruck />}><span>{typeof order.shipping_address === "object" ? Object.values(order.shipping_address).filter(Boolean).join(", ") : order.shipping_address || "No address provided"}</span></DetailCard><DetailCard title="Status & payment" icon={<FiCreditCard />}><span>Order <StatusPill value={order.status} /></span><span>Payment <StatusPill value={order.payment_status} /></span></DetailCard></div><div className="admin-panel order-items-panel"><div className="admin-panel-heading"><div><h3>Order items</h3><p>Quantity, price, and product details</p></div><FiBox /></div>{items.length ? <div className="order-item-list">{items.map((item, index) => <div className="order-item" key={item.id || index}><div className="order-item-image">{item.product_image || item.image ? <img src={item.product_image || item.image} alt="" /> : <FiBox />}</div><div><strong>{recordLabel(item.product) || item.product_name || item.name || "Product"}</strong><span>Qty {item.quantity || 1}{item.color ? ` · ${recordLabel(item.color)}` : ""}{item.size || item.unit ? ` · ${recordLabel(item.size || item.unit)}` : ""}</span></div><strong>{money((item.price || 0) * (item.quantity || 1))}</strong></div>)}</div> : <EmptyState title="No order items" />}<div className="order-total"><span>Subtotal <strong>{money(order.subtotal || order.total_amount)}</strong></span><span>Discount <strong>- {money(order.discount)}</strong></span><span>Shipping <strong>{money(order.shipping_charge || order.shipping_fee)}</strong></span><span className="total"><b>Total</b><strong>{money(order.total_amount)}</strong></span></div></div></div>;
+    const shippingLines = [order.address_name, order.address_line, order.city, order.postcode, order.country].filter(Boolean);
+    const lineTotal = (item) => item.total_price ?? Number(item.price || 0) * Number(item.quantity || 0);
+    return <div className="admin-page">
+        <button className="admin-back-link" onClick={() => navigate("/order-dashboard/orders")}>Back to orders</button>
+        <PageHeader eyebrow="ORDER DETAILS" title={order.order_number || order.order_id || `Order #${id}`} description={`Created ${date(order.created_at || order.date)}. Read-only order details.`} />
+        <div className="admin-detail-grid">
+            <DetailCard title="Customer" icon={<FiUsers />}><strong>{order.customer_name || "Guest customer"}</strong><span>{order.customer_email || "No email provided"}</span></DetailCard>
+            <DetailCard title="Shipping address" icon={<FiTruck />}>{shippingLines.length ? shippingLines.map((line, index) => <span key={`${line}-${index}`}>{line}</span>) : <span>No shipping address provided</span>}</DetailCard>
+            <DetailCard title="Status & payment" icon={<FiCreditCard />}><span>Order <StatusPill value={order.status} /></span><span>Payment <StatusPill value={order.payment_status} /></span><span>Method <strong>{order.payment_method || "Not recorded"}</strong></span></DetailCard>
+        </div>
+        <div className="admin-panel order-items-panel">
+            <div className="admin-panel-heading"><div><h3>Order items</h3><p>Product, quantity, pricing, and stock unit details</p></div><FiBox /></div>
+            {items.length ? <div className="order-item-list">{items.map((item, index) => <div className="order-item" key={item.id || index}>
+                <div className="order-item-image">{item.product_image || item.image ? <img src={getImageUrl(item.product_image || item.image)} alt={item.product_name || "Product"} /> : <FiBox />}</div>
+                <div><strong>{item.product_name || item.name || recordLabel(item.product) || "Product"}</strong><span>Qty {item.quantity ?? 0}{item.color ? ` · ${item.color}` : ""}{item.size ? ` · ${item.size}` : ""}{item.unit_type ? ` · ${item.unit_type}` : ""}</span><small>Unit price {money(item.price)}{item.original_price !== undefined ? ` · Original ${money(item.original_price)}` : ""}{item.discount_amount !== undefined ? ` · Discount ${money(item.discount_amount)}` : ""}</small></div>
+                <strong>{money(lineTotal(item))}</strong>
+            </div>)}</div> : <EmptyState title="No order items" />}
+            <div className="order-total"><span>Subtotal <strong>{money(order.subtotal)}</strong></span><span>Discount <strong>- {money(order.discount_amount)}</strong></span><span>Shipping <strong>{Number(order.shipping_charge || 0) === 0 ? "Free" : money(order.shipping_charge)}</strong></span><span className="total"><b>Total</b><strong>{money(order.total_amount)}</strong></span></div>
+        </div>
+    </div>;
 }
 
 /* function LegacyOrderDetail({ id }) {

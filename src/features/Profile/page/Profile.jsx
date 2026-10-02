@@ -10,7 +10,7 @@ import {
   FaHeart,
   FaSignOutAlt
 } from "react-icons/fa";
-import client from "../../../lib/ApiClient";
+import client, { logoutSession } from "../../../lib/ApiClient";
 import "../styles/user.css";
 import showToast from "../../../utils/toast";
 
@@ -274,14 +274,9 @@ const Profile = () => {
 
   };
 
-  const logout = () => {
-
-    sessionStorage.clear();
-
-    localStorage.clear();
-
-    navigate("/login");
-
+  const logout = async () => {
+    await logoutSession();
+    navigate("/login", { replace: true });
   };
   return (
 

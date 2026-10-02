@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import client from "../../../lib/ApiClient";
 import "../style/Checkout.css";
@@ -21,6 +21,7 @@ const Checkout = () => {
 
     const [loading, setLoading] = useState(true);
     const [processing, setProcessing] = useState(false);
+    const checkoutIdempotencyKey = useRef(null);
 
     useEffect(() => {
 
@@ -98,11 +99,16 @@ const Checkout = () => {
 
             setProcessing(true);
 
+            if (!checkoutIdempotencyKey.current) {
+                checkoutIdempotencyKey.current = crypto.randomUUID();
+            }
+
             const response = await client.post(
                 "payment/create-checkout-session/",
                 {
                     address: selectedAddress
-                }
+                },
+                { headers: { "Idempotency-Key": checkoutIdempotencyKey.current } }
             );
 
             window.location.href = response.data.checkout_url;
