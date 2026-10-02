@@ -34,15 +34,17 @@ export function FilterBar({ children, onClear }) {
     return <div className="admin-filters"><div className="admin-filter-fields">{children}</div>{onClear && <button type="button" className="admin-button secondary" onClick={onClear}>Clear filters</button>}</div>;
 }
 
-export function Pagination({ page, pageSize, count, onPageChange, onPageSizeChange }) {
+export function Pagination({ page, pageSize, count, next, previous, onPageChange, onPageSizeChange }) {
     const totalPages = Math.max(1, Math.ceil((count || 0) / pageSize));
+    const hasPrevious = previous === undefined ? page > 1 : Boolean(previous);
+    const hasNext = next === undefined ? page < totalPages : Boolean(next);
     return <div className="admin-pagination">
         <span aria-live="polite">{count ? `${(page - 1) * pageSize + 1}-${Math.min(page * pageSize, count)} of ${count}` : "0 records"}</span>
         <div className="admin-pagination-actions">
             <label>Rows <select aria-label="Rows per page" value={pageSize} onChange={(event) => onPageSizeChange(Number(event.target.value))}><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option></select></label>
-            <button type="button" disabled={page <= 1} onClick={() => onPageChange(page - 1)} aria-label="Previous page"><FiChevronLeft aria-hidden="true" /></button>
+            <button type="button" disabled={!hasPrevious} onClick={() => onPageChange(page - 1)} aria-label="Previous page"><FiChevronLeft aria-hidden="true" /></button>
             <strong aria-label={`Page ${page} of ${totalPages}`}>{page} / {totalPages}</strong>
-            <button type="button" disabled={page >= totalPages} onClick={() => onPageChange(page + 1)} aria-label="Next page"><FiChevronRight aria-hidden="true" /></button>
+            <button type="button" disabled={!hasNext} onClick={() => onPageChange(page + 1)} aria-label="Next page"><FiChevronRight aria-hidden="true" /></button>
         </div>
     </div>;
 }

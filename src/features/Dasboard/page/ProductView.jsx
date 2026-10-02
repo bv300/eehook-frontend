@@ -6,7 +6,7 @@ import { EmptyState, LoadingState } from "../components/AdminPrimitives";
 import { getImageUrl } from "../../../utils/imageUrl";
 import defaultImage from "../../../assets/image_not_available.png";
 
-const rows = (payload) => Array.isArray(payload) ? payload : payload?.results || payload?.items || payload?.data || [];
+const rows = (payload) => Array.isArray(payload) ? payload : Array.isArray(payload?.results) ? payload.results : [];
 const idOf = (value) => value?.id ?? value?.pk ?? value;
 const labelOf = (value) => typeof value === "object" ? value?.name || value?.title || `#${idOf(value)}` : value || "—";
 
@@ -31,7 +31,7 @@ export default function ProductView() {
                         listResource("product-variant-units", { variant: idOf(variant), page_size: 500 }),
                         listResource("product-images", { variant: idOf(variant), page_size: 500 }),
                     ]);
-                    return { ...variant, units: rows(units.data), images: rows(images.data) };
+                    return { ...variant, units: rows(units.data), images: rows(images.data).sort((a, b) => Number(a.position ?? 0) - Number(b.position ?? 0)) };
                 }));
                 if (active) { setProduct(productResponse.data); setVariants(details); }
             } catch (requestError) { if (active) setError(getErrorMessage(requestError, "Could not load product.")); }

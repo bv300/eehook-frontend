@@ -12,10 +12,10 @@ export const getResource = (resource, id) =>
     client.get(resourceUrl(resource, id));
 
 export const createResource = (resource, data) =>
-    client.post(resourceUrl(resource), data);
+    client.post(resourceUrl(resource), data, data instanceof FormData ? { headers: { "Content-Type": "multipart/form-data" } } : undefined);
 
 export const updateResource = (resource, id, data) =>
-    client.patch(resourceUrl(resource, id), data);
+    client.patch(resourceUrl(resource, id), data, data instanceof FormData ? { headers: { "Content-Type": "multipart/form-data" } } : undefined);
 
 export const deleteResource = (resource, id) =>
     client.delete(resourceUrl(resource, id));
@@ -27,12 +27,29 @@ export const updateOrderDetails = (id, data) => client.patch(`/orders/${id}/`, d
 
 export const unwrapList = (payload) => {
     if (Array.isArray(payload)) return { rows: payload, count: payload.length };
-    const rows = payload?.results || payload?.items || payload?.data || [];
+    const rows = payload?.results || [];
     return {
         rows: Array.isArray(rows) ? rows : [],
-        count: payload?.count ?? payload?.total ?? payload?.total_count ?? rows.length,
+        count: payload?.count ?? rows.length,
         next: payload?.next,
         previous: payload?.previous,
+        page: payload?.page,
+        page_size: payload?.page_size,
+    };
+};
+
+// Admin and public list endpoints use DRF's paginated shape. Keeping this
+// helper in one place prevents a table from accidentally rendering the whole
+// response object as a row collection.
+export const paginationFromPayload = (payload) => {
+    const normalized = unwrapList(payload);
+    return {
+        results: normalized.rows,
+        count: normalized.count,
+        next: normalized.next ?? null,
+        previous: normalized.previous ?? null,
+        page: normalized.page,
+        page_size: normalized.page_size,
     };
 };
 
@@ -49,13 +66,26 @@ export const getFieldSchema = (schema, resource) => {
 
 export const getErrorMessage = (error, fallback = "Something went wrong") => {
     const data = error?.response?.data;
+    if (error?.response?.status === 401) return "Your session has expired. Please log in again.";
+    if (error?.response?.status === 403) return "You do not have permission to perform this action.";
+    if (error?.response?.status === 404) return "Resource not found.";
     if (typeof data === "string") return data;
     if (data?.detail) return data.detail;
     if (data?.message) return data.message;
     if (data && typeof data === "object") {
+        const formatValue = (value) => Array.isArray(value) ? value.map(formatValue).join(", ") : value && typeof value === "object" ? Object.values(value).map(formatValue).join(" ") : String(value);
         return Object.entries(data)
-            .map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(", ") : value}`)
+            .map(([key, value]) => `${key}: ${formatValue(value)}`)
             .join(" | ");
     }
     return fallback;
+};
+
+export const flattenApiErrors = (payload) => {
+    if (!payload || typeof payload !== "object") return {};
+    const formatValue = (value) => Array.isArray(value) ? value.map(formatValue).join(", ") : value && typeof value === "object" ? Object.values(value).map(formatValue).join(" ") : String(value);
+    return Object.fromEntries(Object.entries(payload).map(([key, value]) => [
+        key,
+        formatValue(value),
+    ]));
 };

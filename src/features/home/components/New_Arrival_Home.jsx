@@ -1,4 +1,3 @@
-import React from "react";
 import "../styles/New_Arrival_Home.css";
 import Newarrival_Query from "../../newArrivals/queries/Newarrival_Query";
 import { Link, useNavigate } from "react-router-dom";
@@ -7,7 +6,7 @@ import Product_Query from "../../sale/queries/Product_Query";
 
 import { useEffect, useState } from "react";
 
-const New_Arrival_Home = ({ products = [] }) => {
+const New_Arrival_Home = () => {
 
     const navigate = useNavigate();
 
@@ -16,11 +15,11 @@ const New_Arrival_Home = ({ products = [] }) => {
         isLoading: isNewArrivalsLoading,
         error: newArrivalsError,
     } = Newarrival_Query();
-    const data = Array.isArray(rawData) ? rawData : [];
+    const data = rawData?.results || [];
 
     // Fetch shop products to pad the second row
     const { data: rawShopData, isLoading: isShopLoading } = Product_Query({});
-    const shopData = Array.isArray(rawShopData) ? rawShopData : (rawShopData?.results || []);
+    const shopData = rawShopData?.results || [];
 
     const isLoading = isNewArrivalsLoading || isShopLoading;
     const error = newArrivalsError;

@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import '../styles/Sale_page.css'
 import Product_card from '../components/Product_card'
 import Product_Query from '../queries/Product_Query'
-import { Link, NavLink, useSearchParams,useNavigate } from "react-router-dom"
+import { NavLink, useSearchParams, useNavigate } from "react-router-dom"
 import ShopBy_categoryQuery from '../../shop_by_category/queries/ShopBy_categoryQuery'
 import { getImageUrl } from '../../../utils/imageUrl'
 
@@ -18,13 +18,16 @@ function Sale() {
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 1140)
     const [showFilter, setShowFilter] = useState(false)
 
-    const [searchParams] = useSearchParams()
+    const [searchParams, setSearchParams] = useSearchParams()
 
-    const filter = Object.fromEntries(searchParams.entries())
+    const page = Number(searchParams.get("page") || 1)
+    const pageSize = Number(searchParams.get("page_size") || 14)
+    const filter = { ...Object.fromEntries(searchParams.entries()), page, page_size: pageSize }
 
     const isOfferPage = searchParams.get("offer") === "true"
 
     const { data, isLoading, error } = Product_Query(filter)
+    const products = data?.results || []
 
     // Set first category as default
     useEffect(() => {
@@ -81,7 +84,7 @@ function Sale() {
                     )}
 
                     <span className="product_count">
-                        {data?.length} Products
+                        {data?.count ?? products.length} Products
                     </span>
                 </div>
             </div>
@@ -165,9 +168,13 @@ function Sale() {
             <div className="shop_page">
                 <div>
                     <Product_card
-                        products={data || []}
+                        products={products}
                         isLoading={isLoading}
                         error={error}
+                        page={page}
+                        pageSize={pageSize}
+                        count={data?.count}
+                        onPageChange={(nextPage) => { const next = new URLSearchParams(searchParams); next.set("page", String(nextPage)); setSearchParams(next); }}
                     />
                 </div>
             </div>

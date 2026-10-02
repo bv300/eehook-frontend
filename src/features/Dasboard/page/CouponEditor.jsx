@@ -25,7 +25,7 @@ export default function CouponEditor() {
 
     useEffect(() => {
         let active = true;
-        listResource("products", { page_size: 500 }).then((response) => { if (active) setProducts(response.data?.results || response.data || []); }).catch(() => {});
+        listResource("products", { page_size: 500 }).then((response) => { if (active) setProducts(response.data?.results || []); }).catch(() => {});
         if (!editing) return () => { active = false; };
         getResource("coupons", id).then((response) => {
             const row = response.data || {};
