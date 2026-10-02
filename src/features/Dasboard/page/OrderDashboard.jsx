@@ -133,7 +133,7 @@ export default function OrderDashboard() {
     const [refreshing, setRefreshing] = useState(false);
     const pathKey = location.pathname.split("/")[2] || "overview";
     const isEditRoute = routeMode === "edit" || location.pathname.endsWith("/edit");
-    const isProductEditor = pathKey === "products" && isEditRoute;
+    const isProductEditor = pathKey === "products" && (location.pathname.endsWith("/new") || isEditRoute);
     const isProductView = pathKey === "products" && Boolean(detailId) && !isProductEditor;
     const isHeroBannerEditor = pathKey === "hero-banners" && (location.pathname.endsWith("/new") || isEditRoute);
     const isPromoBannerEditor = pathKey === "promo-banners" && (location.pathname.endsWith("/new") || isEditRoute);
