@@ -1,5 +1,6 @@
 .contact-page {
     width: 100%;
+    min-width: 0;
     background-color: #F8F9F3;
     background-image: url("data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='rgba(75,99,109,0.06)' stroke-width='1.5'%3E%3Cpath d='M20,30 L30,30 L45,65 L85,65 L95,40 L35,40' /%3E%3Ccircle cx='50' cy='75' r='4' /%3E%3Ccircle cx='75' cy='75' r='4' /%3E%3Cpath d='M70,80 L70,105 L100,105 L100,80 Z' /%3E%3Cpath d='M78,80 C78,65 92,65 92,80' /%3E%3Cpath d='M20,80 L35,80 L50,95 L35,110 L20,110 Z' /%3E%3Ccircle cx='28' cy='95' r='2' /%3E%3C/g%3E%3C/svg%3E");
     background-repeat: repeat;
@@ -37,6 +38,7 @@
 }
 
 .contact-container {
+    min-width: 0;
     display: grid;
     grid-template-columns: 380px 1fr;
     gap: 60px;
@@ -46,6 +48,7 @@
 /* LEFT SIDE */
 
 .contact-info {
+    min-width: 0;
     background: #F8F9F3;
     border-radius: 20px;
     padding: 40px;
@@ -78,6 +81,7 @@
 /* RIGHT */
 
 .contact-form {
+    min-width: 0;
     background: #F8F9F3;
     border-radius: 20px;
     padding: 50px;

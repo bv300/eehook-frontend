@@ -28,6 +28,7 @@
     font-weight: 700;
     color: #4B636D;
     margin: 0 0 8px 0;
+    overflow-wrap: anywhere;
 }
 
 .heading-sub {
@@ -35,6 +36,7 @@
     font-size: 1.1rem;
     color: #6B8490;
     margin: 0;
+    overflow-wrap: anywhere;
 }
 
 .view-all-link {
@@ -242,6 +244,7 @@
     font-weight: 600;
     letter-spacing: 1.5px;
     text-transform: uppercase;
+    overflow-wrap: anywhere;
 }
 
 
@@ -269,6 +272,7 @@
     justify-content: space-between;
     align-items: center;
     margin-top: auto;
+    min-width: 0;
 }
 
 
@@ -404,6 +408,72 @@
 @media(max-width:576px) {
     .new-arrivals-grid {
         grid-template-columns: repeat(2, 1fr);
+    }
+
+    .new-arrivals-wrapper {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    .heading-container {
+        align-items: flex-start;
+        margin-bottom: 24px;
+    }
+
+    .heading-text h2 {
+        font-size: clamp(2rem, 10vw, 3rem);
+    }
+
+    .heading-sub {
+        font-size: 0.95rem;
+    }
+
+    .image-container {
+        height: clamp(150px, 45vw, 220px);
+    }
+
+    .product-details {
+        padding: 14px 6px 10px;
+    }
+
+    .newHome-product-title {
+        font-size: 0.8rem;
+        height: 58px;
+    }
+
+    .price-area .product-price {
+        font-size: 16px;
+    }
+}
+
+@media(max-width:380px) {
+    .new-arrivals-grid {
+        gap: 8px;
+    }
+
+    .image-container {
+        height: 140px;
+    }
+
+    .badge-new,
+    .badge-offer {
+        top: 8px;
+        left: 8px;
+        padding: 5px 8px;
+        font-size: 0.6rem;
+    }
+
+    .wishlist-btn {
+        top: 8px;
+        right: 8px;
+        width: 30px;
+        height: 30px;
+    }
+
+    .quick-add-btn {
+        bottom: 8px;
+        padding: 10px 0;
+        font-size: 0.7rem;
     }
 }
 .loading-container{

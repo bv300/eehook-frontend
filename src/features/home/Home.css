@@ -1,3 +1,30 @@
+.home-page {
+    width: 100%;
+    min-width: 0;
+}
+
+/* The inline category section has horizontal padding. Keep that padding within
+   the viewport instead of making the page wider than the browser window. */
+.category-section-wrapper {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+.section-heritage,
+.section-heritage-text,
+.section-heritage-gallery {
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+.section-heritage-text h2,
+.section-heritage-text p,
+.heritage-tag {
+    overflow-wrap: anywhere;
+}
+
 .hero_section {
     width: 100%;
     min-height: 90vh;
@@ -520,6 +547,7 @@
     line-height:1.15;
     margin-bottom:25px;
     color: #4B636D;
+    overflow-wrap: anywhere;
 }
 
 .section-heritage-text p{
@@ -527,6 +555,7 @@
     line-height:1.9;
     color: #6B8490;
     margin-bottom: 20px;
+    overflow-wrap: anywhere;
 }
 
 @media(max-width:992px){

@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { GoogleLogin } from "@react-oauth/google";
 import client from "../../../lib/ApiClient";
 import { isSuperAdminUser, saveAuthUser } from "../authUtils";
+import { getPasswordPolicyError, PASSWORD_POLICY_HELP } from "../passwordPolicy";
+import showToast from "../../../utils/toast";
 import "./SignUp.css";
 
 function Signup() {
@@ -20,20 +22,34 @@ function Signup() {
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [passwordError, setPasswordError] = useState("");
+    const [formError, setFormError] = useState("");
 
     const handleChange = (e) => {
+        const { name, value } = e.target;
         setFormData({
             ...formData,
-            [e.target.name]: e.target.value
+            [name]: value
         });
+        if (name === "password") {
+            setPasswordError(value ? getPasswordPolicyError(value) : "");
+        }
+        setFormError("");
     };
 
     const handleSubmit = async (e) => {
 
         e.preventDefault();
+        const nextPasswordError = getPasswordPolicyError(formData.password);
+        if (nextPasswordError) {
+            setPasswordError(nextPasswordError);
+            showToast.error("Please meet the password requirements.");
+            return;
+        }
 
         if (formData.password !== formData.confirm_password) {
-            alert("Passwords do not match");
+            setFormError("Passwords do not match.");
+            showToast.error("Passwords do not match.");
             return;
         }
 
@@ -51,16 +67,12 @@ function Signup() {
             navigate("/login");
 
         } catch (error) {
-
-            if (error.response?.data) {
-
-                alert(JSON.stringify(error.response.data));
-
-            } else {
-
-                alert("Registration Failed");
-
-            }
+            const data = error.response?.data || {};
+            const backendPasswordError = data.password;
+            setPasswordError(Array.isArray(backendPasswordError) ? backendPasswordError.join(" ") : backendPasswordError || "");
+            
+            const errorMsg = data.detail || (data.non_field_errors && data.non_field_errors[0]) || (data.email && data.email[0]) || (data.first_name && data.first_name[0]) || "Registration failed.";
+            setFormError(errorMsg);
 
         } finally {
 
@@ -75,7 +87,8 @@ function Signup() {
         try {
 
             const response = await client.post("google-login/", {
-                token: credentialResponse.credential
+                token: credentialResponse.credential,
+                login_type: "customer",
             });
             const user = response.data.user || response.data;
 
@@ -85,7 +98,7 @@ function Signup() {
 
             if (isSuperAdminUser(user)) {
 
-                navigate("/OrderDashboard");
+                navigate("/eehook-dashboard");
 
             } else {
 
@@ -96,7 +109,7 @@ function Signup() {
         } catch (error) {
 
             alert(
-                error.response?.data?.error ||
+                error.response?.data?.detail || error.response?.data?.error ||
                 "Google Signup Failed"
             );
 
@@ -182,6 +195,8 @@ function Signup() {
                                 </span>
 
                             </div>
+                            <small className="password-policy-help">{PASSWORD_POLICY_HELP}</small>
+                            {passwordError && <small className="password-policy-error" role="alert">{passwordError}</small>}
 
                         </div>
 
@@ -212,6 +227,8 @@ function Signup() {
                             </div>
 
                         </div>
+
+                        {formError && <p className="signup-form-error" role="alert">{formError}</p>}
 
                         <button
                             type="submit"

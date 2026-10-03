@@ -7,29 +7,29 @@ function ForgotPassword() {
 
     const [email, setEmail] = useState("");
     const [loading, setLoading] = useState(false);
+    const [message, setMessage] = useState("");
+    const [errorMessage, setErrorMessage] = useState("");
 
     const handleSubmit = async (e) => {
 
         e.preventDefault();
 
         setLoading(true);
+        setMessage("");
+        setErrorMessage("");
 
         try {
 
-            await axios.post(`${import.meta.env.VITE_API_URL}/forgot-password/`, {
+            const response = await axios.post(`${import.meta.env.VITE_API_URL}/forgot-password/`, {
                 email,
             });
 
-            alert("Password reset link has been sent to your email.");
-
+            setMessage(response.data.message || "If the account exists, a password reset link has been sent to your email.");
             setEmail("");
 
         } catch (error) {
 
-            alert(
-                error.response?.data?.error ||
-                "Something went wrong."
-            );
+            setErrorMessage(error.response?.data?.error || error.response?.data?.message || "Unable to send the password reset email. Please try again.");
 
         } finally {
 
@@ -71,6 +71,9 @@ function ForgotPassword() {
                         {loading ? "Sending..." : "Send Reset Link"}
 
                     </button>
+
+                    {message && <p className="password-reset-success" role="status">{message}</p>}
+                    {errorMessage && <p className="password-reset-error" role="alert">{errorMessage}</p>}
 
                 </form>
 

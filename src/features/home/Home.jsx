@@ -1,33 +1,20 @@
-import React from 'react'
 import './Home.css'
 
 import vedio1 from '../../assets/eehook-video-one.mp4'
 
 import vedio2 from '../../assets/eehook-video-two.mp4'
 
-import Our_speciality from './components/Our_speciality';
 import Shop_by_category from './components/Shop_by_category';
 import New_Arrival_Home from './components/New_Arrival_Home';
 import Offer_poster from '../../hooks/offers/page/Offer_poster';
-import { NavLink } from 'react-router-dom'
-import Category_hooks from '../../hooks/Category_hooks'
-import Offer_Query from '../../hooks/offers/queries/Offer_Query'
 import Heropage from './components/Heropage'
-import Navbar from '../../components/Navbar'
 import ContactUs from '../../components/Contact'
 
 function Home() {
 
-    const sections = [
-        {
-            title: "Our Vision",
-            text: "Rooted in a passion for innovation, eehook represents cutting-edge technology and premium lifestyle products curated for the modern world."
-        }
-    ];
-
     return (
 
-        <div>
+        <div className="home-page">
 
 
             {/* hero page  */}

@@ -1,7 +1,11 @@
 export function isSuperAdminUser(user = {}) {
     const role = String(user.role || user.user_role || user.user_type || user.role_name || "").trim().toLowerCase().replace(/[_-]/g, " ");
-    const explicitFlag = user.is_superuser ?? user.is_super_admin ?? user.isSuperAdmin ?? user.super_admin;
-    return role === "super admin" || role === "superadmin" || explicitFlag === true || explicitFlag === 1 || explicitFlag === "1" || String(explicitFlag).toLowerCase() === "true";
+    return role === "super admin" || role === "superadmin";
+}
+
+export function isPrivilegedUser(user = {}) {
+    const role = String(user.role || user.user_role || user.user_type || user.role_name || "").trim().toLowerCase().replace(/[_-]/g, " ");
+    return isSuperAdminUser(user) || role.includes("admin") || role === "staff" || user.is_staff === true || user.is_superuser === true;
 }
 
 export function saveAuthUser(user = {}) {

@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useMemo } from "react";
 import ShopBy_categoryQuery from "../../shop_by_category/queries/ShopBy_categoryQuery";
 import "../styles/ShopBy-category.css";
 
@@ -12,7 +12,10 @@ import { getImageUrl } from "../../../utils/imageUrl";
 function Shop_by_category() {
 
     const { data: rawCategories, isLoading } = ShopBy_categoryQuery();
-    const categories = Array.isArray(rawCategories) ? rawCategories : [];
+    const categories = useMemo(
+        () => (Array.isArray(rawCategories) ? rawCategories : []),
+        [rawCategories]
+    );
 
     const navigate = useNavigate();
 

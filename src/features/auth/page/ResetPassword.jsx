@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import axios from "axios";
+import { getPasswordPolicyError, PASSWORD_POLICY_HELP } from "../passwordPolicy";
 import "./ResetPassword.css";
 
 function ResetPassword() {
@@ -15,22 +16,35 @@ function ResetPassword() {
     });
 
     const [loading, setLoading] = useState(false);
+    const [passwordError, setPasswordError] = useState("");
+    const [formError, setFormError] = useState("");
 
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const handleChange = (e) => {
-
+        const { name, value } = e.target;
         setForm({
             ...form,
-            [e.target.name]: e.target.value
+            [name]: value
         });
-
+        if (name === "password") setPasswordError(value ? getPasswordPolicyError(value) : "");
+        setFormError("");
     };
 
     const handleSubmit = async (e) => {
 
         e.preventDefault();
+
+        const nextPasswordError = getPasswordPolicyError(form.password);
+        if (nextPasswordError) {
+            setPasswordError(nextPasswordError);
+            return;
+        }
+        if (form.password !== form.confirm_password) {
+            setFormError("Passwords do not match.");
+            return;
+        }
 
         setLoading(true);
 
@@ -48,14 +62,9 @@ function ResetPassword() {
             navigate("/login");
 
         } catch (error) {
-
-            alert(
-
-                error.response?.data?.message ||
-                error.response?.data?.non_field_errors?.[0] ||
-                "Something went wrong"
-
-            );
+            const backendPasswordError = error.response?.data?.password;
+            setPasswordError(Array.isArray(backendPasswordError) ? backendPasswordError.join(" ") : backendPasswordError || "");
+            setFormError(error.response?.data?.message || error.response?.data?.non_field_errors?.[0] || "Something went wrong.");
 
         } finally {
 
@@ -110,6 +119,9 @@ function ResetPassword() {
 
                     </div>
 
+                    <small className="password-policy-help">{PASSWORD_POLICY_HELP}</small>
+                    {passwordError && <small className="password-policy-error" role="alert">{passwordError}</small>}
+
                     <div className="password-group">
 
                         <input
@@ -136,6 +148,8 @@ function ResetPassword() {
                         </span>
 
                     </div>
+
+                    {formError && <p className="reset-form-error" role="alert">{formError}</p>}
 
                     <button
                         type="submit"

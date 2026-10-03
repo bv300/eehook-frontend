@@ -71,7 +71,7 @@ export default function ProductEditor({ readOnly = false }) {
     const hasUnsavedChanges = Boolean(initialSnapshot && initialSnapshot !== currentSnapshot);
     useEffect(() => { const warn = (event) => { if (hasUnsavedChanges) { event.preventDefault(); event.returnValue = ""; } }; window.addEventListener("beforeunload", warn); return () => window.removeEventListener("beforeunload", warn); }, [hasUnsavedChanges]);
 
-    const leaveEditor = () => { if (!hasUnsavedChanges || window.confirm("You have unsaved changes. Leave without saving?")) navigate("/order-dashboard/products"); };
+    const leaveEditor = () => { if (!hasUnsavedChanges || window.confirm("You have unsaved changes. Leave without saving?")) navigate("/eehook-dashboard/products"); };
     const toggle = (section) => setOpenSections((current) => ({ ...current, [section]: !current[section] }));
     const updateProduct = (name, value) => setProduct((current) => ({ ...current, [name]: value }));
     const addVariant = () => setVariants((current) => [...current, emptyVariant(id || "")]);
@@ -146,7 +146,7 @@ export default function ProductEditor({ readOnly = false }) {
                 const refreshedImages = sortImages(rows((await listResource("product-images", { variant: variantId, page_size: 500 })).data));
                 setVariants((current) => current.map((item, currentIndex) => currentIndex === index ? { ...item, id: idOf(item) || variantId, images: refreshedImages, deletedImages: [] } : item));
             }
-            toast.success(editing ? "Product updated successfully" : "Product created successfully"); navigate(`/order-dashboard/products/${productId}`, { replace: true });
+            toast.success(editing ? "Product updated successfully" : "Product created successfully"); navigate(`/eehook-dashboard/products/${productId}`, { replace: true });
         } catch (requestError) {
             const backendErrors = flattenApiErrors(requestError?.response?.data); const mappedErrors = { ...backendErrors };
             Object.entries(backendErrors).forEach(([key, message]) => { if (activeVariantIndex >= 0 && ["sku", "color", "price", "stock", "price_type"].includes(key)) mappedErrors[`variant_${activeVariantIndex}_${key}`] = message; if (activeVariantIndex >= 0 && activeUnitIndex >= 0 && ["sku", "unit", "unit_type", "price", "stock"].includes(key)) mappedErrors[`variant_${activeVariantIndex}_unit_${activeUnitIndex}_${key}`] = message; });

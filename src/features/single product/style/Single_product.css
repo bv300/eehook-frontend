@@ -116,9 +116,7 @@
     transform: scale(1.1);
 }
 
-.main-image:hover {
-    transform: scale(1.03);
-}
+
 
 .main-image img {
     width: 100%;
@@ -677,7 +675,7 @@
     max-height: none;
     overflow: hidden;
     border-radius: 2px;
-    background: #fbf0dc;
+    background: #fff;
     box-sizing: border-box;
 }
 .main-image img {

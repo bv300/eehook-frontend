@@ -7,7 +7,9 @@ let refreshPromise = null;
 
 function redirectToLogin() {
     clearAuthSession();
-    const path = window.location.pathname.startsWith("/order-dashboard") ? "/admin-login" : "/login";
+    const normalizedPath = window.location.pathname.toLowerCase();
+    const isOrderDashboardPath = normalizedPath.startsWith("/eehook-dashboard") || normalizedPath.startsWith("/order-dashboard") || normalizedPath.startsWith("/orderdashboard");
+    const path = isOrderDashboardPath ? "/eehook-dashboard/admin-login" : "/login";
     if (window.location.pathname !== path) window.location.href = path;
 }
 

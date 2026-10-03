@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import client, { getRetryAfterSeconds } from "../../../lib/ApiClient";
 import { isSuperAdminUser, saveAuthSession, clearAuthSession } from "../authUtils";
 import "./Login.css";
 
 export default function AdminLogin() {
     const navigate = useNavigate();
+    const location = useLocation();
     const [form, setForm] = useState({ email: "", password: "" });
-    const [error, setError] = useState("");
+    const [error, setError] = useState(location.state?.accessDenied ? "Super Admin access required. Please sign in with a Super Admin account." : "");
     const [loading, setLoading] = useState(false);
     const [retryAfter, setRetryAfter] = useState(0);
 
@@ -20,16 +21,25 @@ export default function AdminLogin() {
     const submit = async (event) => {
         event.preventDefault(); setLoading(true); setError("");
         try {
-            const response = await client.post("login/", form);
+            const response = await client.post("login/", { ...form, login_type: "super_admin" });
             const user = response.data.user || response.data;
             if (!isSuperAdminUser(user)) { clearAuthSession(); setError("Super Admin access required."); return; }
             saveAuthSession(response.data);
-            navigate("/order-dashboard", { replace: true });
+            const requestedPath = location.state?.from;
+            const requestedPathname = requestedPath?.pathname || "";
+            const isDashboardPath = /^\/(?:eehook-dashboard|order-dashboard|orderDashboard)(?:\/|$)/i.test(requestedPathname);
+            const isAdminLoginPath = /\/admin-login$/i.test(requestedPathname);
+            const destination = isDashboardPath && !isAdminLoginPath
+                ? `${requestedPathname}${requestedPath.search || ""}${requestedPath.hash || ""}`
+                : "/eehook-dashboard";
+            navigate(destination, { replace: true });
         } catch (requestError) {
             if (requestError.response?.status === 429) {
                 const seconds = getRetryAfterSeconds(requestError);
                 setRetryAfter(seconds);
                 setError(`Too many attempts. Try again after ${seconds} seconds.`);
+            } else if (requestError.response?.status === 403) {
+                setError(requestError.response?.data?.detail || "Only Super Admin accounts can access this login.");
             } else {
                 setError("Invalid email or password.");
             }

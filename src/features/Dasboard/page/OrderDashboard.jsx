@@ -17,6 +17,7 @@ import CouponUsageEditor from "./CouponUsageEditor";
 import navbarLogo from "../../../assets/navbar-logo.png";
 import { getImageUrl } from "../../../utils/imageUrl";
 import { logoutSession } from "../../../lib/ApiClient";
+import { getPasswordPolicyError } from "../../auth/passwordPolicy";
 import "../styles/AdminDashboard.css";
 import "../styles/LogoutTheme.css";
 import "../styles/AdminPolish.css";
@@ -69,7 +70,7 @@ const recordLabel = (value) => typeof value === "object" ? value?.name || value?
 function fieldsFromSchema(schema, resource) {
     const raw = getFieldSchema(schema, resource);
     const fieldList = Array.isArray(raw) ? raw : raw?.fields || Object.entries(raw || {}).map(([name, config]) => ({ name, ...(typeof config === "object" ? config : { type: config }) }));
-    return fieldList.filter((field) => {
+    const fields = fieldList.filter((field) => {
         const name = field.name || field.key;
         if (resource === "products" && ["emi_available", "emi_starting_price"].includes(name)) return false;
         if (resource === "products" && ["product_type", "has_variants"].includes(name)) return false;
@@ -83,6 +84,10 @@ function fieldsFromSchema(schema, resource) {
         if (resource === "product-images" && !["variant", "image", "is_primary", "position"].includes(name)) return false;
         return name && !["id", "pk", "created_at", "updated_at", "created", "updated"].includes(name) && !field.read_only;
     });
+    if (resource === "users" && !fields.some((field) => (field.name || field.key) === "password")) {
+        fields.splice(1, 0, { name: "password", type: "password", label: "Password", password_policy: true });
+    }
+    return fields;
 }
 
 function displayValue(row, key, references = []) {
@@ -239,7 +244,7 @@ export default function OrderDashboard() {
         return () => { active = false; };
     }, []);
 
-    const go = (key) => { setSidebarOpen(false); navigate(key === "overview" ? "/order-dashboard" : `/order-dashboard/${key}`); };
+    const go = (key) => { setSidebarOpen(false); navigate(key === "overview" ? "/eehook-dashboard" : `/eehook-dashboard/${key}`); };
     const logout = async () => { await logoutSession(); navigate("/login", { replace: true }); };
     const refreshDashboard = () => { if (refreshing) return; setRefreshing(true); window.setTimeout(() => window.location.reload(), 220); };
     const currentTitle = pathKey === "overview" ? "Overview" : resources[pathKey]?.label || "Admin Dashboard";
@@ -380,9 +385,9 @@ function ResourcePage({ resource, schema }) {
     }));
     if (resource === "coupons") columns.unshift({ key: "copy_code", label: "Copy", render: (row) => <button className="table-copy-button" title="Copy coupon code" onClick={async () => { const code = row?.code; if (!code) return; try { await navigator.clipboard.writeText(code); toast.success("Coupon code copied"); } catch { toast.error("Could not copy coupon code"); } }}><FiCopy /> Copy</button> });
     const clearFilters = () => { setSearch(""); setOrdering(defaultOrdering); setStatus(""); setPaymentStatus(""); setDateFrom(""); setDateTo(""); setPage(1); };
-    const openView = (row) => navigate(`/order-dashboard/${resource}/${recordId(row)}/view`);
-    const openEdit = (row) => navigate(`/order-dashboard/${resource}/${recordId(row)}/edit`);
-    const addAction = resource === "products" ? () => navigate("/order-dashboard/products/new") : ["hero-banners", "promo-banners", "hero-side-banners", "coupons", "coupon-usages"].includes(resource) ? () => navigate(`/order-dashboard/${resource}/new`) : () => setModal({ mode: "create" });
+    const openView = (row) => navigate(`/eehook-dashboard/${resource}/${recordId(row)}/view`);
+    const openEdit = (row) => navigate(`/eehook-dashboard/${resource}/${recordId(row)}/edit`);
+    const addAction = resource === "products" ? () => navigate("/eehook-dashboard/products/new") : ["hero-banners", "promo-banners", "hero-side-banners", "coupons", "coupon-usages"].includes(resource) ? () => navigate(`/eehook-dashboard/${resource}/new`) : () => setModal({ mode: "create" });
     const remove = async () => { try { await deleteResource(resource, recordId(deleteTarget)); toast.success(`${config.label.slice(0, -1)} deleted`); setDeleteTarget(null); state.reload(); } catch (error) { toast.error(getErrorMessage(error, "Could not delete record")); } };
     const closeAndReload = () => { setModal(null); state.reload(); };
     const downloadResourceCsv = async () => {
@@ -428,8 +433,8 @@ function ReadOnlyResourcePage({ resource, id, schema }) {
         return () => { active = false; };
     }, [fields]);
     if (loading) return <div className="admin-page"><LoadingState label="Loading record details..." /></div>;
-    if (error || !row) return <div className="admin-page"><button className="admin-back-link" onClick={() => navigate(`/order-dashboard/${resource}`)}>Back to {config.label}</button><div className="admin-form-error">{error || "Record not found."}</div></div>;
-    return <div className="admin-page"><button className="admin-back-link" onClick={() => navigate(`/order-dashboard/${resource}`)}>Back to {config.label}</button><PageHeader eyebrow="VIEW RECORD" title={`${config.label.slice(0, -1)} details`} description="Read-only record details." /><section className="admin-panel resource-view-panel"><div className="resource-view-grid">{fields.map((field) => { const name = field.name || field.key; return <div className="resource-view-field" key={name}><small>{field.label || titleize(name)}</small><div>{resolveTableValue(row, name, references)}</div></div>; })}</div></section></div>;
+    if (error || !row) return <div className="admin-page"><button className="admin-back-link" onClick={() => navigate(`/eehook-dashboard/${resource}`)}>Back to {config.label}</button><div className="admin-form-error">{error || "Record not found."}</div></div>;
+    return <div className="admin-page"><button className="admin-back-link" onClick={() => navigate(`/eehook-dashboard/${resource}`)}>Back to {config.label}</button><PageHeader eyebrow="VIEW RECORD" title={`${config.label.slice(0, -1)} details`} description="Read-only record details." /><section className="admin-panel resource-view-panel"><div className="resource-view-grid">{fields.map((field) => { const name = field.name || field.key; return <div className="resource-view-field" key={name}><small>{field.label || titleize(name)}</small><div>{resolveTableValue(row, name, references)}</div></div>; })}</div></section></div>;
 }
 
 function ResourceEditorPage({ resource, id, schema }) {
@@ -468,14 +473,14 @@ function ResourceEditorPage({ resource, id, schema }) {
             if (editing) await updateResource(resource, id, payload, payload instanceof FormData);
             else await createResource(resource, payload, payload instanceof FormData);
             toast.success(`${config.label.slice(0, -1)} ${editing ? "updated" : "created"}`);
-            navigate(`/order-dashboard/${resource}`);
+            navigate(`/eehook-dashboard/${resource}`);
         } catch (error) {
             setRequestError(error);
             toast.error(getErrorMessage(error, "Please correct the form errors"));
         } finally { setSaving(false); }
     };
     if (loading) return <div className="admin-page"><LoadingState label="Loading record editor..." /></div>;
-    return <div className="admin-page resource-editor-page"><button className="admin-back-link" onClick={() => navigate(`/order-dashboard/${resource}`)}>Back to {config.label}</button><PageHeader eyebrow={editing ? "EDIT RECORD" : "NEW RECORD"} title={`${editing ? "Edit" : "Add"} ${config.label.slice(0, -1)}`} description="Update the record and save your changes." /><section className="admin-panel resource-editor-panel"><form className="admin-form" onSubmit={save}><div className="admin-form-grid">{fallback.map((field) => { const name = field.name || field.key; const refName = { user: "users", customer: "users", product: "products", variant: "product-variants", variant_unit: "product-variant-units", category: "categories", subcategory: "subcategories", offer: "offers", color: "colors", unit_type: "unit-types", unit: "units", coupon: "coupons", order: "orders", address: "addresses" }[name] || ""; return <FormField key={name} field={field} options={references[refName] || []} value={values[name]} onChange={setValue} error={errors[name]} readOnly={false} />; })}</div>{requestError && !Object.keys(errors).length && <p className="admin-form-error">{getErrorMessage(requestError)}</p>}<div className="admin-modal-actions"><button type="button" className="admin-button secondary" onClick={() => navigate(`/order-dashboard/${resource}`)}>Cancel</button><button type="submit" className="admin-button primary" disabled={saving}>{saving ? "Saving..." : "Save changes"}</button></div></form></section></div>;
+    return <div className="admin-page resource-editor-page"><button className="admin-back-link" onClick={() => navigate(`/eehook-dashboard/${resource}`)}>Back to {config.label}</button><PageHeader eyebrow={editing ? "EDIT RECORD" : "NEW RECORD"} title={`${editing ? "Edit" : "Add"} ${config.label.slice(0, -1)}`} description="Update the record and save your changes." /><section className="admin-panel resource-editor-panel"><form className="admin-form" onSubmit={save}><div className="admin-form-grid">{fallback.map((field) => { const name = field.name || field.key; const refName = { user: "users", customer: "users", product: "products", variant: "product-variants", variant_unit: "product-variant-units", category: "categories", subcategory: "subcategories", offer: "offers", color: "colors", unit_type: "unit-types", unit: "units", coupon: "coupons", order: "orders", address: "addresses" }[name] || ""; return <FormField key={name} field={field} options={references[refName] || []} value={values[name]} onChange={setValue} error={errors[name]} readOnly={false} />; })}</div>{requestError && !Object.keys(errors).length && <p className="admin-form-error">{getErrorMessage(requestError)}</p>}<div className="admin-modal-actions"><button type="button" className="admin-button secondary" onClick={() => navigate(`/eehook-dashboard/${resource}`)}>Cancel</button><button type="submit" className="admin-button primary" disabled={saving}>{saving ? "Saving..." : "Save changes"}</button></div></form></section></div>;
 }
 
 function OrderEditPage({ id }) {
@@ -487,10 +492,10 @@ function OrderEditPage({ id }) {
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState("");
     useEffect(() => { let active = true; getOrderDetails(id).then((response) => { if (!active) return; setOrder(response.data); setStatus(response.data.status || ""); setPaymentStatus(response.data.payment_status || ""); }).catch((requestError) => { if (active) setError(getErrorMessage(requestError, "Could not load order.")); }).finally(() => { if (active) setLoading(false); }); return () => { active = false; }; }, [id]);
-    const save = async (event) => { event.preventDefault(); setSaving(true); setError(""); try { await updateOrderDetails(id, { status, payment_status: paymentStatus }); toast.success("Order updated"); navigate(`/order-dashboard/orders/${id}`); } catch (requestError) { setError(getErrorMessage(requestError, "Could not update order.")); } finally { setSaving(false); } };
+    const save = async (event) => { event.preventDefault(); setSaving(true); setError(""); try { await updateOrderDetails(id, { status, payment_status: paymentStatus }); toast.success("Order updated"); navigate(`/eehook-dashboard/orders/${id}`); } catch (requestError) { setError(getErrorMessage(requestError, "Could not update order.")); } finally { setSaving(false); } };
     if (loading) return <div className="admin-page"><LoadingState label="Loading order editor..." /></div>;
-    if (!order) return <div className="admin-page"><button className="admin-back-link" onClick={() => navigate("/order-dashboard/orders")}>Back to orders</button><div className="admin-form-error">{error || "Order not found."}</div></div>;
-    return <div className="admin-page resource-editor-page"><button className="admin-back-link" onClick={() => navigate(`/order-dashboard/orders/${id}`)}>Back to order</button><PageHeader eyebrow="EDIT ORDER" title={order.order_number || order.order_id || `Order #${id}`} description="Update order and payment status." /><section className="admin-panel resource-editor-panel"><form className="admin-form" onSubmit={save}><div className="admin-form-grid"><label className="admin-form-field"><span>Order status</span><select value={status} onChange={(event) => setStatus(event.target.value)}>{["Pending", "Processing", "Shipped", "Delivered", "Cancelled"].map((option) => <option key={option}>{option}</option>)}</select></label><label className="admin-form-field"><span>Payment status</span><select value={paymentStatus} onChange={(event) => setPaymentStatus(event.target.value)}>{["Pending", "Paid", "Failed", "Refunded"].map((option) => <option key={option}>{option}</option>)}</select></label></div>{error && <p className="admin-form-error">{error}</p>}<div className="admin-modal-actions"><button type="button" className="admin-button secondary" onClick={() => navigate(`/order-dashboard/orders/${id}`)}>Cancel</button><button type="submit" className="admin-button primary" disabled={saving}>{saving ? "Saving..." : "Save changes"}</button></div></form></section></div>;
+    if (!order) return <div className="admin-page"><button className="admin-back-link" onClick={() => navigate("/eehook-dashboard/orders")}>Back to orders</button><div className="admin-form-error">{error || "Order not found."}</div></div>;
+    return <div className="admin-page resource-editor-page"><button className="admin-back-link" onClick={() => navigate(`/eehook-dashboard/orders/${id}`)}>Back to order</button><PageHeader eyebrow="EDIT ORDER" title={order.order_number || order.order_id || `Order #${id}`} description="Update order and payment status." /><section className="admin-panel resource-editor-panel"><form className="admin-form" onSubmit={save}><div className="admin-form-grid"><label className="admin-form-field"><span>Order status</span><select value={status} onChange={(event) => setStatus(event.target.value)}>{["Pending", "Processing", "Shipped", "Delivered", "Cancelled"].map((option) => <option key={option}>{option}</option>)}</select></label><label className="admin-form-field"><span>Payment status</span><select value={paymentStatus} onChange={(event) => setPaymentStatus(event.target.value)}>{["Pending", "Paid", "Failed", "Refunded"].map((option) => <option key={option}>{option}</option>)}</select></label></div>{error && <p className="admin-form-error">{error}</p>}<div className="admin-modal-actions"><button type="button" className="admin-button secondary" onClick={() => navigate(`/eehook-dashboard/orders/${id}`)}>Cancel</button><button type="submit" className="admin-button primary" disabled={saving}>{saving ? "Saving..." : "Save changes"}</button></div></form></section></div>;
 }
 
 /* function LegacyResourcePage({ resource, schema }) {
@@ -544,7 +549,7 @@ function OrderEditPage({ id }) {
     const columnKeys = config.columns || (fields.length ? fields.map((field) => field.name || field.key).slice(0, 6) : ["id"]);
     const columns = columnKeys.map((key) => ({ key, label: resource === "coupon-usages" && key === "user" ? "Used By" : titleize(key), render: (row) => resource === "coupon-usages" && ["user", "coupon", "product"].includes(key) ? recordLabel(usageReferences[{ user: "users", coupon: "coupons", product: "products" }[key]].find((item) => String(recordId(item)) === String(row?.[key]?.id ?? row?.[key])) || row?.[key]) : resolveTableValue(row, key, resource === "units" ? { ...tableReferences, "unit-types": unitTypeRows } : tableReferences) }));
     const clearFilters = () => { setSearch(""); setOrdering(defaultOrdering); setStatus(""); setPaymentStatus(""); setDateFrom(""); setDateTo(""); setPage(1); };
-    const openView = (row) => resource === "products" ? navigate(`/order-dashboard/products/${recordId(row)}`) : resource === "orders" ? navigate(`/order-dashboard/orders/${recordId(row)}`) : setModal({ mode: "view", row });
+    const openView = (row) => resource === "products" ? navigate(`/eehook-dashboard/products/${recordId(row)}`) : resource === "orders" ? navigate(`/eehook-dashboard/orders/${recordId(row)}`) : setModal({ mode: "view", row });
     const modalContent = modal && <ResourceModal resource={resource} schema={schema} mode="view" row={modal.row} onClose={() => setModal(null)} />;
     return <div className="admin-page"><PageHeader title={config.label} description={`Create, review, update, and remove ${config.label.toLowerCase()} records.`} action={<button className="admin-button primary" onClick={addAction}><FiPlus /> Add {config.label.slice(0, -1)}</button>} /><div className="admin-panel"><FilterBar onClear={clearFilters}><DebouncedSearch value={search} onChange={(value) => { setSearch(value); setPage(1); }} placeholder={`Search ${config.label.toLowerCase()}…`} /><label className="admin-select"><span>Order</span><select value={ordering} onChange={(event) => { setOrdering(event.target.value); setPage(1); }}><option value="">Default</option><option value="-created_at">Newest</option><option value="created_at">Oldest</option><option value="name">Name A–Z</option><option value="-name">Name Z–A</option></select><FiChevronDown /></label>{resource === "orders" && <><label className="admin-select"><span>Status</span><select value={status} onChange={(event) => { setStatus(event.target.value); setPage(1); }}><option value="">All statuses</option>{["Pending", "Processing", "Shipped", "Delivered", "Cancelled"].map((item) => <option key={item}>{item}</option>)}</select></label><label className="admin-select"><span>Payment</span><select value={paymentStatus} onChange={(event) => { setPaymentStatus(event.target.value); setPage(1); }}><option value="">All payments</option>{["Pending", "Paid", "Failed", "Refunded"].map((item) => <option key={item}>{item}</option>)}</select></label><label className="admin-date"><span>From</span><input type="date" value={dateFrom} onChange={(event) => { setDateFrom(event.target.value); setPage(1); }} /></label><label className="admin-date"><span>To</span><input type="date" value={dateTo} onChange={(event) => { setDateTo(event.target.value); setPage(1); }} /></label></> }</FilterBar><DataTable columns={columns} rows={state.rows} loading={state.loading} error={state.error} onRetry={state.reload} actions={(row) => (<><button className="table-icon" title="View" onClick={() => openView(row)}><FiEye /></button><button className="table-icon" title="Edit" onClick={() => beginEdit(row)}><FiEdit3 /></button><button className="table-icon danger" title="Delete" onClick={() => setDeleteTarget(row)}><FiTrash2 /></button></>)} /><Pagination page={page} pageSize={pageSize} count={state.count} onPageChange={setPage} onPageSizeChange={(size) => { setPageSize(size); setPage(1); }} /></div>{modalContent}{deleteTarget && <ConfirmDialog message={`Delete this ${config.label.slice(0, -1).toLowerCase()} permanently?`} onCancel={() => setDeleteTarget(null)} onConfirm={remove} />}{editTarget && <ConfirmDialog title="Confirm order edit" message="Open this order for editing? Changes will be saved to the backend." onCancel={() => setEditTarget(null)} onConfirm={() => { setModal({ mode: "edit", row: editTarget }); setEditTarget(null); }} />}</div>;
 }
@@ -583,7 +588,38 @@ function ResourceModal({ resource, schema, mode, row, initialValues = {}, onClos
         Promise.all(referenceNames.map((name) => listResource(name, { page_size: 100 })).map((request, index) => request.then((response) => [referenceNames[index], unwrapReferenceRows(response.data)]).catch(() => [referenceNames[index], []]))).then((entries) => setReferences(Object.fromEntries(entries)));
     }, [fallback, resource]);
     const setValue = (name, value) => setValues((current) => ({ ...current, [name]: value }));
-    const submit = async (event) => { event.preventDefault(); if (readOnly) return onClose(); setSaving(true); setRequestError(null); try { await validateUniqueUnit(resource, values, row); const productTypeFields = fallback.map((field) => field.name || field.key); const productValues = resource === "products" ? { ...values, ...(productTypeFields.includes("product_type") ? { product_type: productMode } : {}), ...(productTypeFields.includes("has_variants") ? { has_variants: productMode === "multiple" } : {}) } : values; const payload = cleanPayload(productValues, resource); if (mode === "edit") await updateResource(resource, recordId(row), payload, payload instanceof FormData); else await createResource(resource, payload, payload instanceof FormData); toast.success(`${config.label.slice(0, -1)} ${mode === "edit" ? "updated" : "created"}`); onSaved(); } catch (error) { setRequestError(error); toast.error(getErrorMessage(error, "Please correct the form errors")); } finally { setSaving(false); } };
+    const submit = async (event) => {
+        event.preventDefault();
+        if (readOnly) return onClose();
+        const passwordError = resource === "users" && (mode === "create" || String(values.password || "").length)
+            ? getPasswordPolicyError(values.password || "")
+            : "";
+        if (passwordError) {
+            const validationError = { response: { data: { password: [passwordError] } } };
+            setRequestError(validationError);
+            toast.error(passwordError);
+            return;
+        }
+        setSaving(true);
+        setRequestError(null);
+        try {
+            await validateUniqueUnit(resource, values, row);
+            const productTypeFields = fallback.map((field) => field.name || field.key);
+            const productValues = resource === "products"
+                ? { ...values, ...(productTypeFields.includes("product_type") ? { product_type: productMode } : {}), ...(productTypeFields.includes("has_variants") ? { has_variants: productMode === "multiple" } : {}) }
+                : values;
+            const payload = cleanPayload(productValues, resource);
+            if (mode === "edit") await updateResource(resource, recordId(row), payload, payload instanceof FormData);
+            else await createResource(resource, payload, payload instanceof FormData);
+            toast.success(`${config.label.slice(0, -1)} ${mode === "edit" ? "updated" : "created"}`);
+            onSaved();
+        } catch (error) {
+            setRequestError(error);
+            toast.error(getErrorMessage(error, "Please correct the form errors"));
+        } finally {
+            setSaving(false);
+        }
+    };
     return <Modal wide={fallback.length > 8} onClose={onClose} title={`${readOnly ? "View" : mode === "edit" ? "Edit" : "Create"} ${config.label.slice(0, -1)}`}><div className="admin-form"><form onSubmit={submit}>{resource === "products" && <fieldset className="product-type-field"><legend>Product Type</legend><label><input type="radio" name="product_mode" checked={productMode === "single"} onChange={() => setProductMode("single")} /> Single Product</label><label><input type="radio" name="product_mode" checked={productMode === "multiple"} onChange={() => setProductMode("multiple")} /> Multiple Product</label><small>Use the dedicated product editor to manage variants and images.</small></fieldset>}<div className="admin-form-grid">{fallback.map((field) => { const name = field.name || field.key; const refName = name.includes("category") ? (name.includes("sub") ? "subcategories" : "categories") : name.includes("offer") ? "offers" : name.includes("product") ? "products" : name.includes("variant") ? "product-variants" : name.includes("color") ? "colors" : name.includes("unit_type") ? "unit-types" : name === "unit" ? "units" : ["user", "customer"].includes(name) ? "users" : name.includes("coupon") ? "coupons" : name.includes("order") ? "orders" : ""; return <FormField key={name} field={field} options={references[refName] || []} value={values[name]} onChange={setValue} error={errors[name]} />; })}</div>{requestError && !Object.keys(errors).length && <p className="admin-form-error">{getErrorMessage(requestError)}</p>}<div className="admin-modal-actions"><button type="button" className="admin-button secondary" onClick={onClose}>{readOnly ? "Close" : "Cancel"}</button>{!readOnly && <button className="admin-button primary" disabled={saving}>{saving ? "Saving…" : "Save changes"}</button>}</div></form></div></Modal>;
 }
 
@@ -626,6 +662,8 @@ function cleanPayload(values, resource) {
     return form;
 }
 
+// Kept for the legacy product-tool modal flow; the current product editor owns this UI.
+// eslint-disable-next-line no-unused-vars
 function ProductTools({ productId }) {
     const schema = {};
     const variants = useAdminResource("product-variants", { page_size: 100 });
@@ -677,7 +715,7 @@ function OrderDetail({ id }) {
         return () => { active = false; };
     }, [id]);
     if (loading) return <div className="admin-page"><LoadingState label="Loading order details..." /></div>;
-    if (!order) return <div className="admin-page"><button className="admin-back-link" onClick={() => navigate("/order-dashboard/orders")}>Back to orders</button><EmptyState title="Order not found" /></div>;
+    if (!order) return <div className="admin-page"><button className="admin-back-link" onClick={() => navigate("/eehook-dashboard/orders")}>Back to orders</button><EmptyState title="Order not found" /></div>;
     return <OrderDetailContent order={order} id={id} navigate={navigate} />;
 }
 
@@ -686,7 +724,7 @@ function OrderDetailContent({ order, id, navigate }) {
     const shippingLines = [order.address_name, order.address_line, order.city, order.postcode, order.country].filter(Boolean);
     const lineTotal = (item) => item.total_price ?? Number(item.price || 0) * Number(item.quantity || 0);
     return <div className="admin-page">
-        <button className="admin-back-link" onClick={() => navigate("/order-dashboard/orders")}>Back to orders</button>
+        <button className="admin-back-link" onClick={() => navigate("/eehook-dashboard/orders")}>Back to orders</button>
         <PageHeader eyebrow="ORDER DETAILS" title={order.order_number || order.order_id || `Order #${id}`} description={`Created ${date(order.created_at || order.date)}. Read-only order details.`} />
         <div className="admin-detail-grid">
             <DetailCard title="Customer" icon={<FiUsers />}><strong>{order.customer_name || "Guest customer"}</strong><span>{order.customer_email || "No email provided"}</span></DetailCard>
@@ -719,7 +757,7 @@ function OrderDetailContent({ order, id, navigate }) {
     if (!order) return <div className="admin-page"><EmptyState title="Order not found" /></div>;
     const items = order.items || order.order_items || [];
     const save = async () => { setSaving(true); try { await updateResource("orders", id, { status, payment_status: paymentStatus }); toast.success("Order updated"); setEdit(false); const response = await getResource("orders", id); setOrder(response.data); } catch (error) { toast.error(getErrorMessage(error, "Could not update order")); } finally { setSaving(false); } };
-    return <div className="admin-page"><button className="admin-back-link" onClick={() => navigate("/order-dashboard/orders")}>← Back to orders</button><PageHeader eyebrow="ORDER DETAILS" title={order.order_number || order.order_id || `Order #${id}`} description={`Created ${date(order.created_at || order.date)}`} action={<button className="admin-button primary" onClick={() => setConfirmEdit(true)}><FiEdit3 /> Edit order</button>} /><div className="admin-detail-grid"><DetailCard title="Customer" icon={<FiUsers />}><strong>{recordLabel(order.user) || order.customer_name || order.user_name || "Guest customer"}</strong><span>{order.customer_email || order.user_email || order.user?.email || "—"}</span></DetailCard><DetailCard title="Shipping address" icon={<FiTruck />}><span>{typeof order.shipping_address === "object" ? Object.values(order.shipping_address).filter(Boolean).join(", ") : order.shipping_address || "No address provided"}</span></DetailCard><DetailCard title="Status & payment" icon={<FiCreditCard />}><span>Order <StatusPill value={order.status} /></span><span>Payment <StatusPill value={order.payment_status} /></span></DetailCard></div><div className="admin-panel order-items-panel"><div className="admin-panel-heading"><div><h3>Order items</h3><p>Quantity, price, and product details</p></div><FiBox /></div>{items.length ? <div className="order-item-list">{items.map((item, index) => <div className="order-item" key={item.id || index}><div className="order-item-image">{item.product_image || item.image ? <img src={item.product_image || item.image} alt="" /> : <FiBox />}</div><div><strong>{recordLabel(item.product) || item.product_name || item.name || "Product"}</strong><span>Qty {item.quantity || 1}{item.color ? ` · ${recordLabel(item.color)}` : ""}{item.size || item.unit ? ` · ${recordLabel(item.size || item.unit)}` : ""}</span></div><strong>{money((item.price || 0) * (item.quantity || 1))}</strong></div>)}</div> : <EmptyState title="No order items" />}<div className="order-total"><span>Subtotal <strong>{money(order.subtotal || order.total_amount)}</strong></span><span>Discount <strong>- {money(order.discount)}</strong></span><span>Shipping <strong>{money(order.shipping_charge || order.shipping_fee)}</strong></span><span className="total"><b>Total</b><strong>{money(order.total_amount)}</strong></span></div></div>{confirmEdit && <ConfirmDialog title="Confirm order edit" message="Open this order for editing? Changes will be saved to the backend." onCancel={() => setConfirmEdit(false)} onConfirm={() => { setConfirmEdit(false); setEdit(true); }} />}{edit && <Modal onClose={() => setEdit(false)} title="Update order"><div className="admin-form"><label className="admin-form-field"><span>Order status</span><select value={status} onChange={(event) => setStatus(event.target.value)}>{["Pending", "Processing", "Shipped", "Delivered", "Cancelled"].map((option) => <option key={option}>{option}</option>)}</select></label><label className="admin-form-field"><span>Payment status</span><select value={paymentStatus} onChange={(event) => setPaymentStatus(event.target.value)}>{["Pending", "Paid", "Failed", "Refunded"].map((option) => <option key={option}>{option}</option>)}</select></label><div className="admin-modal-actions"><button className="admin-button secondary" onClick={() => setEdit(false)}>Cancel</button><button className="admin-button primary" onClick={save} disabled={saving}>{saving ? "Saving…" : "Save changes"}</button></div></div></Modal>}</div>;
+    return <div className="admin-page"><button className="admin-back-link" onClick={() => navigate("/eehook-dashboard/orders")}>← Back to orders</button><PageHeader eyebrow="ORDER DETAILS" title={order.order_number || order.order_id || `Order #${id}`} description={`Created ${date(order.created_at || order.date)}`} action={<button className="admin-button primary" onClick={() => setConfirmEdit(true)}><FiEdit3 /> Edit order</button>} /><div className="admin-detail-grid"><DetailCard title="Customer" icon={<FiUsers />}><strong>{recordLabel(order.user) || order.customer_name || order.user_name || "Guest customer"}</strong><span>{order.customer_email || order.user_email || order.user?.email || "—"}</span></DetailCard><DetailCard title="Shipping address" icon={<FiTruck />}><span>{typeof order.shipping_address === "object" ? Object.values(order.shipping_address).filter(Boolean).join(", ") : order.shipping_address || "No address provided"}</span></DetailCard><DetailCard title="Status & payment" icon={<FiCreditCard />}><span>Order <StatusPill value={order.status} /></span><span>Payment <StatusPill value={order.payment_status} /></span></DetailCard></div><div className="admin-panel order-items-panel"><div className="admin-panel-heading"><div><h3>Order items</h3><p>Quantity, price, and product details</p></div><FiBox /></div>{items.length ? <div className="order-item-list">{items.map((item, index) => <div className="order-item" key={item.id || index}><div className="order-item-image">{item.product_image || item.image ? <img src={item.product_image || item.image} alt="" /> : <FiBox />}</div><div><strong>{recordLabel(item.product) || item.product_name || item.name || "Product"}</strong><span>Qty {item.quantity || 1}{item.color ? ` · ${recordLabel(item.color)}` : ""}{item.size || item.unit ? ` · ${recordLabel(item.size || item.unit)}` : ""}</span></div><strong>{money((item.price || 0) * (item.quantity || 1))}</strong></div>)}</div> : <EmptyState title="No order items" />}<div className="order-total"><span>Subtotal <strong>{money(order.subtotal || order.total_amount)}</strong></span><span>Discount <strong>- {money(order.discount)}</strong></span><span>Shipping <strong>{money(order.shipping_charge || order.shipping_fee)}</strong></span><span className="total"><b>Total</b><strong>{money(order.total_amount)}</strong></span></div></div>{confirmEdit && <ConfirmDialog title="Confirm order edit" message="Open this order for editing? Changes will be saved to the backend." onCancel={() => setConfirmEdit(false)} onConfirm={() => { setConfirmEdit(false); setEdit(true); }} />}{edit && <Modal onClose={() => setEdit(false)} title="Update order"><div className="admin-form"><label className="admin-form-field"><span>Order status</span><select value={status} onChange={(event) => setStatus(event.target.value)}>{["Pending", "Processing", "Shipped", "Delivered", "Cancelled"].map((option) => <option key={option}>{option}</option>)}</select></label><label className="admin-form-field"><span>Payment status</span><select value={paymentStatus} onChange={(event) => setPaymentStatus(event.target.value)}>{["Pending", "Paid", "Failed", "Refunded"].map((option) => <option key={option}>{option}</option>)}</select></label><div className="admin-modal-actions"><button className="admin-button secondary" onClick={() => setEdit(false)}>Cancel</button><button className="admin-button primary" onClick={save} disabled={saving}>{saving ? "Saving…" : "Save changes"}</button></div></div></Modal>}</div>;
 }
 */
 

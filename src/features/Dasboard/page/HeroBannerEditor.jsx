@@ -67,16 +67,16 @@ export default function HeroBannerEditor({ schema = {} }) {
             const response = editing ? await updateResource("hero-banners", id, data, true) : await createResource("hero-banners", data, true);
             const savedId = id || idOf(response.data);
             toast.success(editing ? "Hero banner updated" : "Hero banner created");
-            if (mode === "another") { setValues(emptyBanner); navigate("/order-dashboard/hero-banners/new", { replace: true }); }
-            else if (mode === "continue") navigate(`/order-dashboard/hero-banners/${savedId}/edit`, { replace: true });
-            else navigate("/order-dashboard/hero-banners");
+            if (mode === "another") { setValues(emptyBanner); navigate("/eehook-dashboard/hero-banners/new", { replace: true }); }
+            else if (mode === "continue") navigate(`/eehook-dashboard/hero-banners/${savedId}/edit`, { replace: true });
+            else navigate("/eehook-dashboard/hero-banners");
         } catch (error) { setErrors(errorMap(error)); setRequestError(getErrorMessage(error, "Could not save hero banner.")); toast.error(getErrorMessage(error, "Could not save hero banner.")); }
         finally { setSaving(false); }
     };
 
     if (loading) return <div className="admin-page"><LoadingState label="Loading hero banner…" /></div>;
     return <div className="hero-banner-editor-page">
-        <div className="hero-editor-heading"><div><button type="button" className="hero-back-link" onClick={() => navigate("/order-dashboard/hero-banners")}><FiArrowLeft /> Hero banners</button><h2>Hero banners</h2></div><div className="hero-breadcrumb">Home&nbsp; / &nbsp;Myapp&nbsp; / &nbsp;Hero banners&nbsp; / &nbsp;{editing ? "Edit hero banner" : "Add hero banner"}</div></div>
+        <div className="hero-editor-heading"><div><button type="button" className="hero-back-link" onClick={() => navigate("/eehook-dashboard/hero-banners")}><FiArrowLeft /> Hero banners</button><h2>Hero banners</h2></div><div className="hero-breadcrumb">Home&nbsp; / &nbsp;Myapp&nbsp; / &nbsp;Hero banners&nbsp; / &nbsp;{editing ? "Edit hero banner" : "Add hero banner"}</div></div>
         <div className="hero-editor-layout"><section className="hero-editor-card"><div className="hero-editor-form">{fields.map((field) => { const value = values[field.name]; const schemaField = schemaFields.find((item) => (item.name || item.key) === field.name) || field; const type = field.type || schemaField.type || "text"; return <label className={`hero-editor-field ${errors[field.name] ? "has-error" : ""}`} key={field.name}><span>{field.label}{field.required && <em> *</em>}</span>{type === "boolean" ? <input type="checkbox" checked={Boolean(value)} onChange={(event) => setValue(field.name, event.target.checked)} /> : type === "textarea" ? <textarea rows="7" value={value || ""} onChange={(event) => setValue(field.name, event.target.value)} /> : type === "image" ? <><input type="file" accept="image/*" onChange={(event) => setValue(field.name, event.target.files?.[0] || null)} />{value && <img className="hero-upload-preview" src={value instanceof File ? URL.createObjectURL(value) : value} alt="Hero preview" />}</> : <input type={type === "integer" || type === "number" ? "number" : "text"} min={field.min} value={value ?? ""} onChange={(event) => setValue(field.name, event.target.value)} />}{errors[field.name] && <small>{errors[field.name]}</small>}</label>; })}</div>{requestError && <p className="hero-editor-error">{requestError}</p>}</section><aside className="hero-editor-actions"><button className="hero-save-button" onClick={() => save("list")} disabled={saving}><FiSave /> Save</button><button className="hero-secondary-button" onClick={() => save("another")} disabled={saving}>Save and add another</button><button className="hero-secondary-button" onClick={() => save("continue")} disabled={saving}>Save and continue editing</button></aside></div>
     </div>;
 }

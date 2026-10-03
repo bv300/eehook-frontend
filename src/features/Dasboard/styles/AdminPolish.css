@@ -29,9 +29,20 @@
 }
 
 .admin-app {
+    width: 100%;
+    max-width: 100%;
     min-width: 0;
     background: #f2f6f4;
     letter-spacing: .005em;
+    overflow-x: hidden;
+}
+
+.admin-page,
+.admin-content,
+.admin-panel,
+.admin-stat-card {
+    min-width: 0;
+    max-width: 100%;
 }
 
 .admin-sidebar {
@@ -1028,6 +1039,43 @@
     .admin-app .admin-menu,
     .admin-app .admin-scrim {
         display: none;
+    }
+}
+
+.admin-form-field .field-hint {
+    display: block;
+    margin-top: 6px;
+    color: var(--admin-muted);
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+}
+
+.admin-app,
+.admin-app .admin-content,
+.admin-app .admin-page,
+.admin-app .admin-form,
+.admin-app .admin-form-grid,
+.admin-app .admin-form-field {
+    min-width: 0;
+}
+
+.admin-app img,
+.admin-app input,
+.admin-app select,
+.admin-app textarea,
+.admin-app button {
+    max-width: 100%;
+}
+
+@media (max-width: 760px) {
+    .admin-app .admin-form-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .admin-app .admin-modal {
+        width: 100%;
     }
 }
 

@@ -45,16 +45,16 @@ export default function PromoBannerEditor() {
             const response = editing ? await updateResource("promo-banners", id, form, true) : await createResource("promo-banners", form, true);
             const savedId = id || idOf(response.data);
             toast.success(editing ? "Promotional banner updated" : "Promotional banner created");
-            if (mode === "another") { setValues(emptyBanner); navigate("/order-dashboard/promo-banners/new", { replace: true }); }
-            else if (mode === "continue") navigate(`/order-dashboard/promo-banners/${savedId}/edit`, { replace: true });
-            else navigate("/order-dashboard/promo-banners");
+            if (mode === "another") { setValues(emptyBanner); navigate("/eehook-dashboard/promo-banners/new", { replace: true }); }
+            else if (mode === "continue") navigate(`/eehook-dashboard/promo-banners/${savedId}/edit`, { replace: true });
+            else navigate("/eehook-dashboard/promo-banners");
         } catch (error) { setErrors(errorMap(error)); setRequestError(getErrorMessage(error, "Could not save promotional banner.")); toast.error(getErrorMessage(error, "Could not save promotional banner.")); }
         finally { setSaving(false); }
     };
 
     if (loading) return <div className="admin-page"><LoadingState label="Loading promotional banner..." /></div>;
     return <div className="hero-banner-editor-page">
-        <div className="hero-editor-heading"><div><button type="button" className="hero-back-link" onClick={() => navigate("/order-dashboard/promo-banners")}><FiArrowLeft /> Promo banners</button><h2>Promo banners</h2></div><div className="hero-breadcrumb">Home&nbsp; / &nbsp;Myapp&nbsp; / &nbsp;Promo banners&nbsp; / &nbsp;{editing ? "Edit promo banner" : "Add promo banner"}</div></div>
+        <div className="hero-editor-heading"><div><button type="button" className="hero-back-link" onClick={() => navigate("/eehook-dashboard/promo-banners")}><FiArrowLeft /> Promo banners</button><h2>Promo banners</h2></div><div className="hero-breadcrumb">Home&nbsp; / &nbsp;Myapp&nbsp; / &nbsp;Promo banners&nbsp; / &nbsp;{editing ? "Edit promo banner" : "Add promo banner"}</div></div>
         <div className="hero-editor-layout"><section className="hero-editor-card"><div className="hero-editor-form">{fields.map((field) => { const value = values[field.name]; return <label className="hero-editor-field" key={field.name}><span>{field.label}{field.required && <em> *</em>}</span>{field.type === "boolean" ? <input type="checkbox" checked={Boolean(value)} onChange={(event) => setValue(field.name, event.target.checked)} /> : field.type === "image" ? <><input type="file" accept="image/*" onChange={(event) => setValue(field.name, event.target.files?.[0] || null)} />{value && <img className="hero-upload-preview" src={value instanceof File ? URL.createObjectURL(value) : value} alt="Promo preview" />}</> : <input type="text" value={value ?? ""} onChange={(event) => setValue(field.name, event.target.value)} />}{field.help && <small className="hero-field-help">{field.help}</small>}{errors[field.name] && <small>{errors[field.name]}</small>}</label>; })}</div>{requestError && <p className="hero-editor-error">{requestError}</p>}</section><aside className="hero-editor-actions"><button className="hero-save-button" onClick={() => save("list")} disabled={saving}><FiSave /> Save</button><button className="hero-secondary-button" onClick={() => save("another")} disabled={saving}>Save and add another</button><button className="hero-secondary-button" onClick={() => save("continue")} disabled={saving}>Save and continue editing</button></aside></div>
     </div>;
 }

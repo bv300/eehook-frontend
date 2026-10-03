@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate, useParams } from 'react-router-dom'
+import { Routes, Route, Navigate, useLocation, useParams } from 'react-router-dom'
 import Home from '../features/home/Home'
 import Sale from '../features/sale/page/Sale'
 import Single_product from '../features/single product/page/Single_product'
@@ -25,7 +25,13 @@ import ProtectedRoute from '../features/auth/page/ProtectedRoute'
 import Unauthorized from '../features/auth/page/Unauthorized'
 function LegacyOrderDetailsRedirect() {
     const { id } = useParams();
-    return <Navigate to={`/order-dashboard/orders/${id}`} replace />;
+    return <Navigate to={`/eehook-dashboard/orders/${id}`} replace />;
+}
+
+function LegacyDashboardPathRedirect() {
+    const location = useLocation();
+    const nextPath = location.pathname.replace(/^\/(?:order-dashboard|orderdashboard)/i, "/eehook-dashboard");
+    return <Navigate to={`${nextPath}${location.search}${location.hash}`} replace />;
 }
 
 function Router() {
@@ -71,44 +77,44 @@ function Router() {
 
                 <Route path='login' element={<Login />} />
                 <Route path='admin-login' element={<AdminLogin />} />
+                <Route path='eehook-dashboard/admin-login' element={<AdminLogin />} />
                 <Route path='unauthorized' element={<Unauthorized />} />
                 <Route path='signup' element={<Signup />} />
                 <Route path='forgot-password' element={<ForgotPassword />} />
                 <Route path="/reset-password/:uidb64/:token" element={<ResetPassword />} />
 
 
-                <Route path="order-dashboard" element={
+                <Route path="eehook-dashboard" element={
                     <AdminRoute>
                         <OrderDashboard />
                     </AdminRoute>
                 } />
-                <Route path="order-dashboard/product-variants" element={<AdminRoute><Navigate to="/order-dashboard/products" replace /></AdminRoute>} />
-                <Route path="order-dashboard/product-variant-units" element={<AdminRoute><Navigate to="/order-dashboard/products" replace /></AdminRoute>} />
-                <Route path="order-dashboard/product-images" element={<AdminRoute><Navigate to="/order-dashboard/products" replace /></AdminRoute>} />
-                <Route path="order-dashboard/products/new" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
-                <Route path="order-dashboard/products/:id" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
-                <Route path="order-dashboard/products/:id/edit" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
-                <Route path="order-dashboard/hero-banners/new" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
-                <Route path="order-dashboard/hero-banners/:id/edit" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
-                <Route path="order-dashboard/promo-banners/new" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
-                <Route path="order-dashboard/promo-banners/:id/edit" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
-                <Route path="order-dashboard/hero-side-banners/new" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
-                <Route path="order-dashboard/hero-side-banners/:id/edit" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
-                <Route path="order-dashboard/coupons/new" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
-                <Route path="order-dashboard/coupons/:id/edit" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
-                <Route path="order-dashboard/coupon-usages/new" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
-                <Route path="order-dashboard/coupon-usages/:id/edit" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
-                <Route path="order-dashboard/:section" element={
+                <Route path="eehook-dashboard/product-variants" element={<AdminRoute><Navigate to="/eehook-dashboard/products" replace /></AdminRoute>} />
+                <Route path="eehook-dashboard/product-variant-units" element={<AdminRoute><Navigate to="/eehook-dashboard/products" replace /></AdminRoute>} />
+                <Route path="eehook-dashboard/product-images" element={<AdminRoute><Navigate to="/eehook-dashboard/products" replace /></AdminRoute>} />
+                <Route path="eehook-dashboard/products/new" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
+                <Route path="eehook-dashboard/products/:id" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
+                <Route path="eehook-dashboard/products/:id/edit" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
+                <Route path="eehook-dashboard/hero-banners/new" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
+                <Route path="eehook-dashboard/hero-banners/:id/edit" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
+                <Route path="eehook-dashboard/promo-banners/new" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
+                <Route path="eehook-dashboard/promo-banners/:id/edit" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
+                <Route path="eehook-dashboard/hero-side-banners/new" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
+                <Route path="eehook-dashboard/hero-side-banners/:id/edit" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
+                <Route path="eehook-dashboard/coupons/new" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
+                <Route path="eehook-dashboard/coupons/:id/edit" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
+                <Route path="eehook-dashboard/coupon-usages/new" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
+                <Route path="eehook-dashboard/coupon-usages/:id/edit" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
+                <Route path="eehook-dashboard/:section" element={
                     <AdminRoute>
                         <OrderDashboard />
                     </AdminRoute>
                 } />
-                <Route path="OrderDashboard" element={<Navigate to="/order-dashboard" replace />} />
-                <Route path="order-dashboard/orders/:id" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
-                <Route path="order-dashboard/:section/:id/view" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
-                <Route path="order-dashboard/:section/:id/edit" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
+                <Route path="eehook-dashboard/orders/:id" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
+                <Route path="eehook-dashboard/:section/:id/view" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
+                <Route path="eehook-dashboard/:section/:id/edit" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
                 <Route
-                    path="/orderDashboard/details/:id"
+                    path="/eehook-dashboard/details/:id"
                     element={
                         <AdminRoute>
                             <LegacyOrderDetailsRedirect />
@@ -116,13 +122,17 @@ function Router() {
                     }
                 />
                 <Route
-                    path="/orderDashboard/invoice/:id"
+                    path="/eehook-dashboard/invoice/:id"
                     element={
                         <AdminRoute>
                             <Invoice />
                         </AdminRoute>
                     }
                 />
+                <Route path="order-dashboard" element={<LegacyDashboardPathRedirect />} />
+                <Route path="order-dashboard/*" element={<LegacyDashboardPathRedirect />} />
+                <Route path="orderDashboard" element={<LegacyDashboardPathRedirect />} />
+                <Route path="orderDashboard/*" element={<LegacyDashboardPathRedirect />} />
                 <Route
                     path="/payment-success"
                     element={<PaymentSuccess />}

@@ -1,9 +1,14 @@
 .checkout-page {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
     padding: 35px;
     margin-top: 80px;
 }
 
 .checkout-container {
+    width: 100%;
+    min-width: 0;
     max-width: 1400px;
     margin: auto;
     display: flex;
@@ -15,6 +20,7 @@
 /* LEFT ORDER SUMMARY */
 
 .order-summary {
+    min-width: 0;
     width: 60%;
     flex-shrink: 0;
     background: #ffffff;
@@ -32,6 +38,7 @@
 /* PRODUCT */
 
 .product {
+    min-width: 0;
     display: flex;
     align-items: center;
     gap: 18px;
@@ -52,12 +59,14 @@
 }
 
 .product-details {
+    min-width: 0;
     flex: 1;
 }
 
 .product-details h4 {
     font-size: 18px;
     margin-bottom: 8px;
+    overflow-wrap: anywhere;
 }
 
 .product-details p {
@@ -113,12 +122,14 @@
 
 .product h5 {
     font-size: 18px;
-    white-space: nowrap;
+    white-space: normal;
+    overflow-wrap: anywhere;
 }
 
 /* RIGHT SUMMARY */
 
 .checkout-right {
+    min-width: 0;
     width: 40%;
     position: sticky;
     top: 100px;
@@ -132,6 +143,7 @@
 /* CARD */
 
 .Checkout_card {
+    min-width: 0;
     background: #fffefd;
     border-radius: 12px;
     padding: 28px;
@@ -176,6 +188,9 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    min-width: 0;
+    gap: 10px;
+    flex-wrap: wrap;
     margin: 18px 0;
 }
 

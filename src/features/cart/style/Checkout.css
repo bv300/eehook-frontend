@@ -1,4 +1,6 @@
 .eehook-checkout{
+    width: 100%;
+    min-width: 0;
     max-width:1280px;
     margin:40px auto;
     padding:0 20px;
@@ -24,6 +26,7 @@
 }
 
 .eehook-checkout-wrapper{
+    min-width: 0;
     display:grid;
     grid-template-columns:minmax(0,2fr) 420px;
     gap:32px;
@@ -31,17 +34,20 @@
 }
 
 .eehook-checkout-left{
+    min-width: 0;
     display:flex;
     flex-direction:column;
     gap:24px;
 }
 
 .eehook-checkout-right{
+    min-width: 0;
     position:sticky;
     top:20px;
 }
 
 .eehook-checkout-card{
+    min-width: 0;
     background: #FFFFFF;
     border:1px solid #ececec;
     border-radius:14px;
@@ -120,6 +126,7 @@
 }
 
 .eehook-address-info{
+    min-width: 0;
     flex:1;
 }
 
@@ -207,6 +214,7 @@
 }
 
 .eehook-summary-details{
+    min-width: 0;
     flex:1;
 }
 
@@ -216,6 +224,8 @@
     color: #4B636D;
     margin-bottom:6px;
     line-height:1.4;
+    overflow-wrap:anywhere;
+    word-break:break-word;
 }
 
 .eehook-summary-details p{
@@ -238,6 +248,7 @@
 }
 
 .eehook-summary-row{
+    min-width: 0;
     display:flex;
     justify-content:space-between;
     align-items:center;
@@ -251,8 +262,15 @@
 }
 
 .eehook-summary-row span:last-child{
+    min-width: 0;
+    overflow-wrap: anywhere;
     font-weight:500;
     color: #4B636D;
+}
+
+.eehook-summary-row span:first-child{
+    min-width: 0;
+    overflow-wrap: anywhere;
 }
 
 .eehook-grand-total{

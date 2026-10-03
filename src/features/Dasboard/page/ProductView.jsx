@@ -107,7 +107,7 @@ export default function ProductView() {
     const lookupLabel = (value, collection) => labelOf(collection.find((item) => String(idOf(item)) === String(idOf(value))) || value);
 
     if (loading) return <div className="admin-page"><LoadingState label="Loading product..." /></div>;
-    if (error) return <div className="admin-page"><div className="admin-form-error product-editor-error">{error}</div><button className="admin-button secondary" onClick={() => navigate("/order-dashboard/products")}><FiArrowLeft /> Back to Products</button></div>;
+    if (error) return <div className="admin-page"><div className="admin-form-error product-editor-error">{error}</div><button className="admin-button secondary" onClick={() => navigate("/eehook-dashboard/products")}><FiArrowLeft /> Back to Products</button></div>;
     if (!product) return <div className="admin-page"><EmptyState title="Product not found" /></div>;
 
     const descriptionText = textValue(product.description);
@@ -116,7 +116,7 @@ export default function ProductView() {
     return (
         <div className="admin-page product-view-page">
             <div className="product-view-toolbar">
-                <button className="admin-button secondary" onClick={() => navigate("/order-dashboard/products")}><FiArrowLeft /> Back to Products</button>
+                <button className="admin-button secondary" onClick={() => navigate("/eehook-dashboard/products")}><FiArrowLeft /> Back to Products</button>
             </div>
 
             <div className="admin-page-header">

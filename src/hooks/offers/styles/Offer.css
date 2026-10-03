@@ -77,6 +77,7 @@
   margin: 0;
   letter-spacing: 0.5px;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Enhances text contrast */
+  overflow-wrap: anywhere;
 }
 
 .offer-description {
@@ -136,5 +137,33 @@
   }
   .offer-description {
     max-width: 80%;
+  }
+}
+
+@media (max-width: 480px) {
+  .offer-banner-container {
+    padding: 14px 10px;
+  }
+
+  .offer-banner {
+    height: 230px;
+  }
+
+  .offer-content-overlay {
+    padding: 0 22px;
+    gap: 7px;
+  }
+
+  .offer-title {
+    font-size: clamp(20px, 6vw, 26px);
+  }
+
+  .offer-description {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+
+  .offer-btn {
+    padding: 10px 22px;
   }
 }

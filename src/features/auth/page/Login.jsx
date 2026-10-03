@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { GoogleLogin } from "@react-oauth/google";
 import client, { getRetryAfterSeconds } from "../../../lib/ApiClient";
-import { isSuperAdminUser, saveAuthSession } from "../authUtils";
+import { clearAuthSession, isPrivilegedUser, saveAuthSession } from "../authUtils";
 import "./Login.css";
 
 function Login() {
@@ -47,25 +47,24 @@ function Login() {
 
         try {
 
-            const response = await client.post("login/", formData);
-            const user = saveAuthSession(response.data);
-
-            if (isSuperAdminUser(user)) {
-
-                navigate(response.data.redirect_to || "/order-dashboard", { replace: true });
-                
-
-            } else {
-
-                navigate("/");
-
+            const response = await client.post("login/", { ...formData, login_type: "customer" });
+            const user = response.data.user || response.data;
+            if (isPrivilegedUser(user)) {
+                clearAuthSession();
+                setErrorMessage("Admin accounts must use the Super Admin login page.");
+                return;
             }
+            saveAuthSession(response.data);
+            navigate("/", { replace: true });
 
         } catch (error) {
             if (error.response?.status === 429) {
                 const seconds = getRetryAfterSeconds(error);
                 setRetryAfter(seconds);
                 setErrorMessage(`Too many attempts. Try again after ${seconds} seconds.`);
+            } else if (error.response?.status === 403) {
+                clearAuthSession();
+                setErrorMessage(error.response?.data?.detail || "Admin accounts must use the Super Admin login page.");
             } else {
                 setErrorMessage("Invalid email or password.");
             }
@@ -83,27 +82,26 @@ function Login() {
         try {
 
             const response = await client.post("google-login/", {
-                token: credentialResponse.credential
+                token: credentialResponse.credential,
+                login_type: "customer",
             });
             const user = response.data.user || response.data;
-
-            saveAuthSession(response.data);
-
-            if (isSuperAdminUser(user)) {
-
-                navigate(response.data.redirect_to || "/order-dashboard", { replace: true });
-
-            } else {
-
-                navigate("/");
-
+            if (isPrivilegedUser(user)) {
+                clearAuthSession();
+                setErrorMessage("Admin accounts must use the Super Admin login page.");
+                return;
             }
+            saveAuthSession(response.data);
+            navigate("/", { replace: true });
 
         } catch (error) {
             if (error.response?.status === 429) {
                 const seconds = getRetryAfterSeconds(error);
                 setRetryAfter(seconds);
                 setErrorMessage(`Too many attempts. Try again after ${seconds} seconds.`);
+            } else if (error.response?.status === 403) {
+                clearAuthSession();
+                setErrorMessage(error.response?.data?.detail || "Admin accounts must use the Super Admin login page.");
             } else {
                 setErrorMessage("Google login failed.");
             }

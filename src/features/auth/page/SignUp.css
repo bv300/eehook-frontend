@@ -25,6 +25,7 @@ align-items:center;
 
 .signup-box{
 width:100%;
+min-width:0;
 max-width:430px;
 background: #F8F9F3;
 padding:28px;
@@ -88,6 +89,26 @@ box-shadow:0 0 0 3px rgba(177,31,77,.12);
 
 .password-group{
 position:relative;
+}
+
+.password-policy-help,
+.password-policy-error,
+.signup-form-error{
+display:block;
+max-width:100%;
+overflow-wrap:anywhere;
+font-size:12px;
+line-height:1.45;
+margin-top:6px;
+}
+
+.password-policy-help{
+color:#71838a;
+}
+
+.password-policy-error,
+.signup-form-error{
+color:#c2364f;
 }
 
 .password-group input{
