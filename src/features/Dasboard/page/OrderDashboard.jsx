@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
-import { FiActivity, FiArchive, FiBox, FiChevronDown, FiClipboard, FiCreditCard, FiCopy, FiEdit3, FiEye, FiGrid, FiImage, FiLayers, FiLogOut, FiMenu, FiPackage, FiPlus, FiRefreshCw, FiSettings, FiShoppingBag, FiTag, FiTrash2, FiTruck, FiUsers, FiX } from "react-icons/fi";
+import { FiActivity, FiArchive, FiBox, FiChevronDown, FiClipboard, FiCreditCard, FiCopy, FiDownload, FiEdit3, FiEye, FiGrid, FiImage, FiLayers, FiLogOut, FiMenu, FiPackage, FiPlus, FiRefreshCw, FiSettings, FiShoppingBag, FiTag, FiTrash2, FiTruck, FiUsers, FiX } from "react-icons/fi";
 import { ConfirmDialog, DataTable, DebouncedSearch, EmptyState, FilterBar, FormField, LoadingState, Modal, PageHeader, Pagination, Skeleton, StatusPill } from "../components/AdminPrimitives";
 import useAdminResource from "../hooks/useAdminResource";
 import OverviewGraphs from "../components/OverviewGraphs";
 import useFormErrors from "../hooks/useFormErrors";
-import { createResource, deleteResource, getErrorMessage, getFieldSchema, getOrderDetails, getResource, listResource, updateOrderDetails, updateResource } from "../services/adminApi";
+import { createResource, deleteResource, getErrorMessage, getFieldSchema, getOrderDetails, getResource, listResource, unwrapList, updateOrderDetails, updateResource } from "../services/adminApi";
 import ProductView from "./ProductView";
 import ProductEditor from "./ProductEditor";
 import HeroBannerEditor from "./HeroBannerEditor";
@@ -106,6 +106,83 @@ function resolveTableValue(row, key, references) {
     const value = row?.[key];
     const reference = (references[referenceName] || []).find((item) => String(recordId(item)) === String(value?.id ?? value));
     return displayValue({ [key]: reference || value }, key);
+}
+
+function csvValue(value) {
+    if (value === null || value === undefined) return "";
+    if (Array.isArray(value)) return value.map(csvValue).join("; ");
+    if (typeof value === "object") {
+        const label = value.name || value.title || value.email || value.code;
+        return label ? String(label) : JSON.stringify(value);
+    }
+    return String(value);
+}
+
+function csvEscape(value) {
+    const text = csvValue(value);
+    return /[",\r\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
+}
+
+function downloadCsv(filename, rows, columns) {
+    const header = columns.map((column) => csvEscape(column.label)).join(",");
+    const body = rows.map((row) => columns.map((column) => csvEscape(row?.[column.key])).join(",")).join("\r\n");
+    const blob = new Blob([`\uFEFF${header}${body ? `\r\n${body}` : ""}`], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+}
+
+function flattenForCsv(value, prefix = "", rows = []) {
+    if (Array.isArray(value)) {
+        if (!value.length) rows.push({ metric: prefix, value: "" });
+        value.forEach((item, index) => flattenForCsv(item, `${prefix}[${index + 1}]`, rows));
+        return rows;
+    }
+    if (value && typeof value === "object") {
+        Object.entries(value).forEach(([key, item]) => flattenForCsv(item, prefix ? `${prefix}.${key}` : key, rows));
+        return rows;
+    }
+    rows.push({ metric: prefix, value: value ?? "" });
+    return rows;
+}
+
+function exportColumns(resource, rows) {
+    const keys = [...new Set([
+        ...rows.flatMap((row) => Object.keys(row || {})),
+        ...(resources[resource]?.fields || []),
+    ])].filter((key) => key !== "password");
+    return keys.map((key) => ({ key, label: columnLabel(resource, key) }));
+}
+
+async function fetchAllResourceRows(resource, params = {}) {
+    const requestParams = { ...params };
+    delete requestParams.page;
+    delete requestParams.page_size;
+    const allRows = [];
+    let page = 1;
+
+    while (page <= 10000) {
+        const response = await listResource(resource, { ...requestParams, page, page_size: 500 });
+        const normalized = unwrapList(response.data);
+        allRows.push(...normalized.rows);
+        if (!normalized.next && (!normalized.count || allRows.length >= normalized.count || !normalized.rows.length)) break;
+        page += 1;
+    }
+
+    return allRows;
+}
+
+function CsvButton({ onClick, disabled = false, loading = false }) {
+    return <button type="button" className="admin-button secondary" onClick={onClick} disabled={disabled || loading}><FiDownload /> {loading ? "Preparing CSV..." : "Download CSV"}</button>;
+}
+
+function AdminHeaderActions({ children }) {
+    return <div className="admin-header-actions">{children}</div>;
 }
 
 function relatedProductImageMap(variants, images) {
@@ -214,8 +291,18 @@ function Overview({ data, loading }) {
         ["Total coupons", resourceCount("coupons"), FiTag, "green"],
     ];
     const lowStock = count(data?.low_stock_count, data?.low_stock, data?.products_low_stock);
+    const downloadOverview = () => {
+        const rows = flattenForCsv(data);
+        if (!rows.length) {
+            toast.info("There is no overview data to export yet.");
+            return;
+        }
+        downloadCsv("dashboard-overview.csv", rows, [{ key: "metric", label: "Metric" }, { key: "value", label: "Value" }]);
+        toast.success("Overview CSV downloaded");
+    };
     return <div className="admin-page">
         <PageHeader eyebrow="OVERVIEW" title="Store overview" description="Your store at a glance — products, customers, and order progress." />
+        <div className="admin-overview-export"><CsvButton onClick={downloadOverview} disabled={loading || !Object.keys(data || {}).length} /></div>
         <section className="admin-stat-grid" aria-label="Store totals" aria-busy={loading}>
             {cards.map(([label, number, Icon, tone]) => <article className="admin-stat-card" key={label}>
                 <span className={`admin-stat-icon ${tone}`}><Icon aria-hidden="true" /></span>
@@ -241,6 +328,7 @@ function ResourcePage({ resource, schema }) {
     const [dateTo, setDateTo] = useState("");
     const [modal, setModal] = useState(null);
     const [deleteTarget, setDeleteTarget] = useState(null);
+    const [exporting, setExporting] = useState(false);
     const [unitTypeRows, setUnitTypeRows] = useState([]);
     const [usageReferences, setUsageReferences] = useState({ coupons: [], users: [], products: [] });
     const [tableReferences, setTableReferences] = useState({});
@@ -297,8 +385,25 @@ function ResourcePage({ resource, schema }) {
     const addAction = resource === "products" ? () => navigate("/order-dashboard/products/new") : ["hero-banners", "promo-banners", "hero-side-banners", "coupons", "coupon-usages"].includes(resource) ? () => navigate(`/order-dashboard/${resource}/new`) : () => setModal({ mode: "create" });
     const remove = async () => { try { await deleteResource(resource, recordId(deleteTarget)); toast.success(`${config.label.slice(0, -1)} deleted`); setDeleteTarget(null); state.reload(); } catch (error) { toast.error(getErrorMessage(error, "Could not delete record")); } };
     const closeAndReload = () => { setModal(null); state.reload(); };
+    const downloadResourceCsv = async () => {
+        setExporting(true);
+        try {
+            const rows = await fetchAllResourceRows(resource, params);
+            if (!rows.length) {
+                toast.info(`There are no ${config.label.toLowerCase()} to export.`);
+                return;
+            }
+            downloadCsv(`${resource}.csv`, rows, exportColumns(resource, rows));
+            toast.success(`${config.label} CSV downloaded`);
+        } catch (error) {
+            toast.error(getErrorMessage(error, `Could not export ${config.label.toLowerCase()}.`));
+        } finally {
+            setExporting(false);
+        }
+    };
+    const canExport = resource === "products" || resource === "orders" || resource === "order-items";
 
-    return <div className="admin-page"><PageHeader title={config.label} description={`Create, review, update, and remove ${config.label.toLowerCase()} records.`} action={<button className="admin-button primary" onClick={addAction}><FiPlus /> Add {config.label.slice(0, -1)}</button>} /><div className="admin-panel"><FilterBar onClear={clearFilters}><DebouncedSearch value={search} onChange={(value) => { setSearch(value); setPage(1); }} placeholder={`Search ${config.label.toLowerCase()}...`} /><label className="admin-select"><span>Order</span><select value={ordering} onChange={(event) => { setOrdering(event.target.value); setPage(1); }}><option value="">Default</option><option value="-created_at">Newest</option><option value="created_at">Oldest</option><option value="name">Name A-Z</option><option value="-name">Name Z-A</option></select><FiChevronDown /></label>{resource === "orders" && <><label className="admin-select"><span>Status</span><select value={status} onChange={(event) => { setStatus(event.target.value); setPage(1); }}><option value="">All statuses</option>{["Pending", "Processing", "Shipped", "Delivered", "Cancelled"].map((item) => <option key={item}>{item}</option>)}</select></label><label className="admin-select"><span>Payment</span><select value={paymentStatus} onChange={(event) => { setPaymentStatus(event.target.value); setPage(1); }}><option value="">All payments</option>{["Pending", "Paid", "Failed", "Refunded"].map((item) => <option key={item}>{item}</option>)}</select></label><label className="admin-date"><span>From</span><input type="date" value={dateFrom} onChange={(event) => { setDateFrom(event.target.value); setPage(1); }} /></label><label className="admin-date"><span>To</span><input type="date" value={dateTo} onChange={(event) => { setDateTo(event.target.value); setPage(1); }} /></label></> }</FilterBar><DataTable columns={columns} rows={state.rows} loading={state.loading} error={state.error} onRetry={state.reload} actions={(row) => <><button className="table-icon" title="View details" aria-label={`View ${config.label.slice(0, -1)}`} onClick={() => openView(row)}><FiEye /></button><button className="table-icon" title="Edit" aria-label={`Edit ${config.label.slice(0, -1)}`} onClick={() => openEdit(row)}><FiEdit3 /></button><button className="table-icon danger" title="Delete" aria-label={`Delete ${config.label.slice(0, -1)}`} onClick={() => setDeleteTarget(row)}><FiTrash2 /></button></>} /><Pagination page={page} pageSize={pageSize} count={state.count} next={state.next} previous={state.previous} onPageChange={setPage} onPageSizeChange={(size) => { setPageSize(size); setPage(1); }} /></div>{modal && <ResourceModal resource={resource} schema={schema} mode={modal.mode} onClose={() => setModal(null)} onSaved={closeAndReload} />}{deleteTarget && <ConfirmDialog message={`Delete this ${config.label.slice(0, -1).toLowerCase()} permanently?`} onCancel={() => setDeleteTarget(null)} onConfirm={remove} />}</div>;
+    return <div className="admin-page"><PageHeader title={config.label} description={`Create, review, update, and remove ${config.label.toLowerCase()} records.`} action={<AdminHeaderActions>{canExport && <CsvButton onClick={downloadResourceCsv} loading={exporting} />}<button className="admin-button primary" onClick={addAction}><FiPlus /> Add {config.label.slice(0, -1)}</button></AdminHeaderActions>} /><div className="admin-panel"><FilterBar onClear={clearFilters}><DebouncedSearch value={search} onChange={(value) => { setSearch(value); setPage(1); }} placeholder={`Search ${config.label.toLowerCase()}...`} /><label className="admin-select"><span>Order</span><select value={ordering} onChange={(event) => { setOrdering(event.target.value); setPage(1); }}><option value="">Default</option><option value="-created_at">Newest</option><option value="created_at">Oldest</option><option value="name">Name A-Z</option><option value="-name">Name Z-A</option></select><FiChevronDown /></label>{resource === "orders" && <><label className="admin-select"><span>Status</span><select value={status} onChange={(event) => { setStatus(event.target.value); setPage(1); }}><option value="">All statuses</option>{["Pending", "Processing", "Shipped", "Delivered", "Cancelled"].map((item) => <option key={item}>{item}</option>)}</select></label><label className="admin-select"><span>Payment</span><select value={paymentStatus} onChange={(event) => { setPaymentStatus(event.target.value); setPage(1); }}><option value="">All payments</option>{["Pending", "Paid", "Failed", "Refunded"].map((item) => <option key={item}>{item}</option>)}</select></label><label className="admin-date"><span>From</span><input type="date" value={dateFrom} onChange={(event) => { setDateFrom(event.target.value); setPage(1); }} /></label><label className="admin-date"><span>To</span><input type="date" value={dateTo} onChange={(event) => { setDateTo(event.target.value); setPage(1); }} /></label></> }</FilterBar><DataTable columns={columns} rows={state.rows} loading={state.loading} error={state.error} onRetry={state.reload} actions={(row) => <><button className="table-icon" title="View details" aria-label={`View ${config.label.slice(0, -1)}`} onClick={() => openView(row)}><FiEye /></button><button className="table-icon" title="Edit" aria-label={`Edit ${config.label.slice(0, -1)}`} onClick={() => openEdit(row)}><FiEdit3 /></button><button className="table-icon danger" title="Delete" aria-label={`Delete ${config.label.slice(0, -1)}`} onClick={() => setDeleteTarget(row)}><FiTrash2 /></button></>} /><Pagination page={page} pageSize={pageSize} count={state.count} next={state.next} previous={state.previous} onPageChange={setPage} onPageSizeChange={(size) => { setPageSize(size); setPage(1); }} /></div>{modal && <ResourceModal resource={resource} schema={schema} mode={modal.mode} onClose={() => setModal(null)} onSaved={closeAndReload} />}{deleteTarget && <ConfirmDialog message={`Delete this ${config.label.slice(0, -1).toLowerCase()} permanently?`} onCancel={() => setDeleteTarget(null)} onConfirm={remove} />}</div>;
 }
 
 function ReadOnlyResourcePage({ resource, id, schema }) {

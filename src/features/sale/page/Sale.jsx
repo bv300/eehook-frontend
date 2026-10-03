@@ -86,6 +86,7 @@ function Sale() {
                     <span className="product_count">
                         {data?.count ?? products.length} Products
                     </span>
+
                 </div>
             </div>
 

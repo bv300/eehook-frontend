@@ -88,6 +88,19 @@
     margin-bottom: 24px;
 }
 
+.admin-header-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 9px;
+}
+
+.admin-overview-export {
+    display: flex;
+    justify-content: flex-end;
+    margin: -8px 0 16px;
+}
+
 .admin-page-header > div > p:last-child {
     max-width: 760px;
     line-height: 1.55;
@@ -503,6 +516,15 @@
     }
 
     .admin-page-header .admin-button {
+        width: 100%;
+    }
+
+    .admin-header-actions {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .admin-header-actions .admin-button {
         width: 100%;
     }
 

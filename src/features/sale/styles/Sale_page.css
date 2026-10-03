@@ -63,7 +63,6 @@
     white-space: nowrap;
 }
 
-
 @media (max-width: 1024px) {
     .shop_page {
         grid-template-columns: 1fr;

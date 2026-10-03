@@ -21,6 +21,40 @@ import showToast from "../../../utils/toast";
 import { getImageUrl } from "../../../utils/imageUrl";
 import defaultImage from "../../../assets/image_not_available.png";
 
+function getDescriptionText(value) {
+    if (Array.isArray(value)) return value.filter(Boolean).join("\n").trim();
+    return value === null || value === undefined ? "" : String(value).trim();
+}
+
+function getKeyFeatures(value) {
+    if (Array.isArray(value)) {
+        return value
+            .flatMap((feature) => {
+                if (feature && typeof feature === "object") return feature.name || feature.title || feature.description || "";
+                return feature;
+            })
+            .map((feature) => String(feature || "").trim())
+            .filter(Boolean);
+    }
+
+    if (value === null || value === undefined) return [];
+
+    const text = String(value).trim();
+    if (!text) return [];
+
+    try {
+        const parsed = JSON.parse(text);
+        if (Array.isArray(parsed)) return getKeyFeatures(parsed);
+    } catch {
+        // The backend normally returns one feature per line, so plain text is handled below.
+    }
+
+    return text
+        .split(/\r?\n|[•●▪◦]/)
+        .map((feature) => feature.replace(/^\s*[-*]\s*/, "").trim())
+        .filter(Boolean);
+}
+
 function Single_product() {
 
     const navigate = useNavigate();
@@ -42,6 +76,9 @@ function Single_product() {
         isLoading,
         error
     } = GetSingle_product_Query(id);
+
+    const descriptionText = getDescriptionText(data.description);
+    const keyFeatures = getKeyFeatures(data.key_features);
 
     const [selectedColor, setSelectedColor] = useState(null);
 
@@ -539,15 +576,23 @@ function Single_product() {
                         {couponError && <div style={{ color: 'red', fontSize: '13px', marginTop: '8px' }}>{couponError}</div>}
                     </div>
 
-                    <p className="description">{data.description}</p>
+                    {(descriptionText || keyFeatures.length > 0) && (
+                        <div className="product-content-details" aria-label="Product details">
+                            {descriptionText && (
+                                <section className="product-content-section" aria-labelledby="product-description-heading">
+                                    <h2 id="product-description-heading">Description</h2>
+                                    <p className="description">{descriptionText}</p>
+                                </section>
+                            )}
 
-                    {data?.key_features && data.key_features.length > 0 && (
-                        <div className="key-features" style={{ margin: "15px 0", color: "#444", fontSize: "14px" }}>
-                            <ul style={{ paddingLeft: "20px" }}>
-                                {data.key_features.map((feature, idx) => (
-                                    <li key={idx} style={{ marginBottom: "6px" }}>{feature}</li>
-                                ))}
-                            </ul>
+                            {keyFeatures.length > 0 && (
+                                <section className="product-content-section key-features" aria-labelledby="product-features-heading">
+                                    <h2 id="product-features-heading">Key features</h2>
+                                    <ul className="key-features-list">
+                                        {keyFeatures.map((feature, idx) => <li key={`${feature}-${idx}`}>{feature}</li>)}
+                                    </ul>
+                                </section>
+                            )}
                         </div>
                     )}
 
