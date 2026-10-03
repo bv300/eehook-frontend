@@ -91,11 +91,14 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    background: #FFFFFF;
+    background: #FFFFFF !important;
     min-height: 400px;
     cursor: zoom-in;
     transition: transform 0.3s;
     position: relative;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    border: 1px solid #eaeaea;
 }
 
 .wishlist-icon {
@@ -123,6 +126,7 @@
     height: auto;
     max-height: 500px;
     object-fit: contain;
+    mix-blend-mode: multiply; /* Helps remove white/light background from product JPEGs */
 }
 
 .thumbs {
@@ -674,9 +678,11 @@
     min-height: 0;
     max-height: none;
     overflow: hidden;
-    border-radius: 2px;
-    background: #fff;
+    border-radius: 8px;
+    background: #FFFFFF !important;
     box-sizing: border-box;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    border: 1px solid #eaeaea;
 }
 .main-image img {
     display: block;
@@ -684,6 +690,7 @@
     height: 100%;
     max-height: none;
     object-fit: contain;
+    mix-blend-mode: multiply;
 }
 .wishlist-icon {
     top: 12px;
