@@ -11,7 +11,7 @@ const emptyProduct = {
     name: "", description: "", key_features: "", category: "", subcategory: "", offer: "",
     seller_name: "", shipping_fee: "0", estimated_delivery_time: "", warranty_info: "",
     current_viewers_count: "0", promotional_banner_image: null, promotional_banner_link: "",
-    is_active: true, emi_available: false, emi_starting_price: "",
+    is_active: true,
 };
 
 const emptyVariant = (product = "") => ({
@@ -47,7 +47,7 @@ export default function ProductEditor({ readOnly = false }) {
     const [fieldErrors, setFieldErrors] = useState({});
     const [deleteTarget, setDeleteTarget] = useState(null);
     const [initialSnapshot, setInitialSnapshot] = useState(() => editing ? "" : JSON.stringify({ product: emptyProduct, variants: [] }));
-    const [openSections, setOpenSections] = useState({ information: true, category: true, offer: true, sales: true, promotional: true, emi: true, status: true, variants: true });
+    const [openSections, setOpenSections] = useState({ information: true, category: true, offer: true, sales: true, promotional: true, status: true, variants: true });
 
     useEffect(() => {
         let active = true;
@@ -97,13 +97,12 @@ export default function ProductEditor({ readOnly = false }) {
         if (!product.subcategory) errors.subcategory = "Subcategory is required.";
         const subcategory = dropdowns.subcategories.find((item) => String(item.value) === String(product.subcategory));
         if (subcategory && String(subcategory.category) !== String(product.category)) errors.subcategory = "The subcategory must belong to the selected category.";
-        let lowestPrice = null; const colorlessIndexes = [];
+        const colorlessIndexes = [];
         variants.forEach((variant, index) => {
             if (!variant.color) colorlessIndexes.push(index);
             if (variant.price_type === "single") {
                 if (variant.price === "" || !Number.isFinite(Number(variant.price)) || Number(variant.price) <= 0) errors[`variant_${index}_price`] = "A single-price variant requires a positive price.";
                 if (variant.stock === "" || !Number.isFinite(Number(variant.stock)) || Number(variant.stock) < 0) errors[`variant_${index}_stock`] = "Stock is required and cannot be negative.";
-                if (variant.price !== "" && Number(variant.price) > 0) lowestPrice = lowestPrice === null ? Number(variant.price) : Math.min(lowestPrice, Number(variant.price));
             } else {
                 if (!variant.units.length) errors[`variant_${index}_units`] = "Add at least one unit for a multiple-price variant.";
                 variant.units.forEach((unit, unitIndex) => {
@@ -112,15 +111,10 @@ export default function ProductEditor({ readOnly = false }) {
                     if (!unit.unit) errors[`${prefix}_unit`] = "Unit is required."; else if (!belongs) errors[`${prefix}_unit`] = "The selected unit does not belong to this unit type.";
                     if (unit.price === "" || !Number.isFinite(Number(unit.price)) || Number(unit.price) <= 0) errors[`${prefix}_price`] = "Unit price is required and must be positive.";
                     if (unit.stock === "" || !Number.isFinite(Number(unit.stock)) || Number(unit.stock) < 0) errors[`${prefix}_stock`] = "Unit stock is required and cannot be negative.";
-                    if (unit.price !== "" && Number(unit.price) > 0) lowestPrice = lowestPrice === null ? Number(unit.price) : Math.min(lowestPrice, Number(unit.price));
                 });
             }
         });
         if (colorlessIndexes.length > 1) { errors.variant_colorless = "A product can have only one variant without a color."; colorlessIndexes.slice(1).forEach((index) => { errors[`variant_${index}_color`] = errors.variant_colorless; }); }
-        if (product.emi_available) {
-            if (product.emi_starting_price === "" || Number(product.emi_starting_price) <= 0) errors.emi_starting_price = "EMI starting price is required when EMI is enabled.";
-            else if (lowestPrice !== null && Number(product.emi_starting_price) > lowestPrice) errors.emi_starting_price = "EMI starting price cannot be greater than the product's lowest variant price.";
-        }
         return errors;
     };
 
@@ -161,7 +155,6 @@ export default function ProductEditor({ readOnly = false }) {
         <EditorSection title="Offer Details" open={openSections.offer} onToggle={() => toggle("offer")}><div className="product-form-grid two"><SelectField label="Offer" value={product.offer} options={dropdowns.offers} emptyLabel="No offer" onChange={(value) => updateProduct("offer", value)} /></div></EditorSection>
         <EditorSection title="Sales & Delivery" open={openSections.sales} onToggle={() => toggle("sales")}><div className="product-form-grid two"><TextField label="Seller name" value={product.seller_name} onChange={(value) => updateProduct("seller_name", value)} /><NumberField label="Shipping fee" min="0" step="0.01" value={product.shipping_fee} onChange={(value) => updateProduct("shipping_fee", value)} /><TextField label="Estimated delivery time" value={product.estimated_delivery_time} onChange={(value) => updateProduct("estimated_delivery_time", value)} /><TextField label="Warranty information" value={product.warranty_info} onChange={(value) => updateProduct("warranty_info", value)} /></div></EditorSection>
         <EditorSection title="Promotional & Social" open={openSections.promotional} onToggle={() => toggle("promotional")}><div className="product-form-grid two"><NumberField label="Current viewers count" min="0" step="1" value={product.current_viewers_count} onChange={(value) => updateProduct("current_viewers_count", value)} /><FileField label="Promotional banner image" value={product.promotional_banner_image} onChange={(value) => updateProduct("promotional_banner_image", value)} /><TextField label="Promotional banner link" value={product.promotional_banner_link} onChange={(value) => updateProduct("promotional_banner_link", value)} /></div></EditorSection>
-        <EditorSection title="EMI" open={openSections.emi} onToggle={() => toggle("emi")}><div className="product-form-grid two"><label className="product-toggle"><input type="checkbox" checked={Boolean(product.emi_available)} onChange={(event) => updateProduct("emi_available", event.target.checked)} /> EMI available</label>{product.emi_available && <NumberField label="EMI starting price" min="0.01" step="0.01" value={product.emi_starting_price} onChange={(value) => updateProduct("emi_starting_price", value)} error={fieldErrors.emi_starting_price} />}</div></EditorSection>
         <EditorSection title="Status" open={openSections.status} onToggle={() => toggle("status")}><label className="product-toggle"><input type="checkbox" checked={Boolean(product.is_active)} onChange={(event) => updateProduct("is_active", event.target.checked)} /> Active</label></EditorSection>
         <EditorSection title="Product Variants & Images" open={openSections.variants} onToggle={() => toggle("variants")}><div className="variant-section-heading"><div><strong>Variants</strong><span>Use Single Price for one price/stock pair, or Multiple Price for unit-specific prices.</span></div><button type="button" className="admin-button secondary" onClick={addVariant}><FiPlus /> Add Variant</button></div>{fieldErrors.variant_colorless && <small className="product-error">{fieldErrors.variant_colorless}</small>}{variants.length ? variants.map((variant, index) => <VariantCard key={idOf(variant) || `new-${index}`} variant={variant} index={index} colors={dropdowns.colors} unitTypes={dropdowns.unitTypes} units={dropdowns.units} fieldErrors={fieldErrors} onChange={updateVariant} onDelete={removeVariant} onConfirmTypeChange={(nextType) => changeVariantType(variants, setVariants, index, nextType)} onAddUnit={() => addUnit(setVariants, index)} onRemoveUnit={(unitIndex) => removeUnit(setVariants, index, unitIndex)} onAddImage={(file) => addImage(setVariants, index, file)} onRemoveImage={(imageIndex) => removeImage(setVariants, index, imageIndex)} onMoveImage={(from, to) => moveImage(setVariants, index, from, to)} />) : <EmptyState title="No variants yet" description="Add a variant to configure pricing, stock, and images." />}</EditorSection>
         <div className="product-editor-footer"><button type="button" className="admin-button secondary" onClick={leaveEditor}>Cancel</button><button className="admin-button primary" disabled={saving}><FiSave /> {saving ? "Saving..." : "Save Product"}</button></div>
@@ -174,9 +167,9 @@ async function loadProduct(id) {
     return { product, variants };
 }
 
-function normalizeProduct(data = {}) { return { ...emptyProduct, ...data, category: valueOf(data.category), subcategory: valueOf(data.subcategory), offer: valueOf(data.offer), key_features: Array.isArray(data.key_features) ? data.key_features.join("\n") : data.key_features || "", promotional_banner_image: data.promotional_banner_image || null, emi_available: Boolean(data.emi_available), emi_starting_price: data.emi_starting_price ?? "" }; }
+function normalizeProduct(data = {}) { const productData = { ...data }; delete productData.emi_available; delete productData.emi_starting_price; return { ...emptyProduct, ...productData, category: valueOf(data.category), subcategory: valueOf(data.subcategory), offer: valueOf(data.offer), key_features: Array.isArray(data.key_features) ? data.key_features.join("\n") : data.key_features || "", promotional_banner_image: data.promotional_banner_image || null }; }
 function normalizeUnit(unit) { return { ...unit, sku: unit.sku || "", unit_type: valueOf(unit.unit_type), unit: valueOf(unit.unit) }; }
-function makeProductPayload(product) { const values = { ...product, key_features: Array.isArray(product.key_features) ? product.key_features.join("\n") : String(product.key_features || ""), category: product.category || null, subcategory: product.subcategory || null, offer: product.offer || null, shipping_fee: product.shipping_fee === "" ? 0 : Number(product.shipping_fee), current_viewers_count: product.current_viewers_count === "" ? 0 : Number(product.current_viewers_count), emi_available: Boolean(product.emi_available), emi_starting_price: product.emi_available && product.emi_starting_price !== "" ? Number(product.emi_starting_price) : null }; delete values.product_type; delete values.has_variants; delete values.variants; delete values.units; delete values.images; delete values.regions; const file = values.promotional_banner_image instanceof File ? values.promotional_banner_image : null; if (!file) { delete values.promotional_banner_image; return values; } const form = new FormData(); Object.entries(values).forEach(([key, value]) => { if (value !== null && value !== undefined) form.append(key, value); }); form.set("promotional_banner_image", file); return form; }
+function makeProductPayload(product) { const values = { ...product, key_features: Array.isArray(product.key_features) ? product.key_features.join("\n") : String(product.key_features || ""), category: product.category || null, subcategory: product.subcategory || null, offer: product.offer || null, shipping_fee: product.shipping_fee === "" ? 0 : Number(product.shipping_fee), current_viewers_count: product.current_viewers_count === "" ? 0 : Number(product.current_viewers_count) }; delete values.product_type; delete values.has_variants; delete values.variants; delete values.units; delete values.images; delete values.regions; delete values.emi_available; delete values.emi_starting_price; const file = values.promotional_banner_image instanceof File ? values.promotional_banner_image : null; if (!file) { delete values.promotional_banner_image; return values; } const form = new FormData(); Object.entries(values).forEach(([key, value]) => { if (value !== null && value !== undefined) form.append(key, value); }); form.set("promotional_banner_image", file); return form; }
 async function saveVariantImages(variantId, variant) { for (const imageId of variant.deletedImages) await deleteResource("product-images", imageId); const images = variant.images || []; const primaryIndex = Math.max(0, images.findIndex((image) => image.is_primary)); for (let position = 0; position < images.length; position += 1) { const image = images[position]; const isPrimary = position === primaryIndex; if (image.file) { const form = new FormData(); form.append("variant", variantId); form.append("image", image.file); form.append("position", String(position)); form.append("is_primary", String(isPrimary)); await createResource("product-images", form); } else if (idOf(image)) await updateResource("product-images", idOf(image), { position, is_primary: isPrimary }); } }
 
 function EditorSection({ title, open, onToggle, children }) { return <section className="product-editor-section"><button type="button" className="product-section-heading" onClick={onToggle}><strong>{title}</strong><FiChevronDown className={open ? "section-open" : ""} /></button>{open && <div className="product-section-content">{children}</div>}</section>; }
