@@ -346,7 +346,7 @@ function Shop_by_category() {
                                         className="subcategory-card"
                                         key={item.id}
                                         onClick={() => navigate(
-                                            `/shop?subcategory=${item.id}`
+                                            `/shop?category=${selectedCategory.id}&subcategory=${item.id}`
                                         )}
                                     >
 

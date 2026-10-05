@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import '../styles/Sale_page.css'
 import Product_card from '../components/Product_card'
 import Product_Query from '../queries/Product_Query'
@@ -12,9 +12,11 @@ function Sale() {
 
     const navigate = useNavigate()
     const { data: rawDataFilter } = ShopBy_categoryQuery()
-    const data_filter = Array.isArray(rawDataFilter) ? rawDataFilter : []
+    const data_filter = useMemo(
+        () => (Array.isArray(rawDataFilter) ? rawDataFilter : []),
+        [rawDataFilter]
+    )
 
-    const [selectedCategory, setSelectedCategory] = useState(null)
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 1140)
     const [showFilter, setShowFilter] = useState(false)
 
@@ -22,6 +24,8 @@ function Sale() {
 
     const page = Number(searchParams.get("page") || 1)
     const pageSize = Number(searchParams.get("page_size") || 14)
+    const categoryId = searchParams.get("category")
+    const subcategoryId = searchParams.get("subcategory")
     const filter = { ...Object.fromEntries(searchParams.entries()), page, page_size: pageSize }
 
     const isOfferPage = searchParams.get("offer") === "true"
@@ -29,12 +33,34 @@ function Sale() {
     const { data, isLoading, error } = Product_Query(filter)
     const products = data?.results || []
 
-    // Set first category as default
-    useEffect(() => {
-        if (data_filter.length > 0 && !selectedCategory) {
-            setSelectedCategory(data_filter[0])
+    // Derive the selected category from the URL so direct/shared shop links
+    // always show the matching category and subcategory image.
+    const selectedCategory = useMemo(() => {
+        if (data_filter.length === 0) return null
+
+        if (categoryId) {
+            return data_filter.find((category) => String(category.id) === String(categoryId)) || null
         }
-    }, [data_filter, selectedCategory])
+
+        if (subcategoryId) {
+            return data_filter.find((category) => category.subcategories?.some(
+                (subcategory) => String(subcategory.id) === String(subcategoryId)
+            )) || null
+        }
+
+        return data_filter[0]
+    }, [categoryId, data_filter, subcategoryId])
+
+    const selectCategory = (category) => {
+        const next = new URLSearchParams()
+        next.set("category", String(category.id))
+        setSearchParams(next)
+        setShowFilter(false)
+    }
+
+    const selectedSubcategory = selectedCategory?.subcategories?.find(
+        (subcategory) => String(subcategory.id) === String(subcategoryId)
+    )
 
     // Mobile resize
     useEffect(() => {
@@ -108,7 +134,7 @@ function Sale() {
                                             ? "shop_category_active"
                                             : ""
                                             }`}
-                                        onClick={() => setSelectedCategory(category)} >
+                                        onClick={() => selectCategory(category)} >
 
                                         {category.name}
                                     </button>
@@ -136,7 +162,10 @@ function Sale() {
                             {selectedCategory?.subcategories?.map(sub => (
                                 <NavLink
                                     key={sub.id}
-                                    className="shop_subcategory_item"
+                                    className={`shop_subcategory_item ${String(sub.id) === String(subcategoryId)
+                                        ? "shop_subcategory_active"
+                                        : ""
+                                        }`}
                                     to={`/shop?category=${selectedCategory.id}&subcategory=${sub.id}`}
                                     onClick={() => setShowFilter(false)}
                                 >
@@ -153,10 +182,10 @@ function Sale() {
                         </h3>
 
                         <div className="shop_category_preview">
-                            {selectedCategory?.image && (
+                            {(selectedSubcategory?.image || selectedCategory?.image) && (
                                 <img
-                                    src={getImageUrl(selectedCategory.image)}
-                                    alt={selectedCategory.name}
+                                    src={getImageUrl(selectedSubcategory?.image || selectedCategory.image)}
+                                    alt={selectedSubcategory?.name || selectedCategory.name}
                                 />
                             )}
                         </div>

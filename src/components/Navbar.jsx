@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import "./../Navbar.css";
 import { useLocation, NavLink, useNavigate } from "react-router-dom";
 
@@ -20,7 +20,7 @@ import { getImageUrl } from "../utils/imageUrl.js";
 function Navbar() {
 
     const { data: rawData, isLoading } = ShopBy_categoryQuery();
-    const data = Array.isArray(rawData) ? rawData : [];
+    const data = useMemo(() => (Array.isArray(rawData) ? rawData : []), [rawData]);
 
     const { data: offers = [] } = Offer_Query();
     const [offerActive, setOfferActive] = useState(false);
@@ -80,13 +80,25 @@ const cartLength = cart.total_items ?? 0;
 
     // shop dropdown 
     const [showMega, setShowMega] = useState(false);
+    const [hoveredCategory, setHoveredCategory] = useState(null);
+    const [hoveredSubcategory, setHoveredSubcategory] = useState(null);
 
-    const [activeCategory, setActiveCategory] = useState(null);
-    useEffect(() => {
-        if (data.length > 0 && !activeCategory) {
-            setActiveCategory(data[0]);
-        }
-    }, [data]);
+    const urlPreview = useMemo(() => {
+        const params = new URLSearchParams(location.search);
+        const categoryId = params.get("category");
+        const subcategoryId = params.get("subcategory");
+        const category = categoryId
+            ? data.find((item) => String(item.id) === String(categoryId))
+            : data[0];
+        const subcategory = category?.subcategories?.find(
+            (item) => String(item.id) === String(subcategoryId)
+        ) || null;
+
+        return { category: category || data[0] || null, subcategory };
+    }, [data, location.search]);
+
+    const activeCategory = hoveredCategory || urlPreview.category;
+    const activeSubcategory = hoveredSubcategory || urlPreview.subcategory;
 
 
 
@@ -136,23 +148,24 @@ const cartLength = cart.total_items ?? 0;
                                 {navlinks.filter((item) => item.name !== "Offers" || item.offer).map((item) =>
                                     item.dropdown ? (
 
-                                        <li key={item.name} className="nav_item dropdown" onMouseOver={() => setShowMega(true)} onMouseLeave={() => setShowMega(false)}>
+                                        <li key={item.name} className="nav_item dropdown" onMouseEnter={() => { setShowMega(true); setHoveredCategory(null); setHoveredSubcategory(null); }} onMouseLeave={() => setShowMega(false)}>
                                             <NavLink to="/shop" className="nav_link">
                                                 Categories
                                             </NavLink>
 
-                                            <div className={`mega_menu ${showMega ? "show" : ""}`} onMouseOver={() => setShowMega(true)} onMouseLeave={() => setShowMega(false)}>
+                                            <div className={`mega_menu ${showMega ? "show" : ""}`} onMouseEnter={() => setShowMega(true)}>
 
                                                 <div className="mega_menu_content">
 
                                                     {/* Category Columns */}
                                                     <div className="mega_categories">
                                                         {data.map((category) => (
-                                                            <div className="mega_column" key={category.id} className="mega_column" onMouseEnter={() => setActiveCategory(category)} >
+                                                            <div className="mega_column" key={category.id} className="mega_column" onMouseEnter={() => { setHoveredCategory(category); setHoveredSubcategory(null); }} >
 
                                                                 <NavLink
                                                                     to={`/shop?category=${category.id}`}
                                                                     className="mega_title"
+                                                                    onMouseEnter={() => { setHoveredCategory(category); setHoveredSubcategory(null); }}
                                                                 >
                                                                     {category.name}
                                                                 </NavLink>
@@ -160,7 +173,9 @@ const cartLength = cart.total_items ?? 0;
                                                                 <ul>
                                                                     {(category.subcategories || []).map((sub) => (
                                                                         <li key={sub.id} >
-                                                                            <NavLink onClick={() => setShowMega(false)}
+                                                                            <NavLink
+                                                                                onMouseEnter={() => { setHoveredCategory(category); setHoveredSubcategory(sub); }}
+                                                                                onClick={() => setShowMega(false)}
                                                                                 to={`/shop?category=${category.id}&subcategory=${sub.id}`}
                                                                                 className="mega_link"
                                                                             >
@@ -177,8 +192,8 @@ const cartLength = cart.total_items ?? 0;
                                                     {data.length > 0 && (
                                                         <div className="mega_image">
                                                             <img
-                                                                src={getImageUrl(activeCategory?.image)}
-                                                                alt={activeCategory?.name}
+                                                                src={getImageUrl(activeSubcategory?.image || activeCategory?.image)}
+                                                                alt={activeSubcategory?.name || activeCategory?.name}
                                                             />
                                                         </div>
                                                     )}
@@ -306,7 +321,7 @@ const cartLength = cart.total_items ?? 0;
                     {categoryOpen && (
                         <div className="mobile_categories">
                             {data.map((cat) => (
-                                <NavLink key={cat.id} to={`/shop?category=${cat.id}`} onClick={closeMenu}>
+                                <NavLink key={cat.id} to={`/shop?category=${cat.id}`} onClick={() => { setHoveredCategory(cat); setHoveredSubcategory(null); closeMenu(); }}>
                                     {cat.name}
                                 </NavLink>
                             ))}

@@ -260,6 +260,11 @@
     color: #FFFFFF;
 }
 
+.shop_subcategory_active {
+    background: #FF9000;
+    color: #FFFFFF;
+}
+
 /* Image */
 
 .shop_category_preview {
