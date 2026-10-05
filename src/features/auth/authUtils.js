@@ -9,6 +9,9 @@ export function isPrivilegedUser(user = {}) {
 }
 
 export function saveAuthUser(user = {}) {
+    const userId = user.id ?? user.user_id ?? user.pk;
+    if (userId !== undefined && userId !== null) localStorage.setItem("user_id", String(userId));
+    else localStorage.removeItem("user_id");
     localStorage.setItem("email", user.email || "");
     localStorage.setItem("first_name", user.first_name || "");
     localStorage.setItem("is_staff", String(Boolean(user.is_staff)));
@@ -28,5 +31,5 @@ export function saveAuthSession(data = {}) {
 }
 
 export function clearAuthSession() {
-    ["access", "refresh", "access_token", "refresh_token", "admin_user", "email", "first_name", "is_staff", "is_superuser", "role"].forEach((key) => localStorage.removeItem(key));
+    ["access", "refresh", "access_token", "refresh_token", "admin_user", "user_id", "email", "first_name", "is_staff", "is_superuser", "role"].forEach((key) => localStorage.removeItem(key));
 }

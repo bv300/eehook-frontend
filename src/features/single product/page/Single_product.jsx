@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "../style/Single_product.css";
 import {
     NavLink,
@@ -20,6 +20,14 @@ import {
 import showToast from "../../../utils/toast";
 import { getImageUrl } from "../../../utils/imageUrl";
 import defaultImage from "../../../assets/image_not_available.png";
+import {
+    getCouponApplication,
+    getMostRecentCouponApplication,
+    isAuthenticatedForCoupons,
+    normalizeCouponCode,
+    saveCouponApplication,
+    validateCoupon,
+} from "../../coupon/couponState";
 
 function getDescriptionText(value) {
     if (Array.isArray(value)) return value.filter(Boolean).join("\n").trim();
@@ -92,43 +100,114 @@ function Single_product() {
     const [couponCode, setCouponCode] = useState("");
     const [appliedCoupon, setAppliedCoupon] = useState(null);
     const [couponError, setCouponError] = useState("");
+    const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
+    const [isCouponLocked, setIsCouponLocked] = useState(false);
+    const couponRequestPending = useRef(false);
+
+    const productId = data?.id || id;
+
+    const couponFromResponse = (responseData = {}) => ({
+        ...responseData,
+        discount_percentage: responseData.discount_percentage ?? responseData.coupon?.discount_percentage,
+    });
+
+    useEffect(() => {
+        const savedCoupon = getMostRecentCouponApplication(productId);
+
+        if (!savedCoupon) {
+            setCouponCode("");
+            setAppliedCoupon(null);
+            setCouponError("");
+            setIsCouponLocked(false);
+            return;
+        }
+
+        setCouponCode(savedCoupon.code);
+        setAppliedCoupon(savedCoupon.response ? couponFromResponse(savedCoupon.response) : null);
+        setCouponError(savedCoupon.status === "already_applied" ? savedCoupon.message : "");
+        setIsCouponLocked(true);
+    }, [productId]);
+
+    const handleCouponCodeChange = (value) => {
+        setCouponCode(value);
+        setCouponError("");
+        setIsCouponLocked(false);
+
+        const savedCoupon = getCouponApplication(productId, value);
+        if (!savedCoupon) return;
+
+        setAppliedCoupon(savedCoupon.response ? couponFromResponse(savedCoupon.response) : null);
+        setCouponError(savedCoupon.status === "already_applied" ? savedCoupon.message : "");
+        setIsCouponLocked(true);
+    };
 
     const handleApplyCoupon = async () => {
+        if (couponRequestPending.current || isApplyingCoupon || isCouponLocked) return;
+
         setCouponError("");
-        if (!couponCode) {
+        const normalizedCouponCode = normalizeCouponCode(couponCode);
+        if (!normalizedCouponCode) {
             setCouponError("Please enter a coupon code");
             return;
         }
 
-        const token = localStorage.getItem("access");
-        if (!token) {
-            showToast.info("Please login to apply a coupon.");
-            navigate("/login");
+        if (!isAuthenticatedForCoupons()) {
+            const message = "Please log in to apply a coupon.";
+            setCouponError(message);
+            showToast.info(message);
             return;
         }
-        
+
+        const savedCoupon = getCouponApplication(productId, normalizedCouponCode);
+        if (savedCoupon) {
+            setAppliedCoupon(savedCoupon.response ? couponFromResponse(savedCoupon.response) : null);
+            setCouponError(savedCoupon.status === "already_applied" ? savedCoupon.message : "");
+            setIsCouponLocked(true);
+            return;
+        }
+
+        couponRequestPending.current = true;
+        setIsApplyingCoupon(true);
         try {
-            const response = await fetch("http://127.0.0.1:8000/validate-coupon/", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`,
-                },
-                body: JSON.stringify({
-                    code: couponCode,
-                    product_id: data.id,
-                }),
-            });
-            const resData = await response.json();
-            
-            if (response.ok) {
-                setAppliedCoupon(resData);
-                showToast.success(resData.message || "Coupon applied successfully!");
-            } else {
-                setCouponError(resData.message || "Failed to apply coupon");
+            const response = await validateCoupon(normalizedCouponCode, productId);
+            if (response.status !== 200) {
+                setCouponError(response.data?.message || "Failed to apply coupon");
+                return;
             }
+
+            const coupon = couponFromResponse(response.data);
+            saveCouponApplication(productId, normalizedCouponCode, {
+                status: "applied",
+                response: coupon,
+                message: response.data?.message || "Coupon applied successfully!",
+            });
+            setCouponCode(normalizedCouponCode);
+            setAppliedCoupon(coupon);
+            setIsCouponLocked(true);
+            showToast.success(response.data?.message || "Coupon applied successfully!");
         } catch (err) {
-            setCouponError("An error occurred while validating coupon");
+            const status = err.response?.status;
+            const responseData = err.response?.data || {};
+
+            if (status === 400 && responseData.error_code === "COUPON_ALREADY_APPLIED") {
+                const message = responseData.message || "You have already applied this coupon to this product.";
+                saveCouponApplication(productId, normalizedCouponCode, {
+                    status: "already_applied",
+                    message,
+                });
+                setCouponCode(normalizedCouponCode);
+                setCouponError(message);
+                setIsCouponLocked(true);
+            } else if (status === 401 || status === 403) {
+                const message = "Please log in to apply a coupon.";
+                setCouponError(message);
+                showToast.info(message);
+            } else {
+                setCouponError(responseData.message || responseData.detail || "An error occurred while validating coupon");
+            }
+        } finally {
+            couponRequestPending.current = false;
+            setIsApplyingCoupon(false);
         }
     };
 
@@ -562,15 +641,16 @@ function Single_product() {
                             <input 
                                 type="text" 
                                 value={couponCode} 
-                                onChange={(e) => setCouponCode(e.target.value)} 
+                                onChange={(e) => handleCouponCodeChange(e.target.value)}
                                 placeholder="Enter Coupon Code" 
                                 style={{ flex: 1, padding: '8px 12px', border: '1px solid #ccc', borderRadius: '4px' }} 
                             />
                             <button 
-                                onClick={handleApplyCoupon} 
-                                style={{ padding: '8px 16px', backgroundColor: '#4B636D', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                                onClick={handleApplyCoupon}
+                                disabled={isApplyingCoupon || isCouponLocked}
+                                style={{ padding: '8px 16px', backgroundColor: '#4B636D', color: '#fff', border: 'none', borderRadius: '4px', cursor: isApplyingCoupon || isCouponLocked ? 'not-allowed' : 'pointer', opacity: isApplyingCoupon || isCouponLocked ? 0.65 : 1 }}
                             >
-                                Apply Coupon
+                                {isApplyingCoupon ? 'Applying...' : 'Apply Coupon'}
                             </button>
                         </div>
                         {couponError && <div style={{ color: 'red', fontSize: '13px', marginTop: '8px' }}>{couponError}</div>}

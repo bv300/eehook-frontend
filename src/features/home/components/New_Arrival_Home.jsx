@@ -3,6 +3,10 @@ import Newarrival_Query from "../../newArrivals/queries/Newarrival_Query";
 import { Link, useNavigate } from "react-router-dom";
 import { getImageUrl } from "../../../utils/imageUrl";
 import Product_Query from "../../sale/queries/Product_Query";
+import WishlistQuery from "../../wishlist/queries/WishlistQuery";
+import { Wishlist_delete, Wishlist_post } from "../../wishlist/api/Wishlisht_Api";
+import showToast from "../../../utils/toast";
+import { FaHeart, FaRegHeart } from "react-icons/fa";
 
 import { useEffect, useState } from "react";
 
@@ -23,6 +27,8 @@ const New_Arrival_Home = () => {
 
     const isLoading = isNewArrivalsLoading || isShopLoading;
     const error = newArrivalsError;
+    const { data: rawWishlist = [], refetch: refetchWishlist } = WishlistQuery();
+    const wishlist = Array.isArray(rawWishlist) ? rawWishlist : rawWishlist?.results || [];
 
     const [showLoader, setShowLoader] = useState(true);
 
@@ -35,6 +41,41 @@ const New_Arrival_Home = () => {
             return () => clearTimeout(timer);
         }
     }, [isLoading]);
+
+    const addToWishlist = async (product, event) => {
+        event.stopPropagation();
+
+        if (!(localStorage.getItem("access_token") || localStorage.getItem("access"))) {
+            showToast.info("Please login to continue");
+            navigate("/login");
+            return;
+        }
+
+        const variant = product.variants?.[0];
+        const size = variant?.price_type === "single" ? null : variant?.sizes?.[0] || variant?.units?.[0];
+        if (!variant || (variant.price_type !== "single" && !size)) {
+            showToast.error("Variant not available");
+            return;
+        }
+
+        const wishlistItem = wishlist.find((item) =>
+            String(item.variant) === String(variant.id) &&
+            String(item.variant_size ?? "") === String(size?.id ?? "")
+        );
+
+        try {
+            if (wishlistItem) {
+                await Wishlist_delete(wishlistItem.id);
+                showToast.success("Product removed from wishlist");
+            } else {
+                await Wishlist_post({ variant: variant.id, variant_size: size?.id ?? null });
+                showToast.success("Product added to wishlist");
+            }
+            await refetchWishlist();
+        } catch (requestError) {
+            showToast.error(requestError?.response?.data?.detail || "Could not update wishlist");
+        }
+    };
 
     if (isLoading || showLoader) {
         return (
@@ -113,6 +154,12 @@ const New_Arrival_Home = () => {
                                     const discountedPrice = item.discounted_price;
                                     const hasOffer = item.has_offer;
                                     const discountPercentage = item.discount_percentage;
+                                    const firstVariant = item.variants?.[0];
+                                    const firstSize = firstVariant?.price_type === "single" ? null : firstVariant?.sizes?.[0] || firstVariant?.units?.[0];
+                                    const isWishlisted = wishlist.some((wishlistItem) =>
+                                        String(wishlistItem.variant) === String(firstVariant?.id) &&
+                                        String(wishlistItem.variant_size ?? "") === String(firstSize?.id ?? "")
+                                    );
 
                                     return (
                                         <div key={item.id} className="new-product-card">
@@ -132,13 +179,14 @@ const New_Arrival_Home = () => {
                                                         NEW
                                                     </span>
                                                 )}
-                                                {item.hasWishlist && (
-                                                    <button className="wishlist-btn">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="heart-icon">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
-                                                        </svg>
-                                                    </button>
-                                                )}
+                                                <button
+                                                    type="button"
+                                                    className={`wishlist-btn ${isWishlisted ? "is-wishlisted" : ""}`}
+                                                    onClick={(event) => addToWishlist(item, event)}
+                                                    aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+                                                >
+                                                    {isWishlisted ? <FaHeart className="heart-icon" /> : <FaRegHeart className="heart-icon" />}
+                                                </button>
                                                 <button className="quick-add-btn">
                                                     View Product
                                                 </button>

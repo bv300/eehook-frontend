@@ -80,7 +80,7 @@ client.interceptors.response.use(
         }
 
         if (status === 403) window.dispatchEvent(new CustomEvent("api:forbidden"));
-        if (status === 401) redirectToLogin();
+        if (status === 401 && !originalRequest.skipAuthRedirect) redirectToLogin();
         return Promise.reject(error);
     }
 );
