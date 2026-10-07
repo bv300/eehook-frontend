@@ -181,6 +181,13 @@
     background: #D97F00;
 }
 
+.coupon-inactive-warning {
+    margin: 7px 0;
+    color: #a33a24;
+    font-size: 12px;
+    font-weight: 600;
+}
+
 /* PRICE */
 
 .price-row,

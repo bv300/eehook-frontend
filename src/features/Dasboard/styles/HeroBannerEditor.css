@@ -45,6 +45,21 @@
 .hero-save-button { background: #188b55; color: #fff; }
 .hero-secondary-button { background: #11c1df; color: #05242b; }
 .hero-editor-actions button:disabled { opacity: .6; cursor: not-allowed; }
+.coupon-choice-field { border: 1px solid #d8e1df; border-radius: 9px; padding: 14px 16px; color: #192a31; }
+.coupon-choice-field legend { padding: 0 6px; font-size: 16px; font-weight: 700; }
+.coupon-choice-field legend em { color: #d93945; font-style: normal; }
+.coupon-choice-field label { display: inline-flex; align-items: center; gap: 7px; margin: 2px 24px 2px 0; font-size: 14px; font-weight: 600; cursor: pointer; }
+.coupon-choice-field input { accent-color: #188b55; }
+.coupon-choice-field small { display: block; margin-top: 10px; color: #4d6470; font-size: 12px; }
+.coupon-editor-page .hero-editor-form { max-width: 980px; }
+.coupon-editor-page .hero-editor-form > .hero-editor-field { grid-template-columns: minmax(180px, 220px) minmax(0, 1fr); }
+.coupon-editor-page .hero-editor-form > .coupon-choice-field { margin: 0; }
+.coupon-form-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; padding-top: 8px; border-top: 1px solid #edf2ef; }
+.coupon-form-actions button { min-height: 42px; padding: 10px 16px; border-radius: 7px; border: 0; font: 14px Inter, sans-serif; cursor: pointer; }
+.coupon-form-actions .hero-save-button { display: inline-flex; align-items: center; gap: 8px; }
+.coupon-form-actions .hero-secondary-button { padding-inline: 14px; }
+.coupon-editor-page .hero-editor-field.has-error > input:not([type="checkbox"]),
+.coupon-editor-page .hero-editor-field.has-error > select { border-color: #d93945; box-shadow: 0 0 0 2px rgba(217, 57, 69, .1); }
 @media (max-width: 900px) {
   .hero-editor-layout { grid-template-columns: 1fr; }
   .hero-editor-actions { position: static; order: -1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -60,6 +75,10 @@
   .hero-editor-actions { grid-template-columns: 1fr; }
   .coupon-product-picker { grid-template-columns: minmax(0, 1fr) auto; }
   .coupon-product-search { grid-column: 1 / -1; }
+  .coupon-editor-page .hero-editor-form > .hero-editor-field { grid-template-columns: 1fr; }
+  .coupon-choice-field label { margin-right: 14px; }
+  .coupon-form-actions { flex-direction: column; }
+  .coupon-form-actions button { width: 100%; }
 }
 @media (max-width: 400px) {
   .hero-editor-heading { gap: 12px; margin-bottom: 18px; }

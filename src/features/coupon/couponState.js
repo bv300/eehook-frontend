@@ -33,11 +33,15 @@ function storageKey(userKey) {
     return `${STORAGE_PREFIX}:${userKey}`;
 }
 
-function readEntries(userKey) {
+function storageAreas() {
+    return [window.localStorage, window.sessionStorage];
+}
+
+function readEntries(userKey, storage = window.localStorage) {
     if (!userKey) return {};
 
     try {
-        const parsed = JSON.parse(localStorage.getItem(storageKey(userKey)) || "{}");
+        const parsed = JSON.parse(storage.getItem(storageKey(userKey)) || "{}");
         return parsed && typeof parsed === "object" ? parsed : {};
     } catch {
         return {};
@@ -45,38 +49,86 @@ function readEntries(userKey) {
 }
 
 function entryKey(productId, couponCode) {
-    return `${String(productId)}:${normalizeCouponCode(couponCode)}`;
+    return `${String(productId?.id ?? productId)}:${normalizeCouponCode(couponCode)}`;
+}
+
+function normalizeProductId(productId) {
+    return productId?.id ?? productId;
 }
 
 export function getCouponApplication(productId, couponCode) {
     const userKey = getUserKey();
-    if (!userKey || !productId || !normalizeCouponCode(couponCode)) return null;
-    return readEntries(userKey)[entryKey(productId, couponCode)] || null;
+    const normalizedProductId = normalizeProductId(productId);
+    if (!userKey || !normalizedProductId || !normalizeCouponCode(couponCode)) return null;
+    return storageAreas().map((storage) => readEntries(userKey, storage)[entryKey(normalizedProductId, couponCode)]).find(Boolean) || null;
 }
 
 export function getMostRecentCouponApplication(productId) {
     const userKey = getUserKey();
-    if (!userKey || !productId) return null;
+    const normalizedProductId = normalizeProductId(productId);
+    if (!userKey || !normalizedProductId) return null;
 
-    return Object.values(readEntries(userKey))
-        .filter((entry) => String(entry.productId) === String(productId))
+    return storageAreas().flatMap((storage) => Object.values(readEntries(userKey, storage)))
+        .filter((entry) => String(entry.productId) === String(normalizedProductId))
         .sort((first, second) => Number(second.updatedAt || 0) - Number(first.updatedAt || 0))[0] || null;
 }
 
 export function saveCouponApplication(productId, couponCode, application) {
     const userKey = getUserKey();
+    const normalizedProductId = normalizeProductId(productId);
     const normalizedCode = normalizeCouponCode(couponCode);
-    if (!userKey || !productId || !normalizedCode) return;
+    if (!userKey || !normalizedProductId || !normalizedCode) return;
 
-    const entries = readEntries(userKey);
-    entries[entryKey(productId, normalizedCode)] = {
+    const entry = {
         ...application,
         code: normalizedCode,
-        productId: String(productId),
+        productId: String(normalizedProductId),
         updatedAt: Date.now(),
     };
 
-    localStorage.setItem(storageKey(userKey), JSON.stringify(entries));
+    storageAreas().forEach((storage) => {
+        const entries = readEntries(userKey, storage);
+        entries[entryKey(normalizedProductId, couponCode)] = entry;
+        storage.setItem(storageKey(userKey), JSON.stringify(entries));
+    });
+}
+
+export function clearCouponApplication(productId, couponCode) {
+    const userKey = getUserKey();
+    const normalizedProductId = normalizeProductId(productId);
+    const normalizedCode = normalizeCouponCode(couponCode);
+    if (!userKey || !normalizedCode) return;
+
+    storageAreas().forEach((storage) => {
+        const entries = readEntries(userKey, storage);
+        Object.entries(entries).forEach(([key, entry]) => {
+            const matchesCode = normalizeCouponCode(entry?.code) === normalizedCode || key.endsWith(`:${normalizedCode}`);
+            const matchesProduct = normalizedProductId == null || String(entry?.productId) === String(normalizedProductId) || key.startsWith(`${String(normalizedProductId)}:`);
+            if (matchesCode && matchesProduct) delete entries[key];
+        });
+        if (Object.keys(entries).length) storage.setItem(storageKey(userKey), JSON.stringify(entries));
+        else storage.removeItem(storageKey(userKey));
+    });
+}
+
+export function clearCouponApplicationsForProduct(productId) {
+    const userKey = getUserKey();
+    const normalizedProductId = normalizeProductId(productId);
+    if (!userKey || normalizedProductId == null) return;
+
+    storageAreas().forEach((storage) => {
+        const entries = readEntries(userKey, storage);
+        Object.entries(entries).forEach(([key, entry]) => {
+            if (String(entry?.productId) === String(normalizedProductId) || key.startsWith(`${String(normalizedProductId)}:`)) delete entries[key];
+        });
+        if (Object.keys(entries).length) storage.setItem(storageKey(userKey), JSON.stringify(entries));
+        else storage.removeItem(storageKey(userKey));
+    });
+}
+
+export function isInactiveCouponError(errorOrResponse) {
+    const data = errorOrResponse?.response?.data || errorOrResponse?.data || errorOrResponse || {};
+    return data?.error_code === "COUPON_INACTIVE" || data?.coupon_status === "COUPON_INACTIVE";
 }
 
 export function isAuthenticatedForCoupons() {

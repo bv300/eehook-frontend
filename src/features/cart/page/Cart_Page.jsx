@@ -6,6 +6,7 @@ import { RemoveCart, saveQuantity } from "../api/Cart_api";
 import { Link, useNavigate } from "react-router-dom";
 import showToast from "../../../utils/toast";
 import { getImageUrl } from "../../../utils/imageUrl";
+import { clearCouponApplication, isInactiveCouponError } from "../../coupon/couponState";
 
 function Cart_page() {
 
@@ -21,14 +22,13 @@ function Cart_page() {
     const [cartItems, setCartItems] = useState([]);
 
     const timers = useRef({});
+    const inactiveCouponsNotified = useRef(new Set());
 
     useEffect(() => {
 
         if (data?.items) {
 
-            setCartItems(
-
-    (Array.isArray(data.items) ? data.items : []).map(item => ({
+            const nextItems = (Array.isArray(data.items) ? data.items : []).map(item => ({
 
         id: item.id,
 
@@ -48,17 +48,33 @@ function Cart_page() {
 
         unit_type: item.unit_type || "",
 
-        price: Number(item.discounted_price || 0),
+        price: Number(item.discounted_price ?? item.original_price ?? 0),
+        discountedPrice: Number(item.discounted_price ?? item.original_price ?? 0),
 
         originalPrice: Number(item.original_price || 0),
 
         discount: Number(item.discount_amount || 0),
 
+        totalPrice: Number(item.total_price ?? 0),
+
+        couponCode: item.coupon_code || "",
+
+        couponStatus: item.coupon_status || "",
+
         quantity: item.quantity || 1,
 
         stock: item.stock || 0
-    }))
-           );
+    }));
+
+            nextItems.filter((item) => item.couponStatus === "COUPON_INACTIVE").forEach((item) => {
+                clearCouponApplication(item.product, item.couponCode);
+                const notificationKey = `${item.product}:${item.couponCode}`;
+                if (!inactiveCouponsNotified.current.has(notificationKey)) {
+                    inactiveCouponsNotified.current.add(notificationKey);
+                    showToast.warning("This coupon is no longer active.");
+                }
+            });
+            setCartItems(nextItems);
 
         }
 
@@ -88,7 +104,11 @@ function Cart_page() {
                         await refetch();
 
                     } catch (err) {
-
+                        if (isInactiveCouponError(err)) {
+                            const item = cartItems.find((cartItem) => cartItem.id === id);
+                            clearCouponApplication(item?.product, item?.couponCode);
+                            showToast.warning("This coupon is no longer active.");
+                        }
                         console.log(err);
 
                     }
@@ -151,6 +171,12 @@ function Cart_page() {
                 await refetch();
 
             } catch (error) {
+
+                if (isInactiveCouponError(error)) {
+                    const latestItem = cartItems.find((cartItem) => cartItem.id === id);
+                    clearCouponApplication(latestItem?.product, latestItem?.couponCode);
+                    showToast.warning("This coupon is no longer active.");
+                }
 
                 showToast.error(
                     "Failed to update quantity"
@@ -279,6 +305,12 @@ function Cart_page() {
                                                 {cart.name}
                                             </h4>
 
+                                            {cart.couponStatus === "COUPON_INACTIVE" && (
+                                                <p className="coupon-inactive-warning" role="alert">
+                                                    This coupon is no longer active.
+                                                </p>
+                                            )}
+
                                             <p>
                                                 Color : {cart.color}
                                             </p>
@@ -336,12 +368,7 @@ function Cart_page() {
                                                     <del>
 
                                                         AED
-                                                        {
-                                                            (
-                                                                cart.originalPrice *
-                                                                cart.quantity
-                                                            ).toFixed(2)
-                                                        }
+                                                        {(cart.originalPrice * cart.quantity).toFixed(2)}
 
                                                     </del>
 
@@ -352,12 +379,7 @@ function Cart_page() {
 
                                                 AED
 
-                                                {
-                                                    (
-                                                        cart.price *
-                                                        cart.quantity
-                                                    ).toFixed(2)
-                                                }
+                                                {cart.totalPrice.toFixed(2)}
 
                                             </h5>
 

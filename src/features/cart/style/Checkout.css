@@ -8,6 +8,13 @@
     padding-top: 53px;
 }
 
+.coupon-inactive-warning {
+    margin: 7px 0;
+    color: #a33a24;
+    font-size: 12px;
+    font-weight: 600;
+}
+
 .eehook-checkout-header{
     margin-bottom:32px;
 }

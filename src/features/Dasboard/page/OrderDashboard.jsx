@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
-import { FiActivity, FiArchive, FiBox, FiChevronDown, FiClipboard, FiCreditCard, FiCopy, FiDownload, FiEdit3, FiEye, FiGrid, FiImage, FiLayers, FiLogOut, FiMenu, FiPackage, FiPlus, FiRefreshCw, FiSettings, FiShoppingBag, FiTag, FiTrash2, FiTruck, FiUsers, FiX } from "react-icons/fi";
+import { FiActivity, FiArchive, FiBox, FiChevronDown, FiClipboard, FiCopy, FiCreditCard, FiDownload, FiEdit3, FiEye, FiGrid, FiImage, FiLayers, FiLogOut, FiMenu, FiPackage, FiPlus, FiPower, FiRefreshCw, FiSettings, FiShoppingBag, FiTag, FiTrash2, FiTruck, FiUsers, FiX } from "react-icons/fi";
 import { ConfirmDialog, DataTable, DebouncedSearch, EmptyState, FilterBar, FormField, LoadingState, Modal, PageHeader, Pagination, Skeleton, StatusPill } from "../components/AdminPrimitives";
 import useAdminResource from "../hooks/useAdminResource";
 import OverviewGraphs from "../components/OverviewGraphs";
@@ -43,7 +43,7 @@ const resources = {
     "hero-banners": { label: "Hero Banners", group: "Marketing", fields: ["subtitle", "title", "description", "image", "button_text", "display_order", "is_active"], columns: ["subtitle", "title", "button_text", "display_order", "is_active"] },
     "promo-banners": { label: "Promotional Banners", group: "Marketing", fields: ["image", "link", "is_active"], columns: ["image", "link", "is_active"] },
     "hero-side-banners": { label: "Hero Side Banners", group: "Marketing", fields: ["image", "link", "is_active"], columns: ["image", "link", "is_active"] },
-    coupons: { label: "Coupons", group: "Marketing", fields: ["code", "products", "discount_percentage", "start_date", "end_date", "is_active"], columns: ["code", "discount_percentage", "start_date", "end_date", "is_active"] },
+    coupons: { label: "Coupons", group: "Marketing", fields: ["code", "applicability_type", "target_name", "discount_type", "discount_value", "start_date", "end_date", "is_active"], columns: ["code", "applicability_type", "target_name", "discount_type", "discount_value", "start_date", "end_date", "is_active", "product", "category"] },
     "coupon-usages": { label: "Coupon Usage History", group: "Marketing", fields: ["coupon", "user", "product", "used_at"], columns: ["user", "coupon", "product", "used_at"] },
 };
 
@@ -66,6 +66,27 @@ const columnLabel = (resource, key) => ({
 const fallbackFields = (resource, fieldNames) => fieldNames.map((name) => ({ name, type: name.includes("description") ? "textarea" : name.includes("active") ? "boolean" : resource === "offers" && ["start_date", "end_date"].includes(name) ? "date" : resource === "offers" && name === "discount" ? "number" : "text", label: resource === "offers" && name === "discount" ? "Discount (%)" : titleize(name), ...(resource === "offers" && name === "discount" ? { min: 0, max: 100, step: 0.01 } : {}) }));
 const recordId = (row) => row?.id ?? row?.pk ?? row?.uuid;
 const recordLabel = (value) => typeof value === "object" ? value?.name || value?.title || value?.email || value?.id || "—" : value;
+
+const couponApplyTo = (row) => String(row?.applicability_type || (row?.category ? "CATEGORY" : "PRODUCT")).toUpperCase() === "CATEGORY" ? "Category" : "Product";
+const couponTarget = (row, references = {}) => {
+    if (row?.target_name || row?.category_name) return row.target_name || row.category_name;
+    if (couponApplyTo(row) === "Category") {
+        const categoryId = row?.category?.id ?? row?.category;
+        return recordLabel((references.categories || []).find((item) => String(recordId(item)) === String(categoryId)) || row?.category) || "—";
+    }
+    const products = Array.isArray(row?.products) ? row.products : [];
+    const labels = products.map((product) => recordLabel((references.products || []).find((item) => String(recordId(item)) === String(product?.id ?? product)) || product)).filter(Boolean);
+    return labels.length ? labels.join(", ") : "—";
+};
+const couponDiscount = (row) => {
+    const type = String(row?.discount_type || "").toUpperCase();
+    if (type === "FIXED" || (row?.fixed_amount !== null && row?.fixed_amount !== undefined && row?.fixed_amount !== "")) {
+        const amount = row?.fixed_amount ?? row?.discount_value;
+        return amount === null || amount === undefined || amount === "" ? "—" : `\u20b9${Number(amount).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
+    const percentage = row?.discount_percentage ?? row?.discount_value;
+    return percentage === null || percentage === undefined || percentage === "" ? "—" : `${percentage}%`;
+};
 
 function fieldsFromSchema(schema, resource) {
     const raw = getFieldSchema(schema, resource);
@@ -98,6 +119,7 @@ function displayValue(row, key, references = []) {
         return reference ? recordLabel(reference) : recordLabel(value);
     }
     if (key.includes("image")) return typeof value === "string" ? <img className="table-image-thumb" src={getImageUrl(value)} alt="" /> : recordLabel(value);
+    if (key === "discount_value") return String(row?.discount_type || "").toUpperCase() === "FIXED" ? `\u20b9${Number(value).toFixed(2)}` : `${value}%`;
     if (key.includes("percentage")) return `${value}%`;
     if (key.includes("amount") || key.includes("price") || key.includes("discount_value") || key.includes("shipping_fee") || key.includes("shipping_charge")) return money(value);
     if (key.includes("date") || key.endsWith("_at") || key === "valid_until" || key === "valid_from") return date(value);
@@ -331,13 +353,18 @@ function ResourcePage({ resource, schema }) {
     const [paymentStatus, setPaymentStatus] = useState("");
     const [dateFrom, setDateFrom] = useState("");
     const [dateTo, setDateTo] = useState("");
+    const [couponProduct, setCouponProduct] = useState("");
+    const [couponCategory, setCouponCategory] = useState("");
+    const [couponDiscountType, setCouponDiscountType] = useState("");
+    const [couponActive, setCouponActive] = useState("");
     const [modal, setModal] = useState(null);
     const [deleteTarget, setDeleteTarget] = useState(null);
+    const [togglingId, setTogglingId] = useState(null);
     const [exporting, setExporting] = useState(false);
     const [unitTypeRows, setUnitTypeRows] = useState([]);
     const [usageReferences, setUsageReferences] = useState({ coupons: [], users: [], products: [] });
     const [tableReferences, setTableReferences] = useState({});
-    const params = useMemo(() => ({ page, page_size: pageSize, ...(search && { search }), ...(ordering && { ordering }), ...(resource === "orders" && status && { status }), ...(resource === "orders" && paymentStatus && { payment_status: paymentStatus }), ...(resource === "orders" && dateFrom && { date_from: dateFrom }), ...(resource === "orders" && dateTo && { date_to: dateTo }) }), [page, pageSize, search, ordering, resource, status, paymentStatus, dateFrom, dateTo]);
+    const params = useMemo(() => ({ page, page_size: pageSize, ...(search && { search }), ...(ordering && { ordering }), ...(resource === "orders" && status && { status }), ...(resource === "orders" && paymentStatus && { payment_status: paymentStatus }), ...(resource === "orders" && dateFrom && { date_from: dateFrom }), ...(resource === "orders" && dateTo && { date_to: dateTo }), ...(resource === "coupons" && couponProduct && { product: couponProduct }), ...(resource === "coupons" && couponCategory && { category: couponCategory }), ...(resource === "coupons" && couponDiscountType && { discount_type: couponDiscountType }), ...(resource === "coupons" && couponActive && { is_active: couponActive }) }), [page, pageSize, search, ordering, resource, status, paymentStatus, dateFrom, dateTo, couponProduct, couponCategory, couponDiscountType, couponActive]);
     const state = useAdminResource(resource, params);
     const relationshipParams = useMemo(() => ({ page_size: 500 }), []);
     const productVariantsState = useAdminResource("product-variants", relationshipParams, resource === "products");
@@ -370,7 +397,7 @@ function ResourcePage({ resource, schema }) {
 
     const fields = fieldsFromSchema(schema, resource);
     const columnKeys = config.columns || (fields.length ? fields.map((field) => field.name || field.key).slice(0, 6) : ["id"]);
-    const columns = columnKeys.map((key) => ({
+    const genericColumns = columnKeys.map((key) => ({
         key,
         label: resource === "coupon-usages" && key === "user" ? "Used By" : columnLabel(resource, key),
         render: (row) => {
@@ -383,11 +410,33 @@ function ResourcePage({ resource, schema }) {
             return resolveTableValue(row, key, resource === "units" ? { ...tableReferences, "unit-types": unitTypeRows } : tableReferences);
         },
     }));
-    if (resource === "coupons") columns.unshift({ key: "copy_code", label: "Copy", render: (row) => <button className="table-copy-button" title="Copy coupon code" onClick={async () => { const code = row?.code; if (!code) return; try { await navigator.clipboard.writeText(code); toast.success("Coupon code copied"); } catch { toast.error("Could not copy coupon code"); } }}><FiCopy /> Copy</button> });
-    const clearFilters = () => { setSearch(""); setOrdering(defaultOrdering); setStatus(""); setPaymentStatus(""); setDateFrom(""); setDateTo(""); setPage(1); };
+    const columns = resource === "coupons" ? [
+        { key: "copy", label: "Copy", render: (row) => <button type="button" className="table-copy-button" title="Copy coupon code" onClick={async () => { if (!row?.code) return; try { await navigator.clipboard.writeText(row.code); toast.success("Coupon code copied"); } catch { toast.error("Could not copy coupon code"); } }}><FiCopy /> Copy</button> },
+        { key: "code", label: "Coupon Code", render: (row) => row?.code || "—" },
+        { key: "applicability_type", label: "Apply To", render: (row) => couponApplyTo(row) },
+        { key: "target_name", label: "Target", render: (row) => couponTarget(row, tableReferences) },
+        { key: "discount_type", label: "Discount Type", render: (row) => String(row?.discount_type || (row?.fixed_amount != null ? "FIXED" : "PERCENTAGE")).toUpperCase() === "FIXED" ? "Fixed Amount" : "Percentage" },
+        { key: "discount_value", label: "Discount", render: (row) => couponDiscount(row) },
+        { key: "start_date", label: "Start Date", render: (row) => date(row?.start_date || row?.valid_from) },
+        { key: "end_date", label: "Expiry Date", render: (row) => date(row?.end_date || row?.valid_until) },
+        { key: "is_active", label: "Status", render: (row) => <StatusPill value={row?.is_active ? "Active" : "Inactive"} /> },
+    ] : genericColumns;
+    const clearFilters = () => { setSearch(""); setOrdering(defaultOrdering); setStatus(""); setPaymentStatus(""); setDateFrom(""); setDateTo(""); setCouponProduct(""); setCouponCategory(""); setCouponDiscountType(""); setCouponActive(""); setPage(1); };
     const openView = (row) => navigate(`/eehook-dashboard/${resource}/${recordId(row)}/view`);
     const openEdit = (row) => navigate(`/eehook-dashboard/${resource}/${recordId(row)}/edit`);
     const addAction = resource === "products" ? () => navigate("/eehook-dashboard/products/new") : ["hero-banners", "promo-banners", "hero-side-banners", "coupons", "coupon-usages"].includes(resource) ? () => navigate(`/eehook-dashboard/${resource}/new`) : () => setModal({ mode: "create" });
+    const toggleCoupon = async (row) => {
+        if (togglingId) return;
+        const couponId = recordId(row);
+        setTogglingId(couponId);
+        try {
+            await updateResource("coupons", couponId, { is_active: !row?.is_active });
+            toast.success(`Coupon ${row?.is_active ? "deactivated" : "activated"}`);
+            state.reload();
+        } catch (error) {
+            toast.error(getErrorMessage(error, "Could not update coupon status."));
+        } finally { setTogglingId(null); }
+    };
     const remove = async () => { try { await deleteResource(resource, recordId(deleteTarget)); toast.success(`${config.label.slice(0, -1)} deleted`); setDeleteTarget(null); state.reload(); } catch (error) { toast.error(getErrorMessage(error, "Could not delete record")); } };
     const closeAndReload = () => { setModal(null); state.reload(); };
     const downloadResourceCsv = async () => {
@@ -408,7 +457,13 @@ function ResourcePage({ resource, schema }) {
     };
     const canExport = resource === "products" || resource === "orders" || resource === "order-items";
 
-    return <div className="admin-page"><PageHeader title={config.label} description={`Create, review, update, and remove ${config.label.toLowerCase()} records.`} action={<AdminHeaderActions>{canExport && <CsvButton onClick={downloadResourceCsv} loading={exporting} />}<button className="admin-button primary" onClick={addAction}><FiPlus /> Add {config.label.slice(0, -1)}</button></AdminHeaderActions>} /><div className="admin-panel"><FilterBar onClear={clearFilters}><DebouncedSearch value={search} onChange={(value) => { setSearch(value); setPage(1); }} placeholder={`Search ${config.label.toLowerCase()}...`} /><label className="admin-select"><span>Order</span><select value={ordering} onChange={(event) => { setOrdering(event.target.value); setPage(1); }}><option value="">Default</option><option value="-created_at">Newest</option><option value="created_at">Oldest</option><option value="name">Name A-Z</option><option value="-name">Name Z-A</option></select><FiChevronDown /></label>{resource === "orders" && <><label className="admin-select"><span>Status</span><select value={status} onChange={(event) => { setStatus(event.target.value); setPage(1); }}><option value="">All statuses</option>{["Pending", "Processing", "Shipped", "Delivered", "Cancelled"].map((item) => <option key={item}>{item}</option>)}</select></label><label className="admin-select"><span>Payment</span><select value={paymentStatus} onChange={(event) => { setPaymentStatus(event.target.value); setPage(1); }}><option value="">All payments</option>{["Pending", "Paid", "Failed", "Refunded"].map((item) => <option key={item}>{item}</option>)}</select></label><label className="admin-date"><span>From</span><input type="date" value={dateFrom} onChange={(event) => { setDateFrom(event.target.value); setPage(1); }} /></label><label className="admin-date"><span>To</span><input type="date" value={dateTo} onChange={(event) => { setDateTo(event.target.value); setPage(1); }} /></label></> }</FilterBar><DataTable columns={columns} rows={state.rows} loading={state.loading} error={state.error} onRetry={state.reload} actions={(row) => <><button className="table-icon" title="View details" aria-label={`View ${config.label.slice(0, -1)}`} onClick={() => openView(row)}><FiEye /></button><button className="table-icon" title="Edit" aria-label={`Edit ${config.label.slice(0, -1)}`} onClick={() => openEdit(row)}><FiEdit3 /></button><button className="table-icon danger" title="Delete" aria-label={`Delete ${config.label.slice(0, -1)}`} onClick={() => setDeleteTarget(row)}><FiTrash2 /></button></>} /><Pagination page={page} pageSize={pageSize} count={state.count} next={state.next} previous={state.previous} onPageChange={setPage} onPageSizeChange={(size) => { setPageSize(size); setPage(1); }} /></div>{modal && <ResourceModal resource={resource} schema={schema} mode={modal.mode} onClose={() => setModal(null)} onSaved={closeAndReload} />}{deleteTarget && <ConfirmDialog message={`Delete this ${config.label.slice(0, -1).toLowerCase()} permanently?`} onCancel={() => setDeleteTarget(null)} onConfirm={remove} />}</div>;
+    const couponFilters = resource === "coupons" && <>
+        <label className="admin-select"><span>Product</span><select value={couponProduct} onChange={(event) => { setCouponProduct(event.target.value); setPage(1); }}><option value="">All products</option>{(tableReferences.products || []).map((product) => <option key={recordId(product)} value={recordId(product)}>{recordLabel(product)}</option>)}</select></label>
+        <label className="admin-select"><span>Category</span><select value={couponCategory} onChange={(event) => { setCouponCategory(event.target.value); setPage(1); }}><option value="">All categories</option>{(tableReferences.categories || []).map((category) => <option key={recordId(category)} value={recordId(category)}>{recordLabel(category)}</option>)}</select></label>
+        <label className="admin-select"><span>Discount</span><select value={couponDiscountType} onChange={(event) => { setCouponDiscountType(event.target.value); setPage(1); }}><option value="">All types</option><option value="PERCENTAGE">Percentage</option><option value="FIXED">Fixed Amount</option></select></label>
+        <label className="admin-select"><span>Status</span><select value={couponActive} onChange={(event) => { setCouponActive(event.target.value); setPage(1); }}><option value="">All statuses</option><option value="true">Active</option><option value="false">Inactive</option></select></label>
+    </>;
+    return <div className="admin-page"><PageHeader title={config.label} description={`Create, review, update, and remove ${config.label.toLowerCase()} records.`} action={<AdminHeaderActions>{canExport && <CsvButton onClick={downloadResourceCsv} loading={exporting} />}<button className="admin-button primary" onClick={addAction}><FiPlus /> Add {config.label.slice(0, -1)}</button></AdminHeaderActions>} /><div className="admin-panel"><FilterBar onClear={clearFilters}><DebouncedSearch value={search} onChange={(value) => { setSearch(value); setPage(1); }} placeholder={`Search ${config.label.toLowerCase()}...`} /><label className="admin-select"><span>Order</span><select value={ordering} onChange={(event) => { setOrdering(event.target.value); setPage(1); }}><option value="">Default</option><option value="-created_at">Newest</option><option value="created_at">Oldest</option><option value="code">Code A-Z</option><option value="-code">Code Z-A</option><option value="name">Name A-Z</option><option value="-name">Name Z-A</option></select><FiChevronDown /></label>{resource === "orders" && <><label className="admin-select"><span>Status</span><select value={status} onChange={(event) => { setStatus(event.target.value); setPage(1); }}><option value="">All statuses</option>{["Pending", "Processing", "Shipped", "Delivered", "Cancelled"].map((item) => <option key={item}>{item}</option>)}</select></label><label className="admin-select"><span>Payment</span><select value={paymentStatus} onChange={(event) => { setPaymentStatus(event.target.value); setPage(1); }}><option value="">All payments</option>{["Pending", "Paid", "Failed", "Refunded"].map((item) => <option key={item}>{item}</option>)}</select></label><label className="admin-date"><span>From</span><input type="date" value={dateFrom} onChange={(event) => { setDateFrom(event.target.value); setPage(1); }} /></label><label className="admin-date"><span>To</span><input type="date" value={dateTo} onChange={(event) => { setDateTo(event.target.value); setPage(1); }} /></label></>}{couponFilters}</FilterBar><DataTable columns={columns} rows={state.rows} loading={state.loading} error={state.error} onRetry={state.reload} actions={(row) => <><button className="table-icon" title="View details" aria-label={`View ${config.label.slice(0, -1)}`} onClick={() => openView(row)}><FiEye /></button><button className="table-icon" title="Edit" aria-label={`Edit ${config.label.slice(0, -1)}`} onClick={() => openEdit(row)}><FiEdit3 /></button>{resource === "coupons" && <button className="table-icon" title={row?.is_active ? "Deactivate" : "Activate"} aria-label={`${row?.is_active ? "Deactivate" : "Activate"} coupon`} onClick={() => toggleCoupon(row)} disabled={togglingId === recordId(row)}><FiPower /></button>}<button className="table-icon danger" title="Delete" aria-label={`Delete ${config.label.slice(0, -1)}`} onClick={() => setDeleteTarget(row)}><FiTrash2 /></button></>} /><Pagination page={page} pageSize={pageSize} count={state.count} next={state.next} previous={state.previous} onPageChange={setPage} onPageSizeChange={(size) => { setPageSize(size); setPage(1); }} /></div>{modal && <ResourceModal resource={resource} schema={schema} mode={modal.mode} onClose={() => setModal(null)} onSaved={closeAndReload} />}{deleteTarget && <ConfirmDialog message={`Delete this ${config.label.slice(0, -1).toLowerCase()} permanently?`} onCancel={() => setDeleteTarget(null)} onConfirm={remove} />}</div>;
 }
 
 function ReadOnlyResourcePage({ resource, id, schema }) {

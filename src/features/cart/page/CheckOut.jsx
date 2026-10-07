@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import client from "../../../lib/ApiClient";
 import "../style/Checkout.css";
 import { getImageUrl } from "../../../utils/imageUrl";
+import showToast from "../../../utils/toast";
+import { clearCouponApplication, isInactiveCouponError } from "../../coupon/couponState";
 
 const Checkout = () => {
 
@@ -21,6 +23,7 @@ const Checkout = () => {
 
     const [loading, setLoading] = useState(true);
     const [processing, setProcessing] = useState(false);
+    const [checkoutError, setCheckoutError] = useState("");
     const checkoutIdempotencyKey = useRef(null);
 
     useEffect(() => {
@@ -68,24 +71,34 @@ const Checkout = () => {
 
             const response = await client.get("cart/");
 
-            setCartItems(response.data.items || []);
+            const cartData = response.data || {};
+            const inactiveItems = (Array.isArray(cartData.items) ? cartData.items : []).filter((item) => item.coupon_status === "COUPON_INACTIVE");
+            inactiveItems.forEach((item) => clearCouponApplication(item.product, item.coupon_code));
+
+            setCartItems(cartData.items || []);
 
             setCartSummary({
-                subtotal: Number(response.data.subtotal || 0),
-                shipping: Number(response.data.shipping || 0),
-                total: Number(response.data.total || 0),
-                discount: Number(response.data.discount || 0),
+                subtotal: Number(cartData.subtotal || 0),
+                shipping: Number(cartData.shipping || 0),
+                total: Number(cartData.total || 0),
+                discount: Number(cartData.discount || 0),
             });
+
+            return cartData;
 
         } catch (error) {
 
             console.log(error);
+            setCheckoutError("Could not refresh your cart. Please try again.");
+            return null;
 
         }
 
     };
 
     const proceedToPayment = async () => {
+
+        if (processing) return;
 
         if (!selectedAddress) {
 
@@ -98,6 +111,22 @@ const Checkout = () => {
         try {
 
             setProcessing(true);
+            setCheckoutError("");
+
+            const latestCart = await fetchCart();
+            if (!latestCart) {
+                setProcessing(false);
+                return;
+            }
+
+            const inactiveItems = (Array.isArray(latestCart.items) ? latestCart.items : []).filter((item) => item.coupon_status === "COUPON_INACTIVE");
+            if (inactiveItems.length) {
+                inactiveItems.forEach((item) => clearCouponApplication(item.product, item.coupon_code));
+                setCheckoutError("This coupon is no longer active. Your cart has been updated.");
+                showToast.warning("This coupon is no longer active. Your cart has been updated.");
+                setProcessing(false);
+                return;
+            }
 
             if (!checkoutIdempotencyKey.current) {
                 checkoutIdempotencyKey.current = crypto.randomUUID();
@@ -116,8 +145,15 @@ const Checkout = () => {
         } catch (error) {
 
             console.log(error);
-
-            alert("Unable to continue payment");
+            if (isInactiveCouponError(error)) {
+                const responseData = error.response?.data || {};
+                clearCouponApplication(null, responseData.coupon_code);
+                setCheckoutError("This coupon is no longer active. Your cart has been updated.");
+                showToast.warning("This coupon is no longer active. Your cart has been updated.");
+                await fetchCart();
+            } else {
+                setCheckoutError("Unable to continue payment. Please try again.");
+            }
 
             setProcessing(false);
 
@@ -155,6 +191,8 @@ const Checkout = () => {
                     Complete your purchase securely.
 
                 </p>
+
+                {checkoutError && <p className="coupon-inactive-warning" role="alert">{checkoutError}</p>}
 
             </div>
 
@@ -359,6 +397,12 @@ const Checkout = () => {
                                                 Color : {item.color}
 
                                             </p>
+
+                                            {item.coupon_status === "COUPON_INACTIVE" && (
+                                                <p className="coupon-inactive-warning" role="alert">
+                                                    This coupon is no longer active.
+                                                </p>
+                                            )}
 
                                             <p>
 

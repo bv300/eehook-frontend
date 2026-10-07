@@ -17,5 +17,7 @@ export const addToCart_Post = async (product) => {
             error
         );
 
+        throw error;
+
     }
 }

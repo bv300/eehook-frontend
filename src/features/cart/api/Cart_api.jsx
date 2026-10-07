@@ -8,6 +8,7 @@ export const GetcartProduct = async (id) => {
     }
     catch (error) {
         console.log('error : ', error)
+        throw error;
     }
 }
 
@@ -21,6 +22,7 @@ export const saveQuantity = async (id, quantity) => {
         });
     } catch (error) {
         console.error(error);
+        throw error;
     }
 };
 
