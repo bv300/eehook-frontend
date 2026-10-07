@@ -171,10 +171,24 @@
     gap: 12px;
     padding: 14px 18px;
     background: linear-gradient(180deg, #fbfdfc 0%, #f7faf8 100%);
+    flex-wrap: wrap;
 }
 
 .admin-filter-fields {
     gap: 10px;
+    min-width: 0;
+    flex-wrap: wrap;
+}
+
+.admin-filter-fields > .admin-select {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.admin-filter-fields > .admin-select select {
+    min-width: 0;
+    max-width: 180px;
+    text-overflow: ellipsis;
 }
 
 .admin-search,
