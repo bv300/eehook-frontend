@@ -11,6 +11,11 @@
 .new-arrivals {
     max-width: 1200px;
     margin: 0 auto;
+    padding: 30px;
+    background: #FFFFFF;
+    border: none;
+    border-radius: 11px;
+    box-shadow: 0 6px 24px rgba(75, 99, 109, 0.14);
 }
 
 /* --- Header --- */
@@ -23,10 +28,11 @@
 }
 
 .heading-text h2 {
-    font-family: Inter, Arial, Helvetica, sans-serif;
-    font-size: 3rem;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 28px;
+    line-height: 1.2;
     font-weight: 700;
-    color: #4B636D;
+    color: #000000;
     margin: 0 0 8px 0;
     overflow-wrap: anywhere;
 }
@@ -34,7 +40,7 @@
 .heading-sub {
     font-family: Inter, Arial, Helvetica, sans-serif;
     font-size: 1.1rem;
-    color: #6B8490;
+    color: #000000;
     margin: 0;
     overflow-wrap: anywhere;
 }
@@ -258,17 +264,16 @@
 
 
 .newHome-product-title {
-    font-family: Inter, Arial, Helvetica, sans-serif;
-    line-height: 1.5;
-    font-size: 0.82rem;
+    font-family: Arial, Helvetica, sans-serif;
+    line-height: 1.25;
+    font-size: 16px;
     font-weight: 400;
     color: #000000;
     margin: 10px 0;
-    
-    height: 65px;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
+
+    height: 20px;
+    display: block;
+    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
@@ -343,7 +348,7 @@
     font-family: Inter, Arial, Helvetica, sans-serif;
     font-size: 18px;
     font-weight: 600;
-    color: #4B636D;
+    color: #000000;
 }
 
 /* Grid and View All Styles */
@@ -423,6 +428,10 @@
         padding-right: 10px;
     }
 
+    .new-arrivals {
+        padding: 20px 14px;
+    }
+
     .heading-container {
         align-items: flex-start;
         margin-bottom: 24px;
@@ -445,8 +454,8 @@
     }
 
     .newHome-product-title {
-        font-size: 0.8rem;
-        height: 58px;
+        font-size: 15px;
+        height: 19px;
     }
 
     .price-area .product-price {
