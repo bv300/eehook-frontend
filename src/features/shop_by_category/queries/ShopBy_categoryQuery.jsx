@@ -1,12 +1,12 @@
 
 import { useQuery } from '@tanstack/react-query'
-import React from 'react'
 import { ShopBy_categoryGet } from '../api/ShopBy_categoryApi'
 
-function ShopBy_categoryQuery() {
+function ShopBy_categoryQuery(options = {}) {
   return useQuery({
     queryKey : ['shopBycategory'],
-    queryFn : ShopBy_categoryGet
+    queryFn : ShopBy_categoryGet,
+    enabled: options.enabled ?? true,
   })
 
 }

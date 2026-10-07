@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
-import { FiActivity, FiArchive, FiBox, FiChevronDown, FiClipboard, FiCopy, FiCreditCard, FiDownload, FiEdit3, FiEye, FiGrid, FiImage, FiLayers, FiLogOut, FiMenu, FiPackage, FiPlus, FiPower, FiRefreshCw, FiSettings, FiShoppingBag, FiTag, FiTrash2, FiTruck, FiUsers, FiX } from "react-icons/fi";
+import { FiActivity, FiArchive, FiBox, FiChevronDown, FiClipboard, FiCopy, FiCreditCard, FiDownload, FiEdit3, FiEye, FiGrid, FiImage, FiLayers, FiLogOut, FiMenu, FiPackage, FiPlus, FiPower, FiRefreshCw, FiSettings, FiShield, FiShoppingBag, FiTag, FiToggleLeft, FiToggleRight, FiTrash2, FiTruck, FiUsers, FiX } from "react-icons/fi";
 import { ConfirmDialog, DataTable, DebouncedSearch, EmptyState, FilterBar, FormField, LoadingState, Modal, PageHeader, Pagination, Skeleton, StatusPill } from "../components/AdminPrimitives";
 import useAdminResource from "../hooks/useAdminResource";
 import OverviewGraphs from "../components/OverviewGraphs";
@@ -43,6 +43,7 @@ const resources = {
     "hero-banners": { label: "Hero Banners", group: "Marketing", fields: ["subtitle", "title", "description", "image", "button_text", "display_order", "is_active"], columns: ["subtitle", "title", "button_text", "display_order", "is_active"] },
     "promo-banners": { label: "Promotional Banners", group: "Marketing", fields: ["image", "link", "is_active"], columns: ["image", "link", "is_active"] },
     "hero-side-banners": { label: "Hero Side Banners", group: "Marketing", fields: ["image", "link", "is_active"], columns: ["image", "link", "is_active"] },
+    "trust-benefits": { label: "Trust & Benefits", itemLabel: "Benefit", group: "Marketing", fields: ["key", "title", "description", "icon_key", "display_order", "is_active"], columns: ["display_order", "key", "title", "icon_key", "is_active"] },
     coupons: { label: "Coupons", group: "Marketing", fields: ["code", "applicability_type", "target_name", "discount_type", "discount_value", "start_date", "end_date", "is_active"], columns: ["code", "applicability_type", "target_name", "discount_type", "discount_value", "start_date", "end_date", "is_active", "product", "category"] },
     "coupon-usages": { label: "Coupon Usage History", group: "Marketing", fields: ["coupon", "user", "product", "used_at"], columns: ["user", "coupon", "product", "used_at"] },
 };
@@ -52,7 +53,14 @@ const navGroups = [
     { title: "Orders", items: [{ key: "orders", label: "Orders", icon: FiShoppingBag }, { key: "order-items", label: "Order Items", icon: FiClipboard }] },
     { title: "Catalog", items: ["categories", "subcategories", "products", "colors", "unit-types", "units", "offers"].map((key) => ({ key, label: key === "products" ? "Products & Variants" : resources[key].label, icon: key === "products" ? FiPackage : FiLayers })) },
     { title: "Customers", items: ["users", "user-profiles", "addresses", "wishlists", "carts"].map((key) => ({ key, label: resources[key].label, icon: key === "users" ? FiUsers : FiArchive })) },
-    { title: "Marketing", items: ["hero-banners", "promo-banners", "hero-side-banners", "coupons", "coupon-usages"].map((key) => ({ key, label: resources[key].label, icon: key.includes("banner") ? FiImage : FiTag })) },
+    { title: "Marketing", items: ["hero-banners", "promo-banners", "hero-side-banners", "trust-benefits", "coupons", "coupon-usages"].map((key) => ({ key, label: resources[key].label, icon: key === "trust-benefits" ? FiShield : key.includes("banner") ? FiImage : FiTag })) },
+];
+
+const TRUST_BENEFIT_ICON_OPTIONS = [
+    ["secure-payment", "Secure payment"],
+    ["delivery-information", "Delivery information"],
+    ["customer-support", "Customer support"],
+    ["easy-returns", "Easy returns"],
 ];
 
 const money = (value) => `AED ${Number(value || 0).toLocaleString("en-AE", { minimumFractionDigits: 2 })}`;
@@ -64,7 +72,17 @@ const columnLabel = (resource, key) => ({
     orders: { customer_name: "Customer" },
 }[resource]?.[key] || titleize(key));
 const fallbackFields = (resource, fieldNames) => fieldNames.map((name) => ({ name, type: name.includes("description") ? "textarea" : name.includes("active") ? "boolean" : resource === "offers" && ["start_date", "end_date"].includes(name) ? "date" : resource === "offers" && name === "discount" ? "number" : "text", label: resource === "offers" && name === "discount" ? "Discount (%)" : titleize(name), ...(resource === "offers" && name === "discount" ? { min: 0, max: 100, step: 0.01 } : {}) }));
+const resourceFallbackFields = (resource, fieldNames) => {
+    const fields = fallbackFields(resource, fieldNames);
+    if (resource !== "trust-benefits") return fields;
+    return fields.map((field) => {
+        if (field.name === "icon_key") return { ...field, type: "choice", choices: TRUST_BENEFIT_ICON_OPTIONS, label: "Icon" };
+        if (field.name === "display_order") return { ...field, type: "integer", label: "Display order", min: 0, step: 1 };
+        return field;
+    });
+};
 const recordId = (row) => row?.id ?? row?.pk ?? row?.uuid;
+const itemLabel = (resource) => resources[resource]?.itemLabel || resources[resource]?.label?.replace(/s$/, "") || "Record";
 const recordLabel = (value) => typeof value === "object" ? value?.name || value?.title || value?.email || value?.id || "—" : value;
 
 const couponApplyTo = (row) => String(row?.applicability_type || (row?.category ? "CATEGORY" : "PRODUCT")).toUpperCase() === "CATEGORY" ? "Category" : "Product";
@@ -107,6 +125,14 @@ function fieldsFromSchema(schema, resource) {
     });
     if (resource === "users" && !fields.some((field) => (field.name || field.key) === "password")) {
         fields.splice(1, 0, { name: "password", type: "password", label: "Password", password_policy: true });
+    }
+    if (resource === "trust-benefits") {
+        return fields.map((field) => {
+            const name = field.name || field.key;
+            if (name === "icon_key") return { ...field, type: "choice", choices: TRUST_BENEFIT_ICON_OPTIONS, label: "Icon" };
+            if (name === "display_order") return { ...field, type: "integer", label: "Display order", min: 0, step: 1 };
+            return field;
+        });
     }
     return fields;
 }
@@ -347,7 +373,7 @@ function ResourcePage({ resource, schema }) {
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
     const [search, setSearch] = useState("");
-    const defaultOrdering = resource === "products" ? "-id" : "";
+    const defaultOrdering = resource === "products" ? "-id" : resource === "trust-benefits" ? "display_order" : "";
     const [ordering, setOrdering] = useState(defaultOrdering);
     const [status, setStatus] = useState("");
     const [paymentStatus, setPaymentStatus] = useState("");
@@ -424,7 +450,7 @@ function ResourcePage({ resource, schema }) {
     const clearFilters = () => { setSearch(""); setOrdering(defaultOrdering); setStatus(""); setPaymentStatus(""); setDateFrom(""); setDateTo(""); setCouponProduct(""); setCouponCategory(""); setCouponDiscountType(""); setCouponActive(""); setPage(1); };
     const openView = (row) => navigate(`/eehook-dashboard/${resource}/${recordId(row)}/view`);
     const openEdit = (row) => navigate(`/eehook-dashboard/${resource}/${recordId(row)}/edit`);
-    const addAction = resource === "products" ? () => navigate("/eehook-dashboard/products/new") : ["hero-banners", "promo-banners", "hero-side-banners", "coupons", "coupon-usages"].includes(resource) ? () => navigate(`/eehook-dashboard/${resource}/new`) : () => setModal({ mode: "create" });
+    const addAction = resource === "products" ? () => navigate("/eehook-dashboard/products/new") : ["hero-banners", "promo-banners", "hero-side-banners", "coupons", "coupon-usages", "trust-benefits"].includes(resource) ? () => navigate(`/eehook-dashboard/${resource}/new`) : () => setModal({ mode: "create", initialValues: resource === "trust-benefits" ? { is_active: true, display_order: 1 } : {} });
     const toggleCoupon = async (row) => {
         if (togglingId) return;
         const couponId = recordId(row);
@@ -437,7 +463,8 @@ function ResourcePage({ resource, schema }) {
             toast.error(getErrorMessage(error, "Could not update coupon status."));
         } finally { setTogglingId(null); }
     };
-    const remove = async () => { try { await deleteResource(resource, recordId(deleteTarget)); toast.success(`${config.label.slice(0, -1)} deleted`); setDeleteTarget(null); state.reload(); } catch (error) { toast.error(getErrorMessage(error, "Could not delete record")); } };
+    const toggleActive = async (row) => { try { await updateResource(resource, recordId(row), { is_active: !row.is_active }); toast.success(`${itemLabel(resource)} ${row.is_active ? "deactivated" : "activated"}`); state.reload(); } catch (error) { toast.error(getErrorMessage(error, `Could not update ${itemLabel(resource).toLowerCase()} status`)); } };
+    const remove = async () => { try { await deleteResource(resource, recordId(deleteTarget)); toast.success(`${itemLabel(resource)} deleted`); setDeleteTarget(null); state.reload(); } catch (error) { toast.error(getErrorMessage(error, "Could not delete record")); } };
     const closeAndReload = () => { setModal(null); state.reload(); };
     const downloadResourceCsv = async () => {
         setExporting(true);
@@ -463,7 +490,7 @@ function ResourcePage({ resource, schema }) {
         <label className="admin-select"><span>Discount</span><select value={couponDiscountType} onChange={(event) => { setCouponDiscountType(event.target.value); setPage(1); }}><option value="">All types</option><option value="PERCENTAGE">Percentage</option><option value="FIXED">Fixed Amount</option></select></label>
         <label className="admin-select"><span>Status</span><select value={couponActive} onChange={(event) => { setCouponActive(event.target.value); setPage(1); }}><option value="">All statuses</option><option value="true">Active</option><option value="false">Inactive</option></select></label>
     </>;
-    return <div className="admin-page"><PageHeader title={config.label} description={`Create, review, update, and remove ${config.label.toLowerCase()} records.`} action={<AdminHeaderActions>{canExport && <CsvButton onClick={downloadResourceCsv} loading={exporting} />}<button className="admin-button primary" onClick={addAction}><FiPlus /> Add {config.label.slice(0, -1)}</button></AdminHeaderActions>} /><div className="admin-panel"><FilterBar onClear={clearFilters}><DebouncedSearch value={search} onChange={(value) => { setSearch(value); setPage(1); }} placeholder={`Search ${config.label.toLowerCase()}...`} /><label className="admin-select"><span>Order</span><select value={ordering} onChange={(event) => { setOrdering(event.target.value); setPage(1); }}><option value="">Default</option><option value="-created_at">Newest</option><option value="created_at">Oldest</option><option value="code">Code A-Z</option><option value="-code">Code Z-A</option><option value="name">Name A-Z</option><option value="-name">Name Z-A</option></select><FiChevronDown /></label>{resource === "orders" && <><label className="admin-select"><span>Status</span><select value={status} onChange={(event) => { setStatus(event.target.value); setPage(1); }}><option value="">All statuses</option>{["Pending", "Processing", "Shipped", "Delivered", "Cancelled"].map((item) => <option key={item}>{item}</option>)}</select></label><label className="admin-select"><span>Payment</span><select value={paymentStatus} onChange={(event) => { setPaymentStatus(event.target.value); setPage(1); }}><option value="">All payments</option>{["Pending", "Paid", "Failed", "Refunded"].map((item) => <option key={item}>{item}</option>)}</select></label><label className="admin-date"><span>From</span><input type="date" value={dateFrom} onChange={(event) => { setDateFrom(event.target.value); setPage(1); }} /></label><label className="admin-date"><span>To</span><input type="date" value={dateTo} onChange={(event) => { setDateTo(event.target.value); setPage(1); }} /></label></>}{couponFilters}</FilterBar><DataTable columns={columns} rows={state.rows} loading={state.loading} error={state.error} onRetry={state.reload} actions={(row) => <><button className="table-icon" title="View details" aria-label={`View ${config.label.slice(0, -1)}`} onClick={() => openView(row)}><FiEye /></button><button className="table-icon" title="Edit" aria-label={`Edit ${config.label.slice(0, -1)}`} onClick={() => openEdit(row)}><FiEdit3 /></button>{resource === "coupons" && <button className="table-icon" title={row?.is_active ? "Deactivate" : "Activate"} aria-label={`${row?.is_active ? "Deactivate" : "Activate"} coupon`} onClick={() => toggleCoupon(row)} disabled={togglingId === recordId(row)}><FiPower /></button>}<button className="table-icon danger" title="Delete" aria-label={`Delete ${config.label.slice(0, -1)}`} onClick={() => setDeleteTarget(row)}><FiTrash2 /></button></>} /><Pagination page={page} pageSize={pageSize} count={state.count} next={state.next} previous={state.previous} onPageChange={setPage} onPageSizeChange={(size) => { setPageSize(size); setPage(1); }} /></div>{modal && <ResourceModal resource={resource} schema={schema} mode={modal.mode} onClose={() => setModal(null)} onSaved={closeAndReload} />}{deleteTarget && <ConfirmDialog message={`Delete this ${config.label.slice(0, -1).toLowerCase()} permanently?`} onCancel={() => setDeleteTarget(null)} onConfirm={remove} />}</div>;
+    return <div className="admin-page"><PageHeader title={config.label} description={`Create, review, update, and remove ${config.label.toLowerCase()} records.`} action={<AdminHeaderActions>{canExport && <CsvButton onClick={downloadResourceCsv} loading={exporting} />}<button className="admin-button primary" onClick={addAction}><FiPlus /> Add {itemLabel(resource)}</button></AdminHeaderActions>} /><div className="admin-panel"><FilterBar onClear={clearFilters}><DebouncedSearch value={search} onChange={(value) => { setSearch(value); setPage(1); }} placeholder={`Search ${config.label.toLowerCase()}...`} /><label className="admin-select"><span>Order</span><select value={ordering} onChange={(event) => { setOrdering(event.target.value); setPage(1); }}><option value="">Default</option>{resource === "trust-benefits" && <><option value="display_order">Display order</option><option value="-display_order">Reverse display order</option></>}<option value="-created_at">Newest</option><option value="created_at">Oldest</option><option value="code">Code A-Z</option><option value="-code">Code Z-A</option><option value="name">Name A-Z</option><option value="-name">Name Z-A</option></select><FiChevronDown /></label>{resource === "orders" && <><label className="admin-select"><span>Status</span><select value={status} onChange={(event) => { setStatus(event.target.value); setPage(1); }}><option value="">All statuses</option>{["Pending", "Processing", "Shipped", "Delivered", "Cancelled"].map((item) => <option key={item}>{item}</option>)}</select></label><label className="admin-select"><span>Payment</span><select value={paymentStatus} onChange={(event) => { setPaymentStatus(event.target.value); setPage(1); }}><option value="">All payments</option>{["Pending", "Paid", "Failed", "Refunded"].map((item) => <option key={item}>{item}</option>)}</select></label><label className="admin-date"><span>From</span><input type="date" value={dateFrom} onChange={(event) => { setDateFrom(event.target.value); setPage(1); }} /></label><label className="admin-date"><span>To</span><input type="date" value={dateTo} onChange={(event) => { setDateTo(event.target.value); setPage(1); }} /></label></>}{resource === "coupons" && <><label className="admin-select"><span>Product</span><select value={couponProduct} onChange={(event) => { setCouponProduct(event.target.value); setPage(1); }}><option value="">All products</option>{(tableReferences.products || []).map((product) => <option key={recordId(product)} value={recordId(product)}>{recordLabel(product)}</option>)}</select></label><label className="admin-select"><span>Category</span><select value={couponCategory} onChange={(event) => { setCouponCategory(event.target.value); setPage(1); }}><option value="">All categories</option>{(tableReferences.categories || []).map((category) => <option key={recordId(category)} value={recordId(category)}>{recordLabel(category)}</option>)}</select></label><label className="admin-select"><span>Discount</span><select value={couponDiscountType} onChange={(event) => { setCouponDiscountType(event.target.value); setPage(1); }}><option value="">All types</option><option value="PERCENTAGE">Percentage</option><option value="FIXED">Fixed Amount</option></select></label><label className="admin-select"><span>Status</span><select value={couponActive} onChange={(event) => { setCouponActive(event.target.value); setPage(1); }}><option value="">All statuses</option><option value="true">Active</option><option value="false">Inactive</option></select></label></>}</FilterBar><DataTable columns={columns} rows={state.rows} loading={state.loading} error={state.error} onRetry={state.reload} actions={(row) => <><button className="table-icon" title="View details" aria-label={`View ${itemLabel(resource)}`} onClick={() => openView(row)}><FiEye /></button><button className="table-icon" title="Edit" aria-label={`Edit ${itemLabel(resource)}`} onClick={() => openEdit(row)}><FiEdit3 /></button>{resource === "coupons" && <button className="table-icon" title={row?.is_active ? "Deactivate" : "Activate"} aria-label={`${row?.is_active ? "Deactivate" : "Activate"} coupon`} onClick={() => toggleCoupon(row)} disabled={togglingId === recordId(row)}><FiPower /></button>}{resource === "trust-benefits" && <button className="table-icon" title={row.is_active ? "Deactivate" : "Activate"} aria-label={`${row.is_active ? "Deactivate" : "Activate"} ${itemLabel(resource)}`} onClick={() => toggleActive(row)}>{row.is_active ? <FiToggleRight /> : <FiToggleLeft />}</button>}<button className="table-icon danger" title="Delete" aria-label={`Delete ${itemLabel(resource)}`} onClick={() => setDeleteTarget(row)}><FiTrash2 /></button></>} /><Pagination page={page} pageSize={pageSize} count={state.count} next={state.next} previous={state.previous} onPageChange={setPage} onPageSizeChange={(size) => { setPageSize(size); setPage(1); }} /></div>{modal && <ResourceModal resource={resource} schema={schema} mode={modal.mode} initialValues={modal.initialValues} onClose={() => setModal(null)} onSaved={closeAndReload} />}{deleteTarget && <ConfirmDialog message={`Delete this ${itemLabel(resource).toLowerCase()} permanently?`} onCancel={() => setDeleteTarget(null)} onConfirm={remove} />}</div>;
 }
 
 function ReadOnlyResourcePage({ resource, id, schema }) {
@@ -473,7 +500,7 @@ function ReadOnlyResourcePage({ resource, id, schema }) {
     const [references, setReferences] = useState({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
-    const fields = useMemo(() => { const schemaFields = fieldsFromSchema(schema, resource); return schemaFields.length ? schemaFields : fallbackFields(resource, config.fields); }, [schema, resource, config.fields]);
+    const fields = useMemo(() => { const schemaFields = fieldsFromSchema(schema, resource); return schemaFields.length ? schemaFields : resourceFallbackFields(resource, config.fields); }, [schema, resource, config.fields]);
     useEffect(() => {
         let active = true;
         getResource(resource, id).then((response) => { if (active) setRow(response.data); }).catch((requestError) => { if (active) setError(getErrorMessage(requestError, "Could not load record.")); }).finally(() => { if (active) setLoading(false); });
@@ -489,7 +516,7 @@ function ReadOnlyResourcePage({ resource, id, schema }) {
     }, [fields]);
     if (loading) return <div className="admin-page"><LoadingState label="Loading record details..." /></div>;
     if (error || !row) return <div className="admin-page"><button className="admin-back-link" onClick={() => navigate(`/eehook-dashboard/${resource}`)}>Back to {config.label}</button><div className="admin-form-error">{error || "Record not found."}</div></div>;
-    return <div className="admin-page"><button className="admin-back-link" onClick={() => navigate(`/eehook-dashboard/${resource}`)}>Back to {config.label}</button><PageHeader eyebrow="VIEW RECORD" title={`${config.label.slice(0, -1)} details`} description="Read-only record details." /><section className="admin-panel resource-view-panel"><div className="resource-view-grid">{fields.map((field) => { const name = field.name || field.key; return <div className="resource-view-field" key={name}><small>{field.label || titleize(name)}</small><div>{resolveTableValue(row, name, references)}</div></div>; })}</div></section></div>;
+    return <div className="admin-page"><button className="admin-back-link" onClick={() => navigate(`/eehook-dashboard/${resource}`)}>Back to {config.label}</button><PageHeader eyebrow="VIEW RECORD" title={`${itemLabel(resource)} details`} description="Read-only record details." /><section className="admin-panel resource-view-panel"><div className="resource-view-grid">{fields.map((field) => { const name = field.name || field.key; return <div className="resource-view-field" key={name}><small>{field.label || titleize(name)}</small><div>{resolveTableValue(row, name, references)}</div></div>; })}</div></section></div>;
 }
 
 function ResourceEditorPage({ resource, id, schema }) {
@@ -501,7 +528,7 @@ function ResourceEditorPage({ resource, id, schema }) {
     const [loading, setLoading] = useState(editing);
     const [saving, setSaving] = useState(false);
     const [requestError, setRequestError] = useState(null);
-    const fallback = useMemo(() => { const schemaFields = fieldsFromSchema(schema, resource); return schemaFields.length ? schemaFields : fallbackFields(resource, config.fields); }, [schema, resource, config.fields]);
+    const fallback = useMemo(() => { const schemaFields = fieldsFromSchema(schema, resource); return schemaFields.length ? schemaFields : resourceFallbackFields(resource, config.fields); }, [schema, resource, config.fields]);
     const errors = useFormErrors(requestError);
     useEffect(() => {
         let active = true;
@@ -527,7 +554,7 @@ function ResourceEditorPage({ resource, id, schema }) {
             const payload = cleanPayload(values, resource);
             if (editing) await updateResource(resource, id, payload, payload instanceof FormData);
             else await createResource(resource, payload, payload instanceof FormData);
-            toast.success(`${config.label.slice(0, -1)} ${editing ? "updated" : "created"}`);
+            toast.success(`${itemLabel(resource)} ${editing ? "updated" : "created"}`);
             navigate(`/eehook-dashboard/${resource}`);
         } catch (error) {
             setRequestError(error);
@@ -535,7 +562,7 @@ function ResourceEditorPage({ resource, id, schema }) {
         } finally { setSaving(false); }
     };
     if (loading) return <div className="admin-page"><LoadingState label="Loading record editor..." /></div>;
-    return <div className="admin-page resource-editor-page"><button className="admin-back-link" onClick={() => navigate(`/eehook-dashboard/${resource}`)}>Back to {config.label}</button><PageHeader eyebrow={editing ? "EDIT RECORD" : "NEW RECORD"} title={`${editing ? "Edit" : "Add"} ${config.label.slice(0, -1)}`} description="Update the record and save your changes." /><section className="admin-panel resource-editor-panel"><form className="admin-form" onSubmit={save}><div className="admin-form-grid">{fallback.map((field) => { const name = field.name || field.key; const refName = { user: "users", customer: "users", product: "products", variant: "product-variants", variant_unit: "product-variant-units", category: "categories", subcategory: "subcategories", offer: "offers", color: "colors", unit_type: "unit-types", unit: "units", coupon: "coupons", order: "orders", address: "addresses" }[name] || ""; return <FormField key={name} field={field} options={references[refName] || []} value={values[name]} onChange={setValue} error={errors[name]} readOnly={false} />; })}</div>{requestError && !Object.keys(errors).length && <p className="admin-form-error">{getErrorMessage(requestError)}</p>}<div className="admin-modal-actions"><button type="button" className="admin-button secondary" onClick={() => navigate(`/eehook-dashboard/${resource}`)}>Cancel</button><button type="submit" className="admin-button primary" disabled={saving}>{saving ? "Saving..." : "Save changes"}</button></div></form></section></div>;
+    return <div className="admin-page resource-editor-page"><button className="admin-back-link" onClick={() => navigate(`/eehook-dashboard/${resource}`)}>Back to {config.label}</button><PageHeader eyebrow={editing ? "EDIT RECORD" : "NEW RECORD"} title={`${editing ? "Edit" : "Add"} ${itemLabel(resource)}`} description="Update the record and save your changes." /><section className="admin-panel resource-editor-panel"><form className="admin-form" onSubmit={save}><div className="admin-form-grid">{fallback.map((field) => { const name = field.name || field.key; const refName = { user: "users", customer: "users", product: "products", variant: "product-variants", variant_unit: "product-variant-units", category: "categories", subcategory: "subcategories", offer: "offers", color: "colors", unit_type: "unit-types", unit: "units", coupon: "coupons", order: "orders", address: "addresses" }[name] || ""; return <FormField key={name} field={field} options={references[refName] || []} value={values[name]} onChange={setValue} error={errors[name]} readOnly={false} />; })}</div>{requestError && !Object.keys(errors).length && <p className="admin-form-error">{getErrorMessage(requestError)}</p>}<div className="admin-modal-actions"><button type="button" className="admin-button secondary" onClick={() => navigate(`/eehook-dashboard/${resource}`)}>Cancel</button><button type="submit" className="admin-button primary" disabled={saving}>{saving ? "Saving..." : "Save changes"}</button></div></form></section></div>;
 }
 
 function OrderEditPage({ id }) {
@@ -617,7 +644,7 @@ function ResourceModal({ resource, schema, mode, row, initialValues = {}, onClos
     const [requestError, setRequestError] = useState(null);
     const [references, setReferences] = useState({});
     const [productMode, setProductMode] = useState(row?.product_type || (row?.has_variants ? "multiple" : "single"));
-    const fallback = useMemo(() => { const fields = fieldsFromSchema(schema, resource); return fields.length ? fields.map((field) => { const name = field.name || field.key; if (resource === "offers" && ["discount", "discount_percentage"].includes(name)) return { ...field, type: "number", label: "Discount (%)", min: 0, max: 100, step: 0.01 }; if (resource === "offers" && ["start_date", "end_date"].includes(name)) return { ...field, type: "datetime-local" }; return field; }) : fallbackFields(resource, config.fields); }, [schema, resource, config.fields]);
+    const fallback = useMemo(() => { const fields = fieldsFromSchema(schema, resource); return fields.length ? fields.map((field) => { const name = field.name || field.key; if (resource === "offers" && ["discount", "discount_percentage"].includes(name)) return { ...field, type: "number", label: "Discount (%)", min: 0, max: 100, step: 0.01 }; if (resource === "offers" && ["start_date", "end_date"].includes(name)) return { ...field, type: "datetime-local" }; return field; }) : resourceFallbackFields(resource, config.fields); }, [schema, resource, config.fields]);
     const errors = useFormErrors(requestError);
     const readOnly = mode === "view";
     useEffect(() => {
@@ -666,7 +693,7 @@ function ResourceModal({ resource, schema, mode, row, initialValues = {}, onClos
             const payload = cleanPayload(productValues, resource);
             if (mode === "edit") await updateResource(resource, recordId(row), payload, payload instanceof FormData);
             else await createResource(resource, payload, payload instanceof FormData);
-            toast.success(`${config.label.slice(0, -1)} ${mode === "edit" ? "updated" : "created"}`);
+            toast.success(`${itemLabel(resource)} ${mode === "edit" ? "updated" : "created"}`);
             onSaved();
         } catch (error) {
             setRequestError(error);
@@ -675,7 +702,7 @@ function ResourceModal({ resource, schema, mode, row, initialValues = {}, onClos
             setSaving(false);
         }
     };
-    return <Modal wide={fallback.length > 8} onClose={onClose} title={`${readOnly ? "View" : mode === "edit" ? "Edit" : "Create"} ${config.label.slice(0, -1)}`}><div className="admin-form"><form onSubmit={submit}>{resource === "products" && <fieldset className="product-type-field"><legend>Product Type</legend><label><input type="radio" name="product_mode" checked={productMode === "single"} onChange={() => setProductMode("single")} /> Single Product</label><label><input type="radio" name="product_mode" checked={productMode === "multiple"} onChange={() => setProductMode("multiple")} /> Multiple Product</label><small>Use the dedicated product editor to manage variants and images.</small></fieldset>}<div className="admin-form-grid">{fallback.map((field) => { const name = field.name || field.key; const refName = name.includes("category") ? (name.includes("sub") ? "subcategories" : "categories") : name.includes("offer") ? "offers" : name.includes("product") ? "products" : name.includes("variant") ? "product-variants" : name.includes("color") ? "colors" : name.includes("unit_type") ? "unit-types" : name === "unit" ? "units" : ["user", "customer"].includes(name) ? "users" : name.includes("coupon") ? "coupons" : name.includes("order") ? "orders" : ""; return <FormField key={name} field={field} options={references[refName] || []} value={values[name]} onChange={setValue} error={errors[name]} />; })}</div>{requestError && !Object.keys(errors).length && <p className="admin-form-error">{getErrorMessage(requestError)}</p>}<div className="admin-modal-actions"><button type="button" className="admin-button secondary" onClick={onClose}>{readOnly ? "Close" : "Cancel"}</button>{!readOnly && <button className="admin-button primary" disabled={saving}>{saving ? "Saving…" : "Save changes"}</button>}</div></form></div></Modal>;
+    return <Modal wide={fallback.length > 8} onClose={onClose} title={`${readOnly ? "View" : mode === "edit" ? "Edit" : "Create"} ${itemLabel(resource)}`}><div className="admin-form"><form onSubmit={submit}>{resource === "products" && <fieldset className="product-type-field"><legend>Product Type</legend><label><input type="radio" name="product_mode" checked={productMode === "single"} onChange={() => setProductMode("single")} /> Single Product</label><label><input type="radio" name="product_mode" checked={productMode === "multiple"} onChange={() => setProductMode("multiple")} /> Multiple Product</label><small>Use the dedicated product editor to manage variants and images.</small></fieldset>}<div className="admin-form-grid">{fallback.map((field) => { const name = field.name || field.key; const refName = name.includes("category") ? (name.includes("sub") ? "subcategories" : "categories") : name.includes("offer") ? "offers" : name.includes("product") ? "products" : name.includes("variant") ? "product-variants" : name.includes("color") ? "colors" : name.includes("unit_type") ? "unit-types" : name === "unit" ? "units" : ["user", "customer"].includes(name) ? "users" : name.includes("coupon") ? "coupons" : name.includes("order") ? "orders" : ""; return <FormField key={name} field={field} options={references[refName] || []} value={values[name]} onChange={setValue} error={errors[name]} />; })}</div>{requestError && !Object.keys(errors).length && <p className="admin-form-error">{getErrorMessage(requestError)}</p>}<div className="admin-modal-actions"><button type="button" className="admin-button secondary" onClick={onClose}>{readOnly ? "Close" : "Cancel"}</button>{!readOnly && <button className="admin-button primary" disabled={saving}>{saving ? "Saving…" : "Save changes"}</button>}</div></form></div></Modal>;
 }
 
 async function validateUniqueUnit(resource, values, row) {

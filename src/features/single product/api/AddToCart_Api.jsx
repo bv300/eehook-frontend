@@ -11,13 +11,7 @@ export const addToCart_Post = async (product) => {
 
     }
     catch (error) {
-
-        console.log(
-            "CartPOST error : ",
-            error
-        );
-
+        console.log("CartPOST error : ", error);
         throw error;
-
     }
 }

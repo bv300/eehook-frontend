@@ -1,5 +1,4 @@
 
-import React from 'react';
 import '../styles/Offer.css';
 import Offer_Query from "../queries/Offer_Query";
 import { getImageUrl } from '../../../utils/imageUrl';

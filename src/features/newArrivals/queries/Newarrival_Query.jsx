@@ -2,13 +2,13 @@
 
 
 import { useQuery } from '@tanstack/react-query'
-import React from 'react'
 import { NewArrivals } from '../api/New_Arrivals'
 
-function Newarrival_Query() {
+function Newarrival_Query(options = {}) {
   return useQuery({
     queryKey : ['NewArrivals'],
-    queryFn : NewArrivals
+    queryFn : NewArrivals,
+    enabled: options.enabled ?? true,
   })
 }
 
