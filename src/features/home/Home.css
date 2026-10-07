@@ -459,8 +459,9 @@
 
 .homepage-benefits-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 330px));
-    justify-content: center;
+    width: min(100%, 1280px);
+    margin: 0 auto;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 14px;
 }
 
@@ -489,23 +490,21 @@
 }
 
 .homepage-benefit-icon {
-    width: 34px;
-    height: 34px;
+    display: inline-grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
     margin-bottom: 15px;
-    object-fit: contain;
+    border-radius: 50%;
+    background: #fff4df;
+    color: #d97f00;
+    font-size: 1.15rem;
 }
 
 .homepage-benefit > .homepage-benefit-icon {
-    display: block;
+    display: grid;
     margin-left: auto;
     margin-right: auto;
-}
-
-.homepage-benefit-icon-text {
-    display: inline-grid;
-    place-items: center;
-    color: #D97F00;
-    font-size: 1.4rem;
 }
 
 .homepage-state {
@@ -590,7 +589,7 @@
     }
 
     .homepage-benefits-grid {
-        grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 330px));
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
 

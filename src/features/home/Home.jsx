@@ -31,7 +31,7 @@ function HomeLoading() {
 }
 
 function Home() {
-    const { data: homepage = {}, isLoading, isError, error, refetch } = Homepage_Query();
+    const { data: homepageData = {}, isLoading, isError, error, refetch } = Homepage_Query();
 
     if (isLoading) return <HomeLoading />;
 
@@ -45,14 +45,14 @@ function Home() {
         );
     }
 
-    const categories = asArray(homepage.categories);
-    const heroBanners = asArray(homepage.hero_banners);
-    const newArrivals = homepage.new_arrivals;
-    const trendingNow = homepage.trending_now;
-    const topDeals = homepage.top_deals;
-    const bestSellers = homepage.best_sellers;
-    const justForYou = homepage.just_for_you;
-    const recentlyViewed = homepage.recently_viewed;
+    const categories = asArray(homepageData.categories);
+    const heroBanners = asArray(homepageData.hero_banners);
+    const newArrivals = homepageData.new_arrivals;
+    const trendingNow = homepageData.trending_now;
+    const topDeals = homepageData.top_deals;
+    const bestSellers = homepageData.best_sellers;
+    const justForYou = homepageData.just_for_you;
+    const recentlyViewed = homepageData.recently_viewed;
 
     return (
         <main className="homepage-discovery">
@@ -71,11 +71,11 @@ function Home() {
             <HomepageProductSection title="Best sellers" eyebrow="Customer favourites" section={bestSellers} />
             <HomepageProductSection title="Just for you" eyebrow="Picked for your next find" section={justForYou} />
 
-            <HomepageBrandSection brands={asArray(homepage.shop_by_brand)} />
+            <HomepageBrandSection brands={asArray(homepageData.shop_by_brand)} />
 
             <HomepageProductSection title="Recently viewed" eyebrow="Pick up where you left off" section={recentlyViewed} />
 
-            <HomepageTrustBenefits benefits={asArray(homepage.trust_benefits)} />
+            <HomepageTrustBenefits benefits={asArray(homepageData.trust_benefits)} />
 
             <section className="section-heritage">
                 <div className="section-heritage-text">

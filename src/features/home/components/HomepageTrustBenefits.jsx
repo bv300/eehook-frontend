@@ -1,8 +1,15 @@
-import { getImageUrl } from "../../../utils/imageUrl";
+import { FiCreditCard, FiHeadphones, FiRefreshCw, FiTruck } from "react-icons/fi";
+
+const TRUST_BENEFIT_ICONS = {
+    "secure-payment": FiCreditCard,
+    "delivery-information": FiTruck,
+    "customer-support": FiHeadphones,
+    "easy-returns": FiRefreshCw,
+};
 
 function HomepageTrustBenefits({ benefits }) {
     const visibleBenefits = Array.isArray(benefits)
-        ? benefits.filter((benefit) => benefit && (benefit.title || benefit.name || benefit.description || benefit.text))
+        ? benefits.filter((benefit) => benefit && TRUST_BENEFIT_ICONS[benefit.icon_key])
         : [];
 
     if (!visibleBenefits.length) return null;
@@ -15,17 +22,16 @@ function HomepageTrustBenefits({ benefits }) {
                 </div>
             </div>
             <div className="homepage-benefits-grid">
-                {visibleBenefits.map((benefit, index) => (
-                    <article className="homepage-benefit" key={benefit.id ?? `${benefit.title || benefit.name}-${index}`}>
-                        {(benefit.icon || benefit.image) && (
-                            benefit.image
-                                ? <img src={getImageUrl(benefit.image)} alt="" className="homepage-benefit-icon" />
-                                : <span className="homepage-benefit-icon homepage-benefit-icon-text" aria-hidden="true">{benefit.icon}</span>
-                        )}
-                        {(benefit.title || benefit.name) && <h3>{benefit.title || benefit.name}</h3>}
-                        {(benefit.description || benefit.text) && <p>{benefit.description || benefit.text}</p>}
+                {visibleBenefits.map((benefit, index) => {
+                    const Icon = TRUST_BENEFIT_ICONS[benefit.icon_key];
+                    return (
+                    <article className="homepage-benefit" key={benefit.id ?? benefit.key ?? `${benefit.icon_key}-${index}`}>
+                        <span className="homepage-benefit-icon" aria-hidden="true"><Icon /></span>
+                        <h3>{benefit.title}</h3>
+                        <p>{benefit.description}</p>
                     </article>
-                ))}
+                    );
+                })}
             </div>
         </section>
     );
