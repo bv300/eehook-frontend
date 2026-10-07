@@ -2,22 +2,25 @@ import { useRef, useState, useEffect, useMemo } from "react";
 import ShopBy_categoryQuery from "../../shop_by_category/queries/ShopBy_categoryQuery";
 import "../styles/ShopBy-category.css";
 
-
-import specialOffer from '../../../assets/specialOffer-image.jpg'
+import specialOffer from '../../../assets/specialOffer-image.jpg';
 
 import { useNavigate } from "react-router-dom";
 import Offer_Query from "../../../hooks/offers/queries/Offer_Query";
 import { RiArrowUpWideLine } from "react-icons/ri";
 import { getImageUrl } from "../../../utils/imageUrl";
-function Shop_by_category() {
+function Shop_by_category({ categories: providedCategories }) {
 
-    const { data: rawCategories, isLoading } = ShopBy_categoryQuery();
+    const hasProvidedCategories = Array.isArray(providedCategories);
+    const { data: rawCategories, isLoading } = ShopBy_categoryQuery({ enabled: !hasProvidedCategories });
     const categories = useMemo(
-        () => (Array.isArray(rawCategories) ? rawCategories : []),
-        [rawCategories]
+        () => (hasProvidedCategories ? providedCategories : (Array.isArray(rawCategories) ? rawCategories : [])),
+        [hasProvidedCategories, providedCategories, rawCategories]
     );
 
     const navigate = useNavigate();
+    const { data: rawOffers = [] } = Offer_Query();
+    const offers = Array.isArray(rawOffers) ? rawOffers : rawOffers?.results || [];
+    const activeOffer = offers.find((offer) => offer && offer.is_active !== false);
 
 
     const categorySliderRef = useRef(null);
@@ -46,11 +49,6 @@ function Shop_by_category() {
         left: false,
         right: true
     });
-
-    const { data: rawOffers, isLoading: offersLoading } = Offer_Query();
-    const offerAvailable = Array.isArray(rawOffers)
-        ? rawOffers.length > 0
-        : Boolean(rawOffers);
 
     const checkCategoryScroll = () => {
 
@@ -127,20 +125,13 @@ function Shop_by_category() {
     };
 
 
-    const offerCard = {
-        id: "offer-id",
-        name: "OFFERS",
-        image: specialOffer,
-        type: "offer"
-    };
-
-
-
     const filteredCategories = categories.filter(
         (category) => category.subcategories?.length > 0
     );
 
-    const categoryItems = [offerCard, ...filteredCategories];
+    const categoryItems = activeOffer
+        ? [{ id: `offer-${activeOffer.id}`, name: "OFFERS", image: specialOffer, type: "offer" }, ...filteredCategories]
+        : filteredCategories;
 
 
 
@@ -212,7 +203,6 @@ function Shop_by_category() {
     };
 
     const selectCategory = (category) => {
-
         if (category.type === "offer") {
             navigate("/shop?offer=true");
             return;
@@ -225,10 +215,6 @@ function Shop_by_category() {
         }, 100);
 
     };
-
-    if (offersLoading || !offerAvailable) {
-        return null;
-    }
 
     if (isLoading) {
         return (
@@ -282,12 +268,8 @@ function Shop_by_category() {
                             ${selectedCategory?.id === item.id ? "active-category" : ""}`} onClick={() => selectCategory(item)} >
                             <div className="image-circle">
 
-                                <img src={item.type === "offer" ?
-                                    item.image
-                                    :
-                                    getImageUrl(item.image)
-                                }
-
+                                <img
+                                    src={item.type === "offer" ? item.image : getImageUrl(item.image)}
                                     alt={item.name}
                                 />
                             </div>

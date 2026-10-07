@@ -100,6 +100,10 @@
     height: 100%;
 }
 
+.hero-split-layout.single .hero-carousel-section {
+    flex-basis: 100%;
+}
+
 /* ---------------- Fixed Side Banner (Right ~28%) ---------------- */
 .hero-fixed-banner-section {
     flex: 1; 

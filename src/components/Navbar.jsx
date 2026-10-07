@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import "./../Navbar.css";
 import { useLocation, NavLink, useNavigate } from "react-router-dom";
 
@@ -6,7 +6,6 @@ import { FaShoppingBag, FaAngleDown, FaAngleUp } from "react-icons/fa";
 import { LuSearch } from "react-icons/lu";
 import { CgProfile } from "react-icons/cg";
 import { FaHeart } from "react-icons/fa6";
-import { RiArrowDropDownLine } from "react-icons/ri";
 import { AiOutlineDoubleRight } from "react-icons/ai";
 import { IoClose } from "react-icons/io5";
 import navbarlogo from './../assets/navbar-logo.png';
@@ -16,34 +15,29 @@ import WishlistQuery from "../features/wishlist/queries/WishlistQuery.jsx";
 import Offer_Query from "../hooks/offers/queries/Offer_Query.jsx";
 import Cart_query from "../features/cart/queries/Cart_query.jsx";
 import ShopBy_categoryQuery from "../features/shop_by_category/queries/ShopBy_categoryQuery.jsx";
+import Homepage_Query from "../features/home/queries/Homepage_Query.jsx";
 import { getImageUrl } from "../utils/imageUrl.js";
 function Navbar() {
 
-    const { data: rawData, isLoading } = ShopBy_categoryQuery();
+    const location = useLocation();
+    const isHomePage = location.pathname === "/";
+    const { data: homepageData } = Homepage_Query({ enabled: isHomePage });
+    const homepageCategories = Array.isArray(homepageData?.categories) ? homepageData.categories : [];
+    const { data: rawData } = ShopBy_categoryQuery({ enabled: !isHomePage });
     const data = useMemo(() => (Array.isArray(rawData) ? rawData : []), [rawData]);
+    const categories = homepageCategories.length > 0 ? homepageCategories : data;
 
     const { data: offers = [] } = Offer_Query();
-    const [offerActive, setOfferActive] = useState(false);
-
-    useEffect(() => {
-        const offer = offers[0];
-        setOfferActive(Boolean(offer?.is_active));
-    }, [offers]);
+    const offerActive = Array.isArray(offers) && offers.some((offer) => offer && offer.is_active !== false);
 
 
 
-    const location = useLocation();
-
-    const isHomePage = location.pathname === "/";
     const [showNavbar, setShowNavbar] = useState(true);
-    const [scrolled, setScrolled] = useState(false);
     const lastScrollY = useRef(0);
 
     useEffect(() => {
         const handleScroll = () => {
             const current = window.scrollY;
-            setScrolled(current > 80);
-
             if (current > lastScrollY.current && current > 100) {
                 setShowNavbar(false);
             } else {
@@ -88,14 +82,14 @@ const cartLength = cart.total_items ?? 0;
         const categoryId = params.get("category");
         const subcategoryId = params.get("subcategory");
         const category = categoryId
-            ? data.find((item) => String(item.id) === String(categoryId))
-            : data[0];
+            ? categories.find((item) => String(item.id) === String(categoryId))
+            : categories[0];
         const subcategory = category?.subcategories?.find(
             (item) => String(item.id) === String(subcategoryId)
         ) || null;
 
-        return { category: category || data[0] || null, subcategory };
-    }, [data, location.search]);
+        return { category: category || categories[0] || null, subcategory };
+    }, [categories, location.search]);
 
     const activeCategory = hoveredCategory || urlPreview.category;
     const activeSubcategory = hoveredSubcategory || urlPreview.subcategory;
@@ -159,7 +153,7 @@ const cartLength = cart.total_items ?? 0;
 
                                                     {/* Category Columns */}
                                                     <div className="mega_categories">
-                                                        {data.map((category) => (
+                                                        {categories.map((category) => (
                                                             <div className="mega_column" key={category.id} className="mega_column" onMouseEnter={() => { setHoveredCategory(category); setHoveredSubcategory(null); }} >
 
                                                                 <NavLink
@@ -189,7 +183,7 @@ const cartLength = cart.total_items ?? 0;
                                                     </div>
 
                                                     {/* Image */}
-                                                    {data.length > 0 && (
+                                                            {categories.length > 0 && (
                                                         <div className="mega_image">
                                                             <img
                                                                 src={getImageUrl(activeSubcategory?.image || activeCategory?.image)}
@@ -320,7 +314,7 @@ const cartLength = cart.total_items ?? 0;
                     </li>
                     {categoryOpen && (
                         <div className="mobile_categories">
-                            {data.map((cat) => (
+                            {categories.map((cat) => (
                                 <NavLink key={cat.id} to={`/shop?category=${cat.id}`} onClick={() => { setHoveredCategory(cat); setHoveredSubcategory(null); closeMenu(); }}>
                                     {cat.name}
                                 </NavLink>

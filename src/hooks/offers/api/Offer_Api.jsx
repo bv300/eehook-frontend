@@ -5,7 +5,10 @@ export const OfferApi = async () => {
     try {
         const response = await client.get('offers/');
 
-        return response.data
+        const payload = response.data;
+        if (Array.isArray(payload)) return payload;
+        if (Array.isArray(payload?.results)) return payload.results;
+        return payload ? [payload] : [];
     }
     catch (error) {
         console.log(error)

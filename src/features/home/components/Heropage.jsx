@@ -7,15 +7,19 @@ import Hero_Query from "../queries/Hero_Query";
 import PromoBanners_Query from "../queries/PromoBanners_Query";
 import HeroSideBanner_Query from "../queries/HeroSideBanner_Query";
 
-const Heropage = () => {
+const Heropage = ({ heroBanners, promoBanners: providedPromoBanners, heroSideBanner: providedSideBanner }) => {
 
-  const { data: rawHeroSlides } = Hero_Query();
-  const heroSlides = Array.isArray(rawHeroSlides) ? rawHeroSlides : [];
+  const hasHeroBanners = Array.isArray(heroBanners);
+  const { data: rawHeroSlides } = Hero_Query({ enabled: !hasHeroBanners });
+  const heroSlides = hasHeroBanners ? heroBanners : (Array.isArray(rawHeroSlides) ? rawHeroSlides : []);
 
-  const { data: rawPromoBanners } = PromoBanners_Query();
-  const promoBanners = Array.isArray(rawPromoBanners) ? rawPromoBanners : [];
+  const hasPromoBanners = Array.isArray(providedPromoBanners);
+  const { data: rawPromoBanners } = PromoBanners_Query({ enabled: !hasPromoBanners });
+  const promoBanners = hasPromoBanners ? providedPromoBanners : (Array.isArray(rawPromoBanners) ? rawPromoBanners : []);
 
-  const { data: heroSideBanner } = HeroSideBanner_Query();
+  const hasSideBanner = providedSideBanner !== undefined;
+  const { data: queriedSideBanner } = HeroSideBanner_Query({ enabled: !hasSideBanner });
+  const heroSideBanner = hasSideBanner ? providedSideBanner : queriedSideBanner;
 
   const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -67,7 +71,7 @@ const Heropage = () => {
     <div className="hero-page-wrapper">
       
       {/* Top Promo Carousel (Visa Banner Equivalent) */}
-      <div className="top-promo-carousel">
+      {promoBanners.length > 0 && <div className="top-promo-carousel">
         <button className="promo-nav-btn left" onClick={prevPromo}>‹</button>
         
         <div className="promo-slides">
@@ -96,9 +100,9 @@ const Heropage = () => {
         </div>
 
         <button className="promo-nav-btn right" onClick={nextPromo}>›</button>
-      </div>
+      </div>}
 
-      <section className="hero-split-layout">
+      <section className={`hero-split-layout ${heroSideBanner?.image ? "" : "single"}`}>
         
         {/* Main Carousel (Left) */}
         <div className="hero-carousel-section">
@@ -111,8 +115,8 @@ const Heropage = () => {
             >
 
               <img
-                src={getImageUrl(slide.image)}
-                alt={slide.title}
+                src={getImageUrl(slide.image || slide.banner_image || slide.image_url)}
+                alt={slide.title || slide.heading || "Featured collection"}
                 className="hero-image"
               />
 
@@ -121,15 +125,15 @@ const Heropage = () => {
               <div className="hero-content">
 
                 <span className="hero-subtitle">
-                  {slide.subtitle}
+                  {slide.subtitle || slide.eyebrow}
                 </span>
 
                 <h1>
-                  {slide.title}
+                  {slide.title || slide.heading}
                 </h1>
 
                 <p>
-                  {slide.description}
+                  {slide.description || slide.text}
                 </p>
 
                 <Link
@@ -170,7 +174,7 @@ const Heropage = () => {
         </div>
 
         {/* Fixed Side Banner (Right) */}
-        <div className="hero-fixed-banner-section">
+        {heroSideBanner?.image && <div className="hero-fixed-banner-section">
           <div className="fixed-banner-content">
              {heroSideBanner?.link ? (
                <a href={heroSideBanner.link} target="_blank" rel="noopener noreferrer">
@@ -180,7 +184,7 @@ const Heropage = () => {
                <img src={getImageUrl(heroSideBanner?.image)} alt="Promotional Banner" className="fixed-banner-image" />
              )}
           </div>
-        </div>
+        </div>}
 
       </section>
     </div>

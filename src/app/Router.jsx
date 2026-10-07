@@ -41,6 +41,7 @@ function Router() {
             <Routes>
                 <Route path='/' element={<Home />} />
                 <Route path='shop' element={<Sale />} />
+                <Route path='products' element={<Sale />} />
                 <Route path='/about' element={<About />} />
 
                 <Route path='profile' element={
