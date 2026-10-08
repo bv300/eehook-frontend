@@ -11,42 +11,44 @@ function HomepageBrandSection({ brands }) {
     if (!visibleBrands.length) return null;
 
     return (
-        <div className="new-arrivals-wrapper homepage-brands-wrapper">
-            <section className="new-arrivals homepage-brand-arrivals" aria-labelledby="homepage-shop-by-brand">
-                <div className="heading-container">
-                <div className="heading-text">
+        <section className="brand-showcase" aria-labelledby="homepage-shop-by-brand">
+            <header className="brand-showcase-header">
+                <div>
+                    <p className="brand-showcase-eyebrow">DISCOVER YOUR NEXT FAVOURITE</p>
                     <h2 id="homepage-shop-by-brand">Shop by brand</h2>
-                    <p className="heading-sub">Curated collections</p>
+                    <p className="brand-showcase-copy">Explore hand-picked collections from the brands you love.</p>
                 </div>
-                </div>
+                <p className="brand-showcase-count"><strong>{visibleBrands.length}</strong> {visibleBrands.length === 1 ? "brand collection" : "brand collections"}</p>
+            </header>
 
-                <div className="grid-container">
-                    <div className="new-arrivals-grid homepage-brand-grid">
-                    {visibleBrands.map((brand) => (
+            <div className={`brand-showcase-grid ${visibleBrands.length === 1 ? "is-single" : ""}`}>
+                {visibleBrands.map((brand) => {
+                    const productCount = Number(brand.product_count || 0);
+                    const brandName = brand.name || "Brand";
+                    return (
                     <button
                         type="button"
-                        className="new-product-card homepage-brand-product-card"
+                        className="brand-showcase-card"
                         key={brand.id}
+                        aria-label={`Shop ${brandName}`}
                         onClick={() => navigate(`/products/?brand=${encodeURIComponent(brand.slug || brand.id)}`)}
                     >
-                        <div className="image-container homepage-brand-image">
-                            <img className="product-img" src={getImageUrl(brand.logo) || defaultImage} alt={brand.name || "Brand"} />
-                            <span className="badge-new">BRAND</span>
-                            <span className="homepage-brand-explore">EXPLORE</span>
+                        <div className="brand-showcase-visual">
+                            <span className="brand-showcase-orb" aria-hidden="true" />
+                            <img src={getImageUrl(brand.logo) || defaultImage} alt="" />
+                            <span className="brand-showcase-product-count">{productCount ? `${productCount} ${productCount === 1 ? "product" : "products"}` : "Explore collection"}</span>
                         </div>
-                        <div className="product-details">
-                            <span className="product-tag">BRAND COLLECTION</span>
-                            <h3 className="newHome-product-title">{brand.name || "Brand"}</h3>
-                            <div className="product-meta">
-                                <span className="product-price">{brand.product_count !== null && brand.product_count !== undefined ? `${brand.product_count} products` : "Explore collection"}</span>
-                            </div>
+                        <div className="brand-showcase-card-content">
+                            <span>BRAND SPOTLIGHT</span>
+                            <h3>{brandName}</h3>
+                            <p>Discover the collection and find your perfect pick.</p>
+                            <span className="brand-showcase-cta">Shop collection <b aria-hidden="true">→</b></span>
                         </div>
                     </button>
-                ))}
-                    </div>
-                </div>
-            </section>
-        </div>
+                    );
+                })}
+            </div>
+        </section>
     );
 }
 
