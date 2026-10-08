@@ -19,6 +19,13 @@ function notificationRows(payload) {
     return Array.isArray(payload?.notifications) ? payload.notifications : [];
 }
 
+function maskedCode(notification) {
+    const value = String(notification?.masked_code || "").trim();
+    // Only accept an already-masked backend value. If a malformed API response
+    // ever contains a real code, retain the safe UI fallback instead.
+    return value && /[•*]/.test(value) ? value : MASKED_CODE;
+}
+
 export default function WelcomeBonusNotifications({ mobile = false }) {
     const [open, setOpen] = useState(false);
     const [notifications, setNotifications] = useState([]);
@@ -135,10 +142,10 @@ export default function WelcomeBonusNotifications({ mobile = false }) {
             {unreadCount > 0 && <span className="notification-badge">{unreadCount > 99 ? "99+" : unreadCount}</span>}
         </button>
         {open && <section className="notification-panel" ref={panelRef} role="dialog" aria-label="Welcome Bonus notifications">
-            <header className="notification-panel-header"><div><strong>Notifications</strong><span>Welcome Bonuses</span></div><button type="button" onClick={() => setOpen(false)} aria-label="Close notifications"><FiX /></button></header>
+            <header className="notification-panel-header"><div><strong>Notifications</strong><span>{unreadCount > 0 ? `${unreadCount} unread notification${unreadCount === 1 ? "" : "s"}` : "All caught up"}</span></div><button type="button" onClick={() => setOpen(false)} aria-label="Close notifications"><FiX /></button></header>
             <div className="notification-list" aria-live="polite">
                 {loading ? <p className="notification-state">Loading notifications…</p> : notifications.length === 0 ? <p className="notification-state">You have no Welcome Bonus notifications.</p> : notifications.map((notification) => <article className={`welcome-bonus-notification ${notification.is_read ? "is-read" : "is-unread"}`} key={notification.id}>
-                    <div className="welcome-bonus-notification-copy"><h3>{notification.title || "Welcome Bonus"}</h3><p>{notification.message}</p>{notification.discount_text && <strong className="welcome-bonus-discount">{notification.discount_text}</strong>}<span className="masked-redemption-code" aria-label="Redemption code is masked">{MASKED_CODE}</span></div>
+                    <div className="welcome-bonus-notification-copy"><div className="notification-title-row"><h3>{notification.title || "Welcome Bonus"}</h3>{!notification.is_read && <span className="notification-unread-mark">New</span>}</div><p>{notification.message}</p>{notification.discount_text && <strong className="welcome-bonus-discount">{notification.discount_text}</strong>}{notification.eligible_target && <p className="welcome-bonus-target">{notification.eligible_target}</p>}<p className="masked-redemption-code" aria-label="Redemption code is masked"><span>Code:</span> {maskedCode(notification)}</p></div>
                     <div className="welcome-bonus-actions">
                         {notification.can_claim && <button type="button" className="welcome-bonus-action claim" onClick={() => claim(notification.id)} disabled={actingId === notification.id}>{actingId === notification.id ? "Claiming…" : "Claim Welcome Bonus"}</button>}
                         {notification.can_copy_code && <button type="button" className="welcome-bonus-action copy" onClick={() => copyCode(notification.id)} disabled={actingId === notification.id}>{copiedId === notification.id ? <><FiCheck /> Copied ✓</> : <><FiCopy /> Copy Code</>}</button>}

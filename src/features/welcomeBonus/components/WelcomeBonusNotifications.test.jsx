@@ -23,7 +23,7 @@ beforeEach(() => {
     localStorage.setItem("access", "customer-token");
     payload = {
         unread_count: 1,
-        notifications: [{ id: 7, title: "A welcome gift", message: "Use your Welcome Bonus on your first order.", discount_text: "10% off", masked_code: "ignored", can_claim: true, can_copy_code: false, is_read: false }],
+        notifications: [{ id: 7, title: "A welcome gift", message: "Use your Welcome Bonus on your first order.", discount_text: "10% off", eligible_target: "Valid for: Travel Mug", masked_code: "••••••••••••••••", can_claim: true, can_copy_code: false, is_read: false }],
     };
     mocks.get.mockImplementation(response);
     mocks.read.mockResolvedValue({});
@@ -47,6 +47,9 @@ describe("Welcome Bonus notifications", () => {
         expect(await screen.findByLabelText("Notifications, 1 unread")).toBeVisible();
         await user.click(screen.getByLabelText("Notifications, 1 unread"));
         expect(await screen.findByText("••••••••••••••••")).toBeVisible();
+        expect(screen.getByText("1 unread notification")).toBeVisible();
+        expect(screen.getByText("Valid for: Travel Mug")).toBeVisible();
+        expect(screen.getByText("New")).toBeVisible();
         expect(screen.queryByText("PRIVATE-WELCOME-CODE")).not.toBeInTheDocument();
         expect(mocks.read).toHaveBeenCalledWith(7);
     });

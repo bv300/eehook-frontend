@@ -30,6 +30,7 @@ describe("Welcome Bonus dashboard list", () => {
         const user = userEvent.setup();
         render(<WelcomeBonusPage />);
         expect(await screen.findByText("First order bonus")).toBeVisible();
+        expect(screen.getByText("Swipe the table horizontally to view all columns and actions.")).toBeInTheDocument();
         expect(screen.getByRole("columnheader", { name: "Assigned Users" })).toBeVisible();
         expect(screen.getByRole("columnheader", { name: "Redeemed Users" })).toBeVisible();
 
