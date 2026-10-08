@@ -23,6 +23,18 @@ export const deleteResource = (resource, id) =>
 export const toggleWelcomeBonusActive = (id) =>
     client.post(`${resourceUrl("welcome-bonuses", id)}toggle-active/`);
 
+// Token blacklist requests deliberately use the Super Admin JSON API. These
+// helpers only deal with refresh-token metadata; a raw refresh token must
+// never be requested, retained, or rendered by the dashboard.
+export const getOutstandingTokens = (params = {}) =>
+    client.get(`${ADMIN_BASE}/token-blacklist/outstanding-tokens/`, { params });
+
+export const getBlacklistedTokens = (params = {}) =>
+    client.get(`${ADMIN_BASE}/token-blacklist/blacklisted-tokens/`, { params });
+
+export const blacklistToken = (id) =>
+    client.post(`${ADMIN_BASE}/token-blacklist/outstanding-tokens/${id}/blacklist/`);
+
 // Detail/edit pages use the dedicated endpoint because generic admin CRUD
 // responses contain model fields only, not customer/address/line-item data.
 export const getOrderDetails = (id) => client.get(`/orders/${id}/`);

@@ -108,6 +108,9 @@ function Router() {
                 <Route path="eehook-dashboard/welcome-bonuses/:id/edit" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
                 <Route path="eehook-dashboard/coupon-usages/new" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
                 <Route path="eehook-dashboard/coupon-usages/:id/edit" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
+                <Route path="eehook-dashboard/token-blacklist" element={<AdminRoute><Navigate to="/eehook-dashboard/token-blacklist/outstanding-tokens" replace /></AdminRoute>} />
+                <Route path="eehook-dashboard/token-blacklist/outstanding-tokens" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
+                <Route path="eehook-dashboard/token-blacklist/blacklisted-tokens" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
                 <Route path="eehook-dashboard/:section" element={
                     <AdminRoute>
                         <OrderDashboard />

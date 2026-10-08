@@ -49,9 +49,9 @@ export function Pagination({ page, pageSize, count, next, previous, onPageChange
     </div>;
 }
 
-export function ConfirmDialog({ title = "Confirm delete", message, onConfirm, onCancel, loading = false }) {
+export function ConfirmDialog({ title = "Confirm delete", message, onConfirm, onCancel, loading = false, confirmLabel = "Delete", loadingLabel = "Deleting..." }) {
     return <Modal onClose={onCancel}>
-        <div className="confirm-dialog"><div className="confirm-icon"><FiAlertCircle aria-hidden="true" /></div><h3>{title}</h3><p>{message || "This action cannot be undone."}</p><div className="admin-modal-actions"><button type="button" className="admin-button secondary" onClick={onCancel} disabled={loading}>Cancel</button><button type="button" className="admin-button danger" onClick={onConfirm} disabled={loading}>{loading ? "Deleting..." : "Delete"}</button></div></div>
+        <div className="confirm-dialog"><div className="confirm-icon"><FiAlertCircle aria-hidden="true" /></div><h3>{title}</h3><p>{message || "This action cannot be undone."}</p><div className="admin-modal-actions"><button type="button" className="admin-button secondary" onClick={onCancel} disabled={loading}>Cancel</button><button type="button" className="admin-button danger" onClick={onConfirm} disabled={loading}>{loading ? loadingLabel : confirmLabel}</button></div></div>
     </Modal>;
 }
 
