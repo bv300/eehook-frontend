@@ -11,6 +11,8 @@ import { FaHeart, FaRegHeart } from "react-icons/fa";
 import GetSingle_product_Query from "../queries/GetSingle_product_Query";
 import Cart_query from "../../cart/queries/Cart_query";
 import { addToCart_Post } from "../api/AddToCart_Api";
+import RelatedProductsModal from "../components/RelatedProductsModal";
+import { relatedProductsFromResponse } from "../components/relatedProducts";
 
 import WishlistQuery from "../../wishlist/queries/WishlistQuery";
 import {
@@ -83,7 +85,8 @@ function Single_product() {
     const {
         data = {},
         isLoading,
-        error
+        error,
+        refetch: refetchProduct
     } = GetSingle_product_Query(id);
 
     const descriptionText = getDescriptionText(data.description);
@@ -97,6 +100,9 @@ function Single_product() {
 
     const [isImageModalOpen, setIsImageModalOpen] = useState(false);
     const [modalImageIndex, setModalImageIndex] = useState(0);
+    const [isAddingToCart, setIsAddingToCart] = useState(false);
+    const [relatedProducts, setRelatedProducts] = useState([]);
+    const [isRelatedProductsOpen, setIsRelatedProductsOpen] = useState(false);
 
     const [couponCode, setCouponCode] = useState("");
     const [appliedCoupon, setAppliedCoupon] = useState(null);
@@ -414,13 +420,17 @@ function Single_product() {
         };
 
         try {
-            await addToCart_Post(
-                cartPayload
-            );
+            setIsAddingToCart(true);
+            const response = await addToCart_Post(cartPayload);
             await refetchCart();
             showToast.success(
                 "Product added to cart"
             );
+            const choices = relatedProductsFromResponse(response);
+            if (choices.length) {
+                setRelatedProducts(choices.slice(0, 4));
+                setIsRelatedProductsOpen(true);
+            }
         } catch (error) {
             console.log(error);
             if (isInactiveCouponError(error)) {
@@ -436,8 +446,30 @@ function Single_product() {
                     "Please login to continue"
                 );
                 navigate("/login");
+            } else if (!isInactiveCouponError(error)) {
+                showToast.error(error.response?.data?.message || error.response?.data?.detail || "Could not add this product to the cart.");
             }
+        } finally {
+            setIsAddingToCart(false);
         }
+    };
+
+    const addSelectedRelatedProducts = async (payload) => {
+        const response = await addToCart_Post(payload);
+        await refetchCart();
+        if (Array.isArray(response?.unavailable_related_products) && response.unavailable_related_products.length) {
+            showToast.warning("Some selected related products are no longer available.");
+            return { unavailable: true };
+        }
+        showToast.success("Selected products added to cart");
+        return response;
+    };
+
+    const refreshRelatedProducts = async () => {
+        const response = await refetchProduct();
+        const choices = relatedProductsFromResponse(response?.data);
+        setRelatedProducts(choices);
+        return choices;
     };
 
     /*
@@ -772,7 +804,7 @@ function Single_product() {
                     </div>
 
                     <div className="sigle_product_cart-buy">
-                        <button className="add-to-cart-amazon-btn" onClick={addTocart} disabled={isApplyingCoupon}>ADD TO CART</button>
+                        <button className="add-to-cart-amazon-btn" onClick={addTocart} disabled={isApplyingCoupon || isAddingToCart}>{isAddingToCart ? "ADDING..." : "ADD TO CART"}</button>
                     </div>
 
                     <div className="sold-by">
@@ -827,6 +859,17 @@ function Single_product() {
                     )}
                     </div>
                 </div>
+            )}
+
+            {isRelatedProductsOpen && relatedProducts.length > 0 && (
+                <RelatedProductsModal
+                    key={relatedProducts.map((product) => product.id || product.pk || product.uuid).join("-")}
+                    products={relatedProducts}
+                    sourceProductId={productId}
+                    onClose={() => setIsRelatedProductsOpen(false)}
+                    onAddSelected={addSelectedRelatedProducts}
+                    onRefreshChoices={refreshRelatedProducts}
+                />
             )}
 
         </div>

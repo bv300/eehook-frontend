@@ -75,3 +75,37 @@
   .product-view-units > div:not(.product-view-units-heading) { align-items: flex-start; flex-direction: column; }
   .product-view-units > div > strong { white-space: normal; }
 }
+
+.related-products-editor { display: grid; gap: 16px; }
+.related-products-editor-copy { margin: 0; color: var(--admin-muted); font-size: 13px; line-height: 1.5; }
+.related-mode-control { display: flex; flex-wrap: wrap; gap: 12px 20px; margin: 0; padding: 0; border: 0; }
+.related-mode-control legend { width: 100%; margin-bottom: 2px; color: var(--admin-ink); font-size: 12px; font-weight: 800; }
+.related-mode-control label { display: inline-flex; align-items: center; gap: 6px; color: var(--admin-ink); font-size: 13px; font-weight: 600; cursor: pointer; }
+.related-mode-control input { width: 16px; height: 16px; accent-color: var(--admin-brand); }
+.related-products-automatic { margin: 0; padding: 14px 15px; border: 1px solid #d8e9e4; border-radius: 9px; background: #f3faf7; color: #39665a; font-size: 13px; line-height: 1.5; }
+.related-products-manual { display: grid; gap: 13px; padding: 16px; border: 1px solid var(--admin-line); border-radius: 10px; background: #fbfcfb; }
+.related-products-manual-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.related-products-manual-heading strong, .related-products-manual-heading span { display: block; }
+.related-products-manual-heading strong { color: var(--admin-ink); font-size: 13px; }
+.related-products-manual-heading span { margin-top: 4px; color: var(--admin-muted); font-size: 12px; line-height: 1.4; }
+.related-products-count { flex: 0 0 auto; margin: 0 !important; padding: 4px 8px; border-radius: 999px; background: #f6e6ec; color: var(--admin-brand); font-size: 11px !important; font-weight: 800; }
+.related-products-selected-list { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.related-products-selected-list li { display: flex; align-items: center; gap: 10px; min-width: 0; padding: 10px; border: 1px solid var(--admin-line); border-radius: 8px; background: #fff; }
+.related-products-selected-list strong { min-width: 0; overflow: hidden; color: var(--admin-ink); font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
+.related-products-position { display: grid; flex: 0 0 auto; width: 23px; height: 23px; place-items: center; border-radius: 50%; background: #f3e9ed; color: var(--admin-brand); font-size: 11px; font-weight: 800; }
+.related-products-item-actions { display: flex; gap: 4px; margin-left: auto; }
+.related-products-item-actions .table-icon { display: grid; width: 29px; height: 29px; place-items: center; border: 1px solid var(--admin-line); border-radius: 6px; background: #fff; color: var(--admin-muted); cursor: pointer; }
+.related-products-item-actions .table-icon:not(:disabled):hover { border-color: #d6a9b9; color: var(--admin-brand); }
+.related-products-item-actions .table-icon:disabled { opacity: .4; cursor: not-allowed; }
+.related-products-search { position: relative; display: grid; gap: 6px; }
+.related-products-search label { color: var(--admin-ink); font-size: 12px; font-weight: 700; }
+.related-products-search input { width: 100%; min-height: 40px; padding: 9px 11px; border: 1px solid var(--admin-line); border-radius: 7px; background: #fff; color: var(--admin-ink); font: inherit; font-size: 13px; outline: 0; }
+.related-products-search input:focus { border-color: #c77999; box-shadow: 0 0 0 3px #8d164712; }
+.related-products-search-results { display: grid; max-height: 218px; overflow-y: auto; border: 1px solid var(--admin-line); border-radius: 7px; background: #fff; box-shadow: 0 8px 20px rgba(38, 64, 72, .08); }
+.related-products-search-results button { min-height: 39px; padding: 9px 11px; border: 0; border-bottom: 1px solid #f0edef; background: #fff; color: var(--admin-ink); font: inherit; font-size: 13px; text-align: left; cursor: pointer; }
+.related-products-search-results button:last-child { border-bottom: 0; }
+.related-products-search-results button:hover, .related-products-search-results button:focus-visible { background: #fcf1f5; color: var(--admin-brand); outline: 0; }
+.related-products-search-results p, .related-products-limit { margin: 0; color: var(--admin-muted); font-size: 12px; }
+.related-products-search-results p { padding: 11px; }
+.related-products-limit { padding: 10px 11px; border: 1px solid #efd8bd; border-radius: 7px; background: #fff9f1; color: #90662d; }
+@media (max-width: 520px) { .related-products-manual { padding: 12px; } .related-products-manual-heading { flex-direction: column; } .related-products-selected-list li { align-items: flex-start; flex-wrap: wrap; } .related-products-selected-list strong { flex: 1 1 calc(100% - 36px); white-space: normal; } .related-products-item-actions { width: 100%; margin-left: 33px; } }
