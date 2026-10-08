@@ -15,7 +15,6 @@ vi.mock("react-router-dom", () => ({
 }));
 
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
-vi.mock("../../../lib/ApiClient", () => ({ default: { get: vi.fn().mockResolvedValue({ data: [] }) } }));
 vi.mock("../services/adminApi", () => ({
     createResource: vi.fn(), deleteResource: vi.fn(), flattenApiErrors: vi.fn(() => ({})), getErrorMessage: vi.fn(() => "Request failed"),
     getResource: (...args) => mocks.getResource(...args), listResource: (...args) => mocks.listResource(...args), updateResource: vi.fn(),
@@ -47,6 +46,15 @@ async function addProduct(user, name) {
 }
 
 describe("product editor related-products configuration", () => {
+    it("loads dashboard brands into the product brand selector", async () => {
+        mocks.listResource.mockImplementation((resource) => Promise.resolve({ data: { results: resource === "brands" ? [{ id: 9, name: "Apple" }] : resource === "products" ? products : [] } }));
+
+        render(<ProductEditor />);
+
+        expect(await screen.findByRole("option", { name: "Apple" })).toHaveValue("9");
+        expect(mocks.listResource).toHaveBeenCalledWith("brands", { page_size: 500 });
+    });
+
     it("shows automatic mode guidance and clears the manual UI when mode changes", async () => {
         const user = userEvent.setup();
         render(<ProductEditor />);

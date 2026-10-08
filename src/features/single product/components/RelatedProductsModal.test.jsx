@@ -36,6 +36,12 @@ describe("related product chooser", () => {
         expect(relatedProductsFromResponse({})).toEqual([]);
     });
 
+    it("limits related-products endpoint results to four items", () => {
+        const results = Array.from({ length: 5 }, (_, index) => product(index + 1));
+
+        expect(relatedProductsFromResponse({ results })).toEqual(results.slice(0, 4));
+    });
+
     it("lets a customer decline without making a related cart request", async () => {
         const user = userEvent.setup();
         const { props } = renderChooser();

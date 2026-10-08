@@ -5,7 +5,6 @@ import { FiArrowDown, FiArrowUp, FiChevronDown, FiImage, FiPlus, FiSave, FiTrash
 import { ConfirmDialog, EmptyState, LoadingState, StatusPill } from "../components/AdminPrimitives";
 import { createResource, deleteResource, flattenApiErrors, getErrorMessage, getResource, listResource, updateResource } from "../services/adminApi";
 import { getImageUrl } from "../../../utils/imageUrl";
-import client from "../../../lib/ApiClient";
 import "../styles/ProductEditor.css";
 
 const emptyProduct = {
@@ -57,7 +56,9 @@ export default function ProductEditor({ readOnly = false }) {
             const names = ["categories", "subcategories", "offers", "colors", "unit-types", "units", "products"];
             const [results, brands] = await Promise.all([
                 Promise.all(names.map((resource) => listResource(resource, { page_size: 500 }).then((response) => response.data).catch(() => ({ results: [] })))),
-                client.get("brands/").then((response) => response.data).catch(() => [])
+                // Brands created in the dashboard are available through the
+                // authenticated admin endpoint, not the public brands endpoint.
+                listResource("brands", { page_size: 500 }).then((response) => response.data).catch(() => ({ results: [] }))
             ]);
             if (!active) return;
             setDropdowns({ categories: toOptions(results[0]), subcategories: toOptions(results[1]), brands: toOptions(brands), offers: toOptions(results[2]), colors: toOptions(results[3]), unitTypes: toOptions(results[4]), units: toOptions(results[5]), products: toOptions(results[6]) });

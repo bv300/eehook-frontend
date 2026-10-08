@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import "../style/Single_product.css";
 import {
     NavLink,
@@ -13,6 +14,7 @@ import Cart_query from "../../cart/queries/Cart_query";
 import { addToCart_Post } from "../api/AddToCart_Api";
 import RelatedProductsModal from "../components/RelatedProductsModal";
 import { relatedProductsFromResponse } from "../components/relatedProducts";
+import { relatedProductsGet } from "../../sale/api/ProductApi";
 
 import WishlistQuery from "../../wishlist/queries/WishlistQuery";
 import {
@@ -66,6 +68,20 @@ function getKeyFeatures(value) {
         .filter(Boolean);
 }
 
+function relatedProductImage(product) {
+    const variants = Array.isArray(product?.variants) ? product.variants : [];
+    const images = Array.isArray(variants[0]?.images) ? variants[0].images : [];
+    const primaryImage = images.find((image) => image?.is_primary) || images[0];
+
+    return product?.product_image || product?.image || primaryImage?.image || primaryImage?.url || "";
+}
+
+function relatedProductPrice(product) {
+    const value = product?.discounted_price ?? product?.current_price ?? product?.starting_price ?? product?.price;
+    const price = Number(value);
+    return Number.isFinite(price) ? `AED ${price.toFixed(2)}` : "Price unavailable";
+}
+
 function Single_product() {
 
     const navigate = useNavigate();
@@ -112,6 +128,17 @@ function Single_product() {
     const couponRequestPending = useRef(false);
 
     const productId = data?.id || id;
+
+    const { data: relatedProductsResponse } = useQuery({
+        queryKey: ["related-products", id],
+        queryFn: () => relatedProductsGet(id),
+        enabled: Boolean(id),
+    });
+
+    const queriedRelatedProducts = relatedProductsFromResponse(relatedProductsResponse);
+    const pageRelatedProducts = (queriedRelatedProducts.length ? queriedRelatedProducts : relatedProductsFromResponse(data))
+        .filter((product) => String(product?.id ?? product?.pk ?? product?.uuid) !== String(productId))
+        .slice(0, 4);
 
     const couponFromResponse = (responseData = {}) => ({
         ...responseData,
@@ -841,6 +868,36 @@ function Single_product() {
                         <img src={data.promotional_banner_url} alt="Promotion" />
                     )}
                 </div>
+            )}
+
+            {pageRelatedProducts.length > 0 && (
+                <section className="product-related-products" aria-labelledby="related-products-heading">
+                    <div className="product-related-products-header">
+                        <div>
+                            <p>YOU MAY ALSO LIKE</p>
+                            <h2 id="related-products-heading">Related Products</h2>
+                        </div>
+                    </div>
+
+                    <div className="product-related-products-grid">
+                        {pageRelatedProducts.map((product) => {
+                            const relatedProductId = product?.id ?? product?.pk ?? product?.uuid;
+                            const image = relatedProductImage(product);
+                            return (
+                                <NavLink className="product-related-product-card" to={`/single/${relatedProductId}`} key={relatedProductId}>
+                                    <div className="product-related-product-image">
+                                        <img src={image ? getImageUrl(image) : defaultImage} alt={product?.name || "Related product"} onError={(event) => { event.currentTarget.src = defaultImage; }} />
+                                    </div>
+                                    <div className="product-related-product-info">
+                                        <h3>{product?.name || "Related product"}</h3>
+                                        <strong>{relatedProductPrice(product)}</strong>
+                                        <span>View product</span>
+                                    </div>
+                                </NavLink>
+                            );
+                        })}
+                    </div>
+                </section>
             )}
 
             {isImageModalOpen && (

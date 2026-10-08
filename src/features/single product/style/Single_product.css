@@ -29,6 +29,97 @@
     object-fit: cover;
 }
 
+.product-related-products {
+    width: 95%;
+    max-width: 1200px;
+    margin: 40px auto 0;
+}
+
+.product-related-products-header {
+    margin-bottom: 18px;
+}
+
+.product-related-products-header p {
+    margin: 0 0 5px;
+    color: #7d0930;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+}
+
+.product-related-products-header h2 {
+    margin: 0;
+    color: #1f2933;
+    font-size: 25px;
+}
+
+.product-related-products-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.product-related-product-card {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    overflow: hidden;
+    color: inherit;
+    text-decoration: none;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.product-related-product-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.12);
+}
+
+.product-related-product-image {
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    background: #f8fafc;
+}
+
+.product-related-product-image img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.product-related-product-info {
+    display: grid;
+    gap: 8px;
+    padding: 14px;
+}
+
+.product-related-product-info h3 {
+    display: -webkit-box;
+    min-height: 38px;
+    margin: 0;
+    overflow: hidden;
+    color: #1f2933;
+    font-size: 14px;
+    line-height: 1.35;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+}
+
+.product-related-product-info strong {
+    color: #7d0930;
+    font-size: 15px;
+}
+
+.product-related-product-info span {
+    color: #4B636D;
+    font-size: 13px;
+    font-weight: 600;
+}
+
 .product-description-banner {
     display: flex;
     justify-content: center;
@@ -642,6 +733,14 @@
         margin-top: 30px;
         border-radius: 8px;
     }
+
+    .product-related-products {
+        margin-top: 30px;
+    }
+
+    .product-related-products-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 }
 
 @media (max-width: 480px) {
@@ -654,6 +753,18 @@
         height: 100px;
         margin-top: 24px;
         border-radius: 6px;
+    }
+
+    .product-related-products-header h2 {
+        font-size: 22px;
+    }
+
+    .product-related-products-grid {
+        gap: 12px;
+    }
+
+    .product-related-product-info {
+        padding: 11px;
     }
 }
 
