@@ -6,6 +6,7 @@ import HomepageProductSection from "./components/HomepageProductSection";
 import HomepageBrandSection from "./components/HomepageBrandSection";
 import HomepageTrustBenefits from "./components/HomepageTrustBenefits";
 import Homepage_Query from "./queries/Homepage_Query";
+import Product_Query from "../sale/queries/Product_Query";
 import Offer_poster from "../../hooks/offers/page/Offer_poster";
 import ContactUs from "../../components/Contact";
 import vedio1 from "../../assets/eehook-video-one.mp4";
@@ -16,6 +17,25 @@ const asArray = (value) => {
     if (Array.isArray(value?.results)) return value.results;
     if (Array.isArray(value?.items)) return value.items;
     return [];
+};
+
+const brandsFromProducts = (products) => {
+    const brands = new Map();
+
+    asArray(products).forEach((product) => {
+        const brand = product?.brand;
+        const id = brand?.id ?? brand?.pk;
+        if (id === null || id === undefined) return;
+
+        const current = brands.get(String(id));
+        brands.set(String(id), {
+            ...brand,
+            id,
+            product_count: (current?.product_count || 0) + 1,
+        });
+    });
+
+    return [...brands.values()];
 };
 
 function HomeLoading() {
@@ -32,6 +52,11 @@ function HomeLoading() {
 
 function Home() {
     const { data: homepageData = {}, isLoading, isError, error, refetch } = Homepage_Query();
+    const homepageBrands = asArray(homepageData.shop_by_brand);
+    const { data: brandProducts } = Product_Query(
+        { page_size: 100 },
+        { enabled: !isLoading && !isError && homepageBrands.length === 0 }
+    );
 
     if (isLoading) return <HomeLoading />;
 
@@ -53,6 +78,7 @@ function Home() {
     const bestSellers = homepageData.best_sellers;
     const justForYou = homepageData.just_for_you;
     const recentlyViewed = homepageData.recently_viewed;
+    const shopByBrand = homepageBrands.length ? homepageBrands : brandsFromProducts(brandProducts);
 
     return (
         <main className="homepage-discovery">
@@ -71,7 +97,7 @@ function Home() {
             <HomepageProductSection title="Best sellers" eyebrow="Customer favourites" section={bestSellers} />
             <HomepageProductSection title="Just for you" eyebrow="Picked for your next find" section={justForYou} />
 
-            <HomepageBrandSection brands={asArray(homepageData.shop_by_brand)} />
+            <HomepageBrandSection brands={shopByBrand} />
 
             <HomepageProductSection title="Recently viewed" eyebrow="Pick up where you left off" section={recentlyViewed} />
 

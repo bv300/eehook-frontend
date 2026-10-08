@@ -444,6 +444,93 @@
     font-size: .72rem;
 }
 
+/* Shop by Brand follows the same product-card treatment as New Arrivals. */
+.homepage-brands-wrapper {
+    padding-top: 30px;
+    padding-bottom: 30px;
+}
+
+.homepage-brand-arrivals .heading-sub {
+    color: #000;
+}
+
+.homepage-brand-arrivals .homepage-brand-grid {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+}
+
+.homepage-brand-product-card {
+    border: 0;
+    cursor: pointer;
+    font: inherit;
+    text-align: left;
+}
+
+.homepage-brand-product-card:focus-visible {
+    outline: 3px solid #FF9000;
+    outline-offset: 4px;
+}
+
+.homepage-brand-image {
+    border: 1px solid #edf0e9;
+    background: #fff;
+}
+
+.homepage-brand-image .product-img {
+    padding: 20px;
+    object-fit: contain;
+    transition: transform .3s ease;
+}
+
+.homepage-brand-product-card:hover .homepage-brand-image .product-img {
+    transform: scale(1.06);
+}
+
+.homepage-brand-explore {
+    position: absolute;
+    right: 12px;
+    bottom: 12px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: #4B636D;
+    color: #fff;
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity .2s ease, transform .2s ease;
+}
+
+.homepage-brand-product-card:hover .homepage-brand-explore,
+.homepage-brand-product-card:focus-visible .homepage-brand-explore {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+@media (max-width: 1400px) {
+    .homepage-brand-arrivals .homepage-brand-grid {
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 1100px) {
+    .homepage-brand-arrivals .homepage-brand-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .homepage-brand-arrivals .homepage-brand-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 576px) {
+    .homepage-brand-arrivals .homepage-brand-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
 .homepage-benefits {
     padding: 55px 0 72px;
 }
