@@ -38,6 +38,11 @@ const brandsFromProducts = (products) => {
     return [...brands.values()];
 };
 
+const withDemoFallback = (section, demoProducts) => {
+    if (asArray(section).length || !demoProducts.length) return { section, isDemo: false };
+    return { section: { results: demoProducts }, isDemo: true };
+};
+
 function HomeLoading() {
     return (
         <main className="homepage-discovery homepage-loading" aria-busy="true" aria-label="Loading homepage">
@@ -56,6 +61,13 @@ function Home() {
     const { data: brandProducts } = Product_Query(
         { page_size: 100 },
         { enabled: !isLoading && !isError && homepageBrands.length === 0 }
+    );
+    const topDealsEmpty = asArray(homepageData.top_deals).length === 0;
+    const bestSellersEmpty = asArray(homepageData.best_sellers).length === 0;
+    const shouldLoadSectionDemos = import.meta.env.DEV && !isLoading && !isError && (topDealsEmpty || bestSellersEmpty);
+    const { data: demoCatalog } = Product_Query(
+        { page_size: 8 },
+        { enabled: shouldLoadSectionDemos }
     );
 
     if (isLoading) return <HomeLoading />;
@@ -79,6 +91,9 @@ function Home() {
     const justForYou = homepageData.just_for_you;
     const recentlyViewed = homepageData.recently_viewed;
     const shopByBrand = homepageBrands.length ? homepageBrands : brandsFromProducts(brandProducts);
+    const demoProducts = asArray(demoCatalog);
+    const topDealsDisplay = withDemoFallback(topDeals, demoProducts);
+    const bestSellersDisplay = withDemoFallback(bestSellers, demoProducts.slice().reverse());
 
     return (
         <main className="homepage-discovery">
@@ -93,8 +108,8 @@ function Home() {
             <New_Arrival_Home products={asArray(newArrivals)} totalCount={newArrivals?.count} showNewBadge />
             <Offer_poster />
             <HomepageProductSection title="Trending now" eyebrow="Popular right now" section={trendingNow} />
-            <HomepageProductSection title="Top deals" eyebrow="Best value" section={topDeals} />
-            <HomepageProductSection title="Best sellers" eyebrow="Customer favourites" section={bestSellers} />
+            <HomepageProductSection title="Top deals" eyebrow={topDealsDisplay.isDemo ? "Demo preview · Best value" : "Best value"} section={topDealsDisplay.section} />
+            <HomepageProductSection title="Best sellers" eyebrow={bestSellersDisplay.isDemo ? "Demo preview · Customer favourites" : "Customer favourites"} section={bestSellersDisplay.section} />
             <HomepageProductSection title="Just for you" eyebrow="Picked for your next find" section={justForYou} />
 
             <HomepageBrandSection brands={shopByBrand} />
