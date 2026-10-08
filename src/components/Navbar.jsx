@@ -17,6 +17,7 @@ import Cart_query from "../features/cart/queries/Cart_query.jsx";
 import ShopBy_categoryQuery from "../features/shop_by_category/queries/ShopBy_categoryQuery.jsx";
 import Homepage_Query from "../features/home/queries/Homepage_Query.jsx";
 import { getImageUrl } from "../utils/imageUrl.js";
+import WelcomeBonusNotifications from "../features/welcomeBonus/components/WelcomeBonusNotifications.jsx";
 function Navbar() {
 
     const location = useLocation();
@@ -251,6 +252,8 @@ const cartLength = cart.total_items ?? 0;
                                     </div>
                                 </NavLink>
 
+                                <div className="desktop-notification"><WelcomeBonusNotifications /></div>
+
                                 <NavLink to="wishlist">
                                     <div className="cart">
                                         <FaHeart size={20} className="nav_icon" />
@@ -339,6 +342,8 @@ const cartLength = cart.total_items ?? 0;
                 <NavLink to="profile" className="mobile_bottom_item">
                     <CgProfile size={22} />
                 </NavLink>
+
+                <WelcomeBonusNotifications mobile />
 
                 <NavLink to="/wishlist" className="mobile_bottom_item">
                     <div className="bottom_icon">

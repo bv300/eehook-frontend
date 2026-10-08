@@ -33,6 +33,7 @@ import {
     saveCouponApplication,
     validateCoupon,
 } from "../../coupon/couponState";
+import ProductCouponInput from "../../coupon/components/ProductCouponInput";
 
 function getDescriptionText(value) {
     if (Array.isArray(value)) return value.filter(Boolean).join("\n").trim();
@@ -80,6 +81,10 @@ function relatedProductPrice(product) {
     const value = product?.discounted_price ?? product?.current_price ?? product?.starting_price ?? product?.price;
     const price = Number(value);
     return Number.isFinite(price) ? `AED ${price.toFixed(2)}` : "Price unavailable";
+}
+
+function isWelcomeBonusCoupon(coupon) {
+    return String(coupon?.promotion_type || coupon?.coupon?.promotion_type || "").toUpperCase() === "WELCOME_BONUS";
 }
 
 function Single_product() {
@@ -168,7 +173,12 @@ function Single_product() {
         validateCoupon(savedCoupon.code, productId).then((response) => {
             if (!active) return;
             const coupon = couponFromResponse(response.data);
-            saveCouponApplication(productId, savedCoupon.code, { ...savedCoupon, status: "applied", response: coupon });
+            if (isWelcomeBonusCoupon(coupon)) {
+                clearCouponApplication(productId, savedCoupon.code);
+                setCouponCode("");
+            } else {
+                saveCouponApplication(productId, savedCoupon.code, { ...savedCoupon, status: "applied", response: coupon });
+            }
             setAppliedCoupon(coupon);
             setCouponError(savedCoupon.status === "already_applied" ? savedCoupon.message : "");
             setIsCouponLocked(true);
@@ -239,12 +249,14 @@ function Single_product() {
             }
 
             const coupon = couponFromResponse(response.data);
-            saveCouponApplication(productId, normalizedCouponCode, {
-                status: "applied",
-                response: coupon,
-                message: response.data?.message || "Coupon applied successfully!",
-            });
-            setCouponCode(normalizedCouponCode);
+            if (!isWelcomeBonusCoupon(coupon)) {
+                saveCouponApplication(productId, normalizedCouponCode, {
+                    status: "applied",
+                    response: coupon,
+                    message: response.data?.message || "Coupon applied successfully!",
+                });
+            }
+            setCouponCode(isWelcomeBonusCoupon(coupon) ? "" : normalizedCouponCode);
             setAppliedCoupon(coupon);
             setIsCouponLocked(true);
             showToast.success(response.data?.message || "Coupon applied successfully!");
@@ -734,7 +746,9 @@ function Single_product() {
                                     </div>
                                     {appliedCoupon && (
                                         <div style={{ color: 'green', fontSize: '14px', marginTop: '5px', fontWeight: 'bold' }}>
-                                            Coupon applied{appliedCoupon.coupon_code ? ` (${appliedCoupon.coupon_code})` : ""}. Final discount will be calculated by the server.
+                                            {String(appliedCoupon.promotion_type || "").toUpperCase() === "WELCOME_BONUS"
+                                                ? "Welcome Bonus applied. Final discount will be calculated by the server."
+                                                : `Coupon applied${appliedCoupon.coupon_code ? ` (${appliedCoupon.coupon_code})` : ""}. Final discount will be calculated by the server.`}
                                         </div>
                                     )}
                                 </div>
@@ -742,26 +756,7 @@ function Single_product() {
                         })()}
                     </div>
 
-                    <div className="coupon-section" style={{ margin: '10px 0 20px', padding: '15px', backgroundColor: '#f9f9f9', borderRadius: '8px', border: '1px solid #ddd' }}>
-                        <div style={{ fontWeight: 'bold', marginBottom: '10px' }}>Apply Discount Coupon:</div>
-                        <div style={{ display: 'flex', gap: '10px' }}>
-                            <input 
-                                type="text" 
-                                value={couponCode} 
-                                onChange={(e) => handleCouponCodeChange(e.target.value)}
-                                placeholder="Enter Coupon Code" 
-                                style={{ flex: 1, padding: '8px 12px', border: '1px solid #ccc', borderRadius: '4px' }} 
-                            />
-                            <button 
-                                onClick={handleApplyCoupon}
-                                disabled={isApplyingCoupon || isCouponLocked}
-                                style={{ padding: '8px 16px', backgroundColor: '#4B636D', color: '#fff', border: 'none', borderRadius: '4px', cursor: isApplyingCoupon || isCouponLocked ? 'not-allowed' : 'pointer', opacity: isApplyingCoupon || isCouponLocked ? 0.65 : 1 }}
-                            >
-                                {isApplyingCoupon ? 'Applying...' : 'Apply Coupon'}
-                            </button>
-                        </div>
-                        {couponError && <div style={{ color: 'red', fontSize: '13px', marginTop: '8px' }}>{couponError}</div>}
-                    </div>
+                    <ProductCouponInput value={couponCode} onChange={handleCouponCodeChange} onApply={handleApplyCoupon} applying={isApplyingCoupon} locked={isCouponLocked} error={couponError} />
 
                     {(descriptionText || keyFeatures.length > 0) && (
                         <div className="product-content-details" aria-label="Product details">

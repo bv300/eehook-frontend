@@ -20,6 +20,9 @@ export const updateResource = (resource, id, data) =>
 export const deleteResource = (resource, id) =>
     client.delete(resourceUrl(resource, id));
 
+export const toggleWelcomeBonusActive = (id) =>
+    client.post(`${resourceUrl("welcome-bonuses", id)}toggle-active/`);
+
 // Detail/edit pages use the dedicated endpoint because generic admin CRUD
 // responses contain model fields only, not customer/address/line-item data.
 export const getOrderDetails = (id) => client.get(`/orders/${id}/`);

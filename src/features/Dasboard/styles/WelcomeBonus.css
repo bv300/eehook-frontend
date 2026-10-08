@@ -1,0 +1,14 @@
+.welcome-bonus-editor-page .hero-editor-form { max-width: 860px; }
+.welcome-bonus-editor-page .hero-editor-field { grid-template-columns: minmax(160px, 220px) minmax(0, 1fr); }
+.welcome-bonus-active input { justify-self: start; }
+.welcome-bonus-page .admin-table { min-width: 1500px; }
+.welcome-bonus-page .admin-table th, .welcome-bonus-page .admin-table td { white-space: nowrap; }
+.welcome-bonus-details { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 0; }
+.welcome-bonus-details > div { min-width: 0; padding: 11px 12px; border: 1px solid var(--admin-line); border-radius: 8px; background: #fbfcfb; }
+.welcome-bonus-details dt { color: var(--admin-muted); font-size: 10px; font-weight: 800; letter-spacing: .6px; text-transform: uppercase; }
+.welcome-bonus-details dd { margin: 5px 0 0; color: var(--admin-ink); font-size: 13px; font-weight: 600; overflow-wrap: anywhere; }
+@media (max-width: 700px) {
+  .welcome-bonus-editor-page .hero-editor-field { grid-template-columns: 1fr; }
+  .welcome-bonus-details { grid-template-columns: 1fr; }
+  .welcome-bonus-page .admin-filters { align-items: stretch; }
+}

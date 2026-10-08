@@ -14,6 +14,8 @@ import PromoBannerEditor from "./PromoBannerEditor";
 import HeroSideBannerEditor from "./HeroSideBannerEditor";
 import CouponEditor from "./CouponEditor";
 import CouponUsageEditor from "./CouponUsageEditor";
+import WelcomeBonusEditor from "./WelcomeBonusEditor";
+import WelcomeBonusPage from "./WelcomeBonusPage";
 import navbarLogo from "../../../assets/navbar-logo.png";
 import { getImageUrl } from "../../../utils/imageUrl";
 import { logoutSession } from "../../../lib/ApiClient";
@@ -46,6 +48,7 @@ const resources = {
     "hero-side-banners": { label: "Hero Side Banners", group: "Marketing", fields: ["image", "link", "is_active"], columns: ["image", "link", "is_active"] },
     "trust-benefits": { label: "Trust & Benefits", itemLabel: "Benefit", group: "Marketing", fields: ["key", "title", "description", "icon_key", "display_order", "is_active"], columns: ["display_order", "key", "title", "icon_key", "is_active"] },
     coupons: { label: "Coupons", group: "Marketing", fields: ["code", "applicability_type", "target_name", "discount_type", "discount_value", "start_date", "end_date", "is_active"], columns: ["code", "applicability_type", "target_name", "discount_type", "discount_value", "start_date", "end_date", "is_active", "product", "category"] },
+    "welcome-bonuses": { label: "Welcome Bonuses", group: "Dashboard", fields: [], columns: [] },
     "coupon-usages": { label: "Coupon Usage History", group: "Marketing", fields: ["coupon", "user", "product", "used_at"], columns: ["user", "coupon", "product", "used_at"] },
 };
 
@@ -54,7 +57,8 @@ const navGroups = [
     { title: "Orders", items: [{ key: "orders", label: "Orders", icon: FiShoppingBag }, { key: "order-items", label: "Order Items", icon: FiClipboard }] },
     { title: "Catalog", items: ["categories", "subcategories", "brands", "products", "colors", "unit-types", "units", "offers"].map((key) => ({ key, label: key === "products" ? "Products & Variants" : resources[key].label, icon: key === "products" ? FiPackage : FiLayers })) },
     { title: "Customers", items: ["users", "user-profiles", "addresses", "wishlists", "carts"].map((key) => ({ key, label: resources[key].label, icon: key === "users" ? FiUsers : FiArchive })) },
-    { title: "Marketing", items: ["hero-banners", "promo-banners", "hero-side-banners", "trust-benefits", "coupons", "coupon-usages"].map((key) => ({ key, label: resources[key].label, icon: key === "trust-benefits" ? FiShield : key.includes("banner") ? FiImage : FiTag })) },
+    { title: "Dashboard", items: ["coupons", "welcome-bonuses"].map((key) => ({ key, label: resources[key].label, icon: FiTag })) },
+    { title: "Marketing", items: ["hero-banners", "promo-banners", "hero-side-banners", "trust-benefits", "coupon-usages"].map((key) => ({ key, label: resources[key].label, icon: key === "trust-benefits" ? FiShield : key.includes("banner") ? FiImage : FiTag })) },
 ];
 
 const TRUST_BENEFIT_ICON_OPTIONS = [
@@ -272,9 +276,11 @@ export default function OrderDashboard() {
     const isHeroSideBannerEditor = pathKey === "hero-side-banners" && (location.pathname.endsWith("/new") || isEditRoute);
     const isCouponEditor = pathKey === "coupons" && (location.pathname.endsWith("/new") || isEditRoute);
     const isCouponUsageEditor = pathKey === "coupon-usages" && (location.pathname.endsWith("/new") || isEditRoute);
+    const isWelcomeBonusEditor = pathKey === "welcome-bonuses" && (location.pathname.endsWith("/new") || isEditRoute);
+    const isWelcomeBonusView = pathKey === "welcome-bonuses" && Boolean(detailId) && location.pathname.endsWith("/view");
     const isOrderEditor = pathKey === "orders" && Boolean(detailId) && isEditRoute;
-    const isGenericEditPage = Boolean(detailId) && isEditRoute && Boolean(resources[pathKey]) && !["products", "orders", "hero-banners", "promo-banners", "hero-side-banners", "coupons", "coupon-usages"].includes(pathKey);
-    const isReadOnlyResourceView = Boolean(detailId) && !isEditRoute && pathKey !== "products" && pathKey !== "orders" && Boolean(resources[pathKey]);
+    const isGenericEditPage = Boolean(detailId) && isEditRoute && Boolean(resources[pathKey]) && !["products", "orders", "hero-banners", "promo-banners", "hero-side-banners", "coupons", "coupon-usages", "welcome-bonuses"].includes(pathKey);
+    const isReadOnlyResourceView = Boolean(detailId) && !isEditRoute && pathKey !== "products" && pathKey !== "orders" && pathKey !== "welcome-bonuses" && Boolean(resources[pathKey]);
 
     useEffect(() => {
         const onForbidden = () => setForbidden(true);
@@ -305,7 +311,7 @@ export default function OrderDashboard() {
             <div className="admin-sidebar-footer"><div className="admin-user"><span>{(localStorage.getItem("first_name") || "S").slice(0, 1).toUpperCase()}</span><div><strong>{localStorage.getItem("first_name") || "Super Admin"}</strong><small>Super Admin</small></div></div><button className="admin-nav-item admin-logout-button" onClick={logout}><FiLogOut /><span>Sign out</span></button></div>
         </aside>
         {sidebarOpen && <button className="admin-scrim" onClick={() => setSidebarOpen(false)} aria-label="Close menu" />}
-        <main className="admin-content"><header className="admin-topbar"><button type="button" className="admin-menu" onClick={() => setSidebarOpen(true)} aria-label="Open navigation"><FiMenu /></button><div><p className="admin-eyebrow">SUPER ADMIN / {currentTitle.toUpperCase()}</p><h1>{currentTitle}</h1></div><div className="admin-top-actions"><button type="button" className={`admin-button secondary refresh-action ${refreshing ? "is-refreshing" : ""}`} onClick={refreshDashboard} disabled={refreshing} aria-label="Refresh dashboard"><FiRefreshCw aria-hidden="true" /> <span>{refreshing ? "Refreshing..." : "Refresh"}</span></button><FiActivity className="admin-live" title="Live admin workspace" aria-label="Live admin workspace" /></div></header>{forbidden && <div className="admin-access-alert" role="alert"><FiSettings /><span><strong>Super Admin access required</strong><small>Your account does not have permission to access this resource.</small></span><button type="button" onClick={() => setForbidden(false)} aria-label="Dismiss access alert"><FiX /></button></div>}{isProductEditor ? <ProductEditor /> : isProductView ? <ProductView /> : isHeroBannerEditor ? <HeroBannerEditor schema={schema} /> : isPromoBannerEditor ? <PromoBannerEditor /> : isHeroSideBannerEditor ? <HeroSideBannerEditor /> : isCouponEditor ? <CouponEditor /> : isCouponUsageEditor ? <CouponUsageEditor /> : isOrderEditor ? <OrderEditPage id={detailId} /> : detailId && pathKey === "orders" ? <OrderDetail id={detailId} /> : isGenericEditPage ? <ResourceEditorPage resource={pathKey} id={detailId} schema={schema} /> : isReadOnlyResourceView ? <ReadOnlyResourcePage resource={pathKey} id={detailId} schema={schema} /> : pathKey === "overview" ? <Overview data={overview} loading={overviewLoading} /> : resources[pathKey] ? <ResourcePage key={pathKey} resource={pathKey} schema={schema} /> : <Overview data={overview} loading={overviewLoading} />}</main>
+        <main className="admin-content"><header className="admin-topbar"><button type="button" className="admin-menu" onClick={() => setSidebarOpen(true)} aria-label="Open navigation"><FiMenu /></button><div><p className="admin-eyebrow">SUPER ADMIN / {currentTitle.toUpperCase()}</p><h1>{currentTitle}</h1></div><div className="admin-top-actions"><button type="button" className={`admin-button secondary refresh-action ${refreshing ? "is-refreshing" : ""}`} onClick={refreshDashboard} disabled={refreshing} aria-label="Refresh dashboard"><FiRefreshCw aria-hidden="true" /> <span>{refreshing ? "Refreshing..." : "Refresh"}</span></button><FiActivity className="admin-live" title="Live admin workspace" aria-label="Live admin workspace" /></div></header>{forbidden && <div className="admin-access-alert" role="alert"><FiSettings /><span><strong>Super Admin access required</strong><small>Your account does not have permission to access this resource.</small></span><button type="button" onClick={() => setForbidden(false)} aria-label="Dismiss access alert"><FiX /></button></div>}{isProductEditor ? <ProductEditor /> : isProductView ? <ProductView /> : isHeroBannerEditor ? <HeroBannerEditor schema={schema} /> : isPromoBannerEditor ? <PromoBannerEditor /> : isHeroSideBannerEditor ? <HeroSideBannerEditor /> : isCouponEditor ? <CouponEditor /> : isCouponUsageEditor ? <CouponUsageEditor /> : isWelcomeBonusEditor ? <WelcomeBonusEditor /> : isWelcomeBonusView ? <WelcomeBonusPage /> : isOrderEditor ? <OrderEditPage id={detailId} /> : detailId && pathKey === "orders" ? <OrderDetail id={detailId} /> : isGenericEditPage ? <ResourceEditorPage resource={pathKey} id={detailId} schema={schema} /> : isReadOnlyResourceView ? <ReadOnlyResourcePage resource={pathKey} id={detailId} schema={schema} /> : pathKey === "overview" ? <Overview data={overview} loading={overviewLoading} /> : pathKey === "welcome-bonuses" ? <WelcomeBonusPage /> : resources[pathKey] ? <ResourcePage key={pathKey} resource={pathKey} schema={schema} /> : <Overview data={overview} loading={overviewLoading} />}</main>
     </div>;
 }
 

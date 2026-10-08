@@ -104,6 +104,8 @@ function Router() {
                 <Route path="eehook-dashboard/hero-side-banners/:id/edit" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
                 <Route path="eehook-dashboard/coupons/new" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
                 <Route path="eehook-dashboard/coupons/:id/edit" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
+                <Route path="eehook-dashboard/welcome-bonuses/new" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
+                <Route path="eehook-dashboard/welcome-bonuses/:id/edit" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
                 <Route path="eehook-dashboard/coupon-usages/new" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
                 <Route path="eehook-dashboard/coupon-usages/:id/edit" element={<AdminRoute><OrderDashboard /></AdminRoute>} />
                 <Route path="eehook-dashboard/:section" element={
