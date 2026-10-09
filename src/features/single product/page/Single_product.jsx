@@ -34,6 +34,7 @@ import {
     validateCoupon,
 } from "../../coupon/couponState";
 import ProductCouponInput from "../../coupon/components/ProductCouponInput";
+import { hasAuthSession } from "../../auth/authUtils";
 
 function getDescriptionText(value) {
     if (Array.isArray(value)) return value.filter(Boolean).join("\n").trim();
@@ -417,9 +418,7 @@ function Single_product() {
             return;
         }
 
-        const token = localStorage.getItem("access");
-
-        if (!token) {
+        if (!hasAuthSession()) {
             showToast.info("Please login to continue");
             navigate("/login");
             return;
@@ -523,9 +522,7 @@ function Single_product() {
 
     const addToWishlist = async () => {
 
-        const token = localStorage.getItem("access");
-
-        if (!token) {
+        if (!hasAuthSession()) {
             showToast.info("Please login to continue");
             navigate("/login");
             return;

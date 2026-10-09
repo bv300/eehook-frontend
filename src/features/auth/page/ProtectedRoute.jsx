@@ -1,8 +1,8 @@
 import { Navigate } from "react-router-dom";
+import { hasAuthSession } from "../authUtils";
 
 const ProtectedRoute=({children})=>{
-    const token=localStorage.getItem("access_token") || localStorage.getItem("access");
-    return token?children:<Navigate to="/login" replace/>;
+    return hasAuthSession() ? children : <Navigate to="/login" replace/>;
 };
 
 export default ProtectedRoute;

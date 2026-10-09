@@ -8,6 +8,8 @@ import WishlistQuery from "../../wishlist/queries/WishlistQuery";
 import { Wishlist_delete, Wishlist_post } from "../../wishlist/api/Wishlisht_Api";
 import showToast from "../../../utils/toast";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
+import { hasAuthSession } from "../../auth/authUtils";
+import { formatHomepagePrice, getHomepageProductPricing } from "../utils/productPricing";
 
 const MAX_PRODUCTS_PER_SECTION = 16;
 const hasValue = (value) => value !== null && value !== undefined && value !== "";
@@ -29,12 +31,6 @@ function getProductImage(product) {
         || product?.variants?.[0]?.images?.[0]?.image;
 }
 
-function formatPrice(value) {
-    if (!hasValue(value)) return "Price unavailable";
-    const numericValue = Number(value);
-    return Number.isFinite(numericValue) ? `AED ${numericValue.toFixed(2)}` : String(value);
-}
-
 function New_Arrival_Home({
     products,
     totalCount,
@@ -42,6 +38,7 @@ function New_Arrival_Home({
     subtitle = "The latest curated collection for the modern lifestyle.",
     viewAllTo = "/shop?sort=new",
     showNewBadge = false,
+    tone = "new",
 }) {
     const navigate = useNavigate();
     const hasProvidedProducts = Array.isArray(products);
@@ -73,7 +70,7 @@ function New_Arrival_Home({
 
     const addToWishlist = async (product, event) => {
         event.stopPropagation();
-        if (!(localStorage.getItem("access_token") || localStorage.getItem("access"))) {
+        if (!hasAuthSession()) {
             showToast.info("Please login to continue");
             navigate("/login");
             return;
@@ -102,7 +99,7 @@ function New_Arrival_Home({
 
     if (isLoading || showLoader) {
         return (
-            <div className="new-arrivals-wrapper">
+            <div className={`new-arrivals-wrapper new-arrivals-wrapper--${tone}`}>
                 <section className="new-arrivals">
                     <div className="heading-container">
                         <div className="heading-text">
@@ -121,7 +118,7 @@ function New_Arrival_Home({
     if (!displayData.length) return null;
 
     return (
-        <div className="new-arrivals-wrapper">
+        <div className={`new-arrivals-wrapper new-arrivals-wrapper--${tone}`}>
             <section className="new-arrivals">
                 <div className="heading-container">
                     <div className="heading-text">
@@ -134,17 +131,15 @@ function New_Arrival_Home({
                     <div className="new-arrivals-grid">
                         {displayData.map((item) => {
                             const { variant, size } = getProductSelection(item);
-                            const hasOffer = item.has_offer === true || Number(item.discount_percentage) > 0;
                             const isWishlisted = wishlist.some((wishlistItem) => String(wishlistItem.variant) === String(variant?.id) && String(wishlistItem.variant_size ?? "") === String(size?.id ?? ""));
                             const image = getProductImage(item);
-                            const currentPrice = hasOffer && hasValue(item.discounted_price) ? item.discounted_price : (item.current_price ?? item.starting_price);
-                            const showOriginal = hasOffer && hasValue(item.original_price) && String(item.original_price) !== String(currentPrice);
+                            const { currentPrice, originalPrice, discountPercentage, hasOffer } = getHomepageProductPricing(item, variant);
 
                             return (
                                 <article key={item.id} className="new-product-card">
                                     <div className="image-container" onClick={() => navigate(`/single/${item.id}`)} role="button" tabIndex={0} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") navigate(`/single/${item.id}`); }}>
                                         <img src={image ? getImageUrl(image) : undefined} alt={item.name} className="product-img" />
-                                        {hasOffer && <span className="badge-offer">{item.discount_percentage}% OFF</span>}
+                                        {hasOffer && <span className="badge-offer">{discountPercentage}% OFF</span>}
                                         {showNewBadge && item.is_active && <span className="badge-new">NEW</span>}
                                         <button type="button" className={`wishlist-btn ${isWishlisted ? "is-wishlisted" : ""}`} onClick={(event) => addToWishlist(item, event)} aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}>{isWishlisted ? <FaHeart className="heart-icon" /> : <FaRegHeart className="heart-icon" />}</button>
                                         <button type="button" className="quick-add-btn" onClick={(event) => { event.stopPropagation(); navigate(`/single/${item.id}`); }}>VIEW PRODUCT</button>
@@ -155,8 +150,8 @@ function New_Arrival_Home({
                                         <h3 className="newHome-product-title">{item.description || item.name}</h3>
                                         <div className="product-meta">
                                             <div className="price-area">
-                                                {showOriginal && <span className="old-price">{formatPrice(item.original_price)}</span>}
-                                                <span className="product-price">{formatPrice(currentPrice)}</span>
+                                                {originalPrice !== null && <span className="old-price">{formatHomepagePrice(originalPrice)}</span>}
+                                                <span className="product-price">{formatHomepagePrice(currentPrice)}</span>
                                             </div>
                                         </div>
                                     </div>

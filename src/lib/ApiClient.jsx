@@ -1,9 +1,11 @@
 import axios from "axios";
 import { clearAuthSession } from "../features/auth/authUtils";
 import showToast from "../utils/toast";
+import { API_URL } from "./apiUrl";
 
-const API_URL = import.meta.env.VITE_API_URL;
 let refreshPromise = null;
+let csrfPromise = null;
+let csrfToken = "";
 
 function redirectToLogin() {
     clearAuthSession();
@@ -23,31 +25,51 @@ function isAuthRequest(config = {}) {
     return /(?:^|\/)login\/?$|google-login|token\/refresh|logout/.test(String(config.url || ""));
 }
 
-async function refreshAccessToken() {
-    const refresh = localStorage.getItem("refresh_token") || localStorage.getItem("refresh");
-    if (!refresh) throw new Error("No refresh token available");
+function readCookie(name) {
+    if (typeof document === "undefined") return "";
+    const encodedName = `${encodeURIComponent(name)}=`;
+    const cookie = document.cookie.split("; ").find((entry) => entry.startsWith(encodedName));
+    return cookie ? decodeURIComponent(cookie.slice(encodedName.length)) : "";
+}
 
+export async function ensureCsrf() {
+    const current = csrfToken || readCookie("csrftoken");
+    if (current) return current;
+    if (!csrfPromise) {
+        csrfPromise = axios.get(`${API_URL}/auth/csrf/`, { withCredentials: true })
+            .then((response) => {
+                csrfToken = response.data?.csrfToken || readCookie("csrftoken");
+                return csrfToken;
+            })
+            .finally(() => { csrfPromise = null; });
+    }
+    return csrfPromise;
+}
+
+async function refreshAccessToken() {
     if (!refreshPromise) {
-        refreshPromise = axios.post(`${API_URL}/token/refresh/`, { refresh }).then((response) => {
-            const access = response.data?.access;
-            if (!access) throw new Error("Refresh response did not contain an access token");
-            localStorage.setItem("access", access);
-            localStorage.setItem("access_token", access);
-            return access;
-        }).finally(() => { refreshPromise = null; });
+        refreshPromise = ensureCsrf()
+            .then((csrfToken) => axios.post(
+                `${API_URL}/token/refresh/`,
+                {},
+                { withCredentials: true, headers: csrfToken ? { "X-CSRFToken": csrfToken } : {} },
+            ))
+            .finally(() => { refreshPromise = null; });
     }
 
     return refreshPromise;
 }
 
-const client = axios.create({ baseURL: `${API_URL}/` });
+const client = axios.create({ baseURL: `${API_URL}/`, withCredentials: true });
 
-client.interceptors.request.use((config) => {
-    const token = localStorage.getItem("access_token") || localStorage.getItem("access");
-    if (token) {
+client.interceptors.request.use(async (config) => {
+    const method = String(config.method || "get").toUpperCase();
+    if (!["GET", "HEAD", "OPTIONS", "TRACE"].includes(method)) {
+        const csrfToken = await ensureCsrf();
         config.headers = config.headers || {};
-        config.headers.Authorization = `Bearer ${token}`;
+        if (csrfToken) config.headers["X-CSRFToken"] = csrfToken;
     }
+    if (config.headers?.Authorization) delete config.headers.Authorization;
     return config;
 });
 
@@ -69,9 +91,7 @@ client.interceptors.response.use(
         if (status === 401 && !originalRequest._retry && !originalRequest.skipAuthRefresh && !isAuthRequest(originalRequest)) {
             originalRequest._retry = true;
             try {
-                const access = await refreshAccessToken();
-                originalRequest.headers = originalRequest.headers || {};
-                originalRequest.headers.Authorization = `Bearer ${access}`;
+                await refreshAccessToken();
                 return client(originalRequest);
             } catch (refreshError) {
                 redirectToLogin();
@@ -86,13 +106,11 @@ client.interceptors.response.use(
 );
 
 export async function logoutSession() {
-    const refresh = localStorage.getItem("refresh_token") || localStorage.getItem("refresh");
     try {
-        if (refresh) await client.post("logout/", { refresh }, { skipAuthRefresh: true });
+        await client.post("logout/", {}, { skipAuthRefresh: true });
     } catch {
         // Local credentials are cleared even when the server cannot be reached.
     } finally {
-        sessionStorage.clear();
         clearAuthSession();
     }
 }

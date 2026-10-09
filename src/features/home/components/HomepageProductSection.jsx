@@ -24,7 +24,7 @@ function getSectionCount(section, products) {
     return Number.isFinite(count) ? count : products.length;
 }
 
-function HomepageProductSection({ title, eyebrow, section, viewAllTo = "/shop" }) {
+function HomepageProductSection({ title, eyebrow, section, viewAllTo = "/shop", tone }) {
     const allProducts = uniqueProducts(getSectionProducts(section));
     const products = allProducts.slice(0, MAX_PRODUCTS_PER_SECTION);
     if (!products.length) return null;
@@ -36,6 +36,7 @@ function HomepageProductSection({ title, eyebrow, section, viewAllTo = "/shop" }
             title={title}
             subtitle={eyebrow}
             viewAllTo={viewAllTo}
+            tone={tone}
         />
     );
 }

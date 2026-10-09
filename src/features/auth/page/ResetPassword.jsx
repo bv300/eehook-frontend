@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import axios from "axios";
+import client from "../../../lib/ApiClient";
+import { clearAuthSession } from "../authUtils";
 import { getPasswordPolicyError, PASSWORD_POLICY_HELP } from "../passwordPolicy";
 import "./ResetPassword.css";
 
@@ -50,16 +51,13 @@ function ResetPassword() {
 
         try {
 
-            const response = await axios.post(
+            const response = await client.post(`reset-password/${uidb64}/${token}/`, form);
 
-                `${import.meta.env.VITE_API_URL}/reset-password/${uidb64}/${token}/`,
-                form
-
-            );
-
+            // Password reset revokes all existing sessions on the backend.
+            // Remove every in-browser auth value before sending the user back.
+            clearAuthSession();
             alert(response.data.message);
-
-            navigate("/login");
+            navigate("/login", { replace: true });
 
         } catch (error) {
             const backendPasswordError = error.response?.data?.password;

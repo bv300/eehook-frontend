@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import "./Home.css";
 import Heropage from "./components/Heropage";
 import Shop_by_category from "./components/Shop_by_category";
@@ -11,6 +12,8 @@ import Offer_poster from "../../hooks/offers/page/Offer_poster";
 import ContactUs from "../../components/Contact";
 import vedio1 from "../../assets/eehook-video-one.mp4";
 import vedio2 from "../../assets/eehook-video-two.mp4";
+import videoOnePoster from "../../assets/eehook_hero_tech.png";
+import videoTwoPoster from "../../assets/eehook_lifestyle_vibe.png";
 
 const asArray = (value) => {
     if (Array.isArray(value)) return value;
@@ -38,11 +41,6 @@ const brandsFromProducts = (products) => {
     return [...brands.values()];
 };
 
-const withDemoFallback = (section, demoProducts) => {
-    if (asArray(section).length || !demoProducts.length) return { section, isDemo: false };
-    return { section: { results: demoProducts }, isDemo: true };
-};
-
 function HomeLoading() {
     return (
         <main className="homepage-discovery homepage-loading" aria-busy="true" aria-label="Loading homepage">
@@ -55,6 +53,39 @@ function HomeLoading() {
     );
 }
 
+function DeferredHeritageVideo({ source, poster, label }) {
+    const videoRef = useRef(null);
+    const [shouldLoad, setShouldLoad] = useState(false);
+
+    useEffect(() => {
+        const video = videoRef.current;
+        if (!video || !("IntersectionObserver" in window)) {
+            setShouldLoad(true);
+            return undefined;
+        }
+
+        const observer = new IntersectionObserver(([entry]) => {
+            if (!entry.isIntersecting) return;
+            setShouldLoad(true);
+            observer.disconnect();
+        }, { rootMargin: "240px 0px" });
+
+        observer.observe(video);
+        return () => observer.disconnect();
+    }, []);
+
+    useEffect(() => {
+        if (!shouldLoad) return;
+        videoRef.current?.play?.().catch(() => {
+            // Playback is optional; the poster remains useful if a browser blocks it.
+        });
+    }, [shouldLoad]);
+
+    return <video ref={videoRef} className="heritage-video" muted loop playsInline preload="none" poster={poster} aria-label={label}>
+        {shouldLoad && <source src={source} type="video/mp4" />}
+    </video>;
+}
+
 function Home() {
     const { data: homepageData = {}, isLoading, isError, error, refetch } = Homepage_Query();
     const homepageBrands = asArray(homepageData.shop_by_brand);
@@ -62,14 +93,6 @@ function Home() {
         { page_size: 100 },
         { enabled: !isLoading && !isError && homepageBrands.length === 0 }
     );
-    const topDealsEmpty = asArray(homepageData.top_deals).length === 0;
-    const bestSellersEmpty = asArray(homepageData.best_sellers).length === 0;
-    const shouldLoadSectionDemos = import.meta.env.DEV && !isLoading && !isError && (topDealsEmpty || bestSellersEmpty);
-    const { data: demoCatalog } = Product_Query(
-        { page_size: 8 },
-        { enabled: shouldLoadSectionDemos }
-    );
-
     if (isLoading) return <HomeLoading />;
 
     if (isError) {
@@ -91,10 +114,6 @@ function Home() {
     const justForYou = homepageData.just_for_you;
     const recentlyViewed = homepageData.recently_viewed;
     const shopByBrand = homepageBrands.length ? homepageBrands : brandsFromProducts(brandProducts);
-    const demoProducts = asArray(demoCatalog);
-    const topDealsDisplay = withDemoFallback(topDeals, demoProducts);
-    const bestSellersDisplay = withDemoFallback(bestSellers, demoProducts.slice().reverse());
-
     return (
         <main className="homepage-discovery">
             <Heropage heroBanners={heroBanners} />
@@ -105,16 +124,16 @@ function Home() {
                 </div>
             )}
 
-            <New_Arrival_Home products={asArray(newArrivals)} totalCount={newArrivals?.count} showNewBadge />
+            <New_Arrival_Home products={asArray(newArrivals)} totalCount={newArrivals?.count} showNewBadge tone="new" />
             <Offer_poster />
-            <HomepageProductSection title="Trending now" eyebrow="Popular right now" section={trendingNow} />
-            <HomepageProductSection title="Top deals" eyebrow={topDealsDisplay.isDemo ? "Demo preview · Best value" : "Best value"} section={topDealsDisplay.section} />
-            <HomepageProductSection title="Best sellers" eyebrow={bestSellersDisplay.isDemo ? "Demo preview · Customer favourites" : "Customer favourites"} section={bestSellersDisplay.section} />
-            <HomepageProductSection title="Just for you" eyebrow="Picked for your next find" section={justForYou} />
+            <HomepageProductSection title="Trending now" eyebrow="Popular right now" section={trendingNow} tone="trending" />
+            <HomepageProductSection title="Top deals" eyebrow="Best value" section={topDeals} tone="deals" />
+            <HomepageProductSection title="Best sellers" eyebrow="Customer favourites" section={bestSellers} tone="bestsellers" />
+            <HomepageProductSection title="Just for you" eyebrow="Picked for your next find" section={justForYou} tone="personal" />
 
             <HomepageBrandSection brands={shopByBrand} />
 
-            <HomepageProductSection title="Recently viewed" eyebrow="Pick up where you left off" section={recentlyViewed} />
+            <HomepageProductSection title="Recently viewed" eyebrow="Pick up where you left off" section={recentlyViewed} tone="recent" />
 
             <HomepageTrustBenefits benefits={asArray(homepageData.trust_benefits)} />
 
@@ -127,12 +146,8 @@ function Home() {
                 </div>
 
                 <div className="section-heritage-gallery">
-                    <video className="heritage-video" autoPlay muted loop playsInline>
-                        <source src={vedio1} type="video/mp4" />
-                    </video>
-                    <video className="heritage-video" autoPlay muted loop playsInline>
-                        <source src={vedio2} type="video/mp4" />
-                    </video>
+                    <DeferredHeritageVideo source={vedio1} poster={videoOnePoster} label="Technology collection preview" />
+                    <DeferredHeritageVideo source={vedio2} poster={videoTwoPoster} label="Lifestyle collection preview" />
                 </div>
             </section>
 

@@ -7,6 +7,7 @@ import WishlistQuery from "../../wishlist/queries/WishlistQuery";
 import { getImageUrl } from "../../../utils/imageUrl";
 import showToast from "../../../utils/toast";
 import defaultImage from "../../../assets/image_not_available.png";
+import { hasAuthSession } from "../../auth/authUtils";
 
 const hasValue = (value) => value !== null && value !== undefined && value !== "";
 
@@ -75,7 +76,7 @@ function Product_card({ products = [], isLoading, error, page = 1, pageSize = 14
     const addToWishlist = async (product, event) => {
         event.stopPropagation();
 
-        if (!(localStorage.getItem("access_token") || localStorage.getItem("access"))) {
+        if (!hasAuthSession()) {
             showToast.info("Please login to continue");
             navigate("/login");
             return;
@@ -118,7 +119,14 @@ function Product_card({ products = [], isLoading, error, page = 1, pageSize = 14
             const showOriginalPrice = hasOffer && hasValue(originalPrice) && hasValue(displayPrice) && String(originalPrice) !== String(displayPrice);
             const availability = getAvailability(product, firstVariant, firstUnit);
 
-            return <article className="product_card" key={product.id} onClick={() => navigate(`/single/${product.id}`)}>
+            const openProduct = () => navigate(`/single/${product.id}`);
+            const openProductWithKeyboard = (event) => {
+                if (event.target !== event.currentTarget || (event.key !== "Enter" && event.key !== " ")) return;
+                event.preventDefault();
+                openProduct();
+            };
+
+            return <article className="product_card" key={product.id} role="link" tabIndex={0} aria-label={`View ${product.name || "product"}`} onClick={openProduct} onKeyDown={openProductWithKeyboard}>
                 <div className="product_img">
                     <button className={`favorite_btn ${isWishlisted ? "active" : ""}`} onClick={(event) => addToWishlist(product, event)} aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}><FaHeart /></button>
                     {hasOffer && hasValue(product.discount_percentage) && <div className="offer-badge">{product.discount_percentage}% OFF</div>}
@@ -128,7 +136,7 @@ function Product_card({ products = [], isLoading, error, page = 1, pageSize = 14
                         className="quick-add-bar"
                         onClick={(event) => {
                             event.stopPropagation();
-                            navigate(`/single/${product.id}`);
+                            openProduct();
                         }}
                     >
                         VIEW PRODUCT

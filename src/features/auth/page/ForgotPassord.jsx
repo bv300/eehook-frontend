@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
+import client from "../../../lib/ApiClient";
 import "./Forgotpassword.css";
 
 function ForgotPassword() {
@@ -8,7 +8,7 @@ function ForgotPassword() {
     const [email, setEmail] = useState("");
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
-    const [errorMessage, setErrorMessage] = useState("");
+    const neutralMessage = "If the account exists, a reset email will be sent.";
 
     const handleSubmit = async (e) => {
 
@@ -16,20 +16,21 @@ function ForgotPassword() {
 
         setLoading(true);
         setMessage("");
-        setErrorMessage("");
 
         try {
 
-            const response = await axios.post(`${import.meta.env.VITE_API_URL}/forgot-password/`, {
+            const response = await client.post("forgot-password/", {
                 email,
             });
 
-            setMessage(response.data.message || "If the account exists, a password reset link has been sent to your email.");
+            setMessage(response.data?.message || neutralMessage);
             setEmail("");
 
         } catch (error) {
 
-            setErrorMessage(error.response?.data?.error || error.response?.data?.message || "Unable to send the password reset email. Please try again.");
+            // The backend intentionally returns the same acknowledgement for
+            // registered and unregistered addresses. Keep that behaviour in UI.
+            setMessage(error.response?.data?.message || neutralMessage);
 
         } finally {
 
@@ -73,7 +74,6 @@ function ForgotPassword() {
                     </button>
 
                     {message && <p className="password-reset-success" role="status">{message}</p>}
-                    {errorMessage && <p className="password-reset-error" role="alert">{errorMessage}</p>}
 
                 </form>
 

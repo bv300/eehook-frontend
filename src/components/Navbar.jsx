@@ -129,9 +129,9 @@ const cartLength = cart.total_items ?? 0;
             {/* Top Navigation Wrapper    ${isHomePage && !scrolled ? "transparent" : "scrolled"}*/}
             <div className={`navbar ${showNavbar ? "show" : "hide"}`}>
                 <div className="nav_main">
-                    <div className="nav_toggle" onClick={() => setMenuOpen(true)}>
+                    <button type="button" className="nav_toggle" onClick={() => setMenuOpen(true)} aria-label="Open navigation menu">
                         <AiOutlineDoubleRight size={30} />
-                    </div>
+                    </button>
 
                     <div className="nav_main2">
                         <NavLink to='/' className="logo-link">
@@ -224,29 +224,19 @@ const cartLength = cart.total_items ?? 0;
                                         onKeyDown={handleSearch}
                                     />
 
-                                    {searchOpen && (
-                                    <LuSearch
-                                        size={20}
-                                        className="input_search_icon"
-                                        onClick={goToSearch}
-                                    />
-                                    )}
+                                    {searchOpen && <button type="button" className="input-search-button input_search_icon" onClick={goToSearch} aria-label="Search products"><LuSearch size={20} /></button>}
                                 </div>
 
 
                                 {searchOpen ? (
-                                    <div onClick={closeSearch}><IoClose size={30} /></div>
+                                    <button type="button" className="nav-icon-button" onClick={closeSearch} aria-label="Close search"><IoClose size={30} /></button>
                                 ) : (
-                                    <LuSearch
-                                        size={30}
-                                        className="nav_icon search_icon"
-                                        onClick={() => setSearchOpen(true)}
-                                    />
+                                    <button type="button" className="nav-icon-button nav_icon search_icon" onClick={() => setSearchOpen(true)} aria-label="Open product search"><LuSearch size={23} /></button>
 
                                 )}
 
 
-                                <NavLink to="profile" className="mobile_bottom_item">
+                                <NavLink to="/profile" className="mobile_bottom_item">
                                     <div className="cart">
                                         <CgProfile size={22} />
                                     </div>
@@ -254,14 +244,14 @@ const cartLength = cart.total_items ?? 0;
 
                                 <div className="desktop-notification"><WelcomeBonusNotifications /></div>
 
-                                <NavLink to="wishlist">
+                                <NavLink to="/wishlist">
                                     <div className="cart">
                                         <FaHeart size={20} className="nav_icon" />
                                         <span>{wishLength}</span>
                                     </div>
                                 </NavLink>
 
-                                <NavLink to="checkout">
+                                <NavLink to="/checkout">
                                     <div className="cart">
                                         <FaShoppingBag size={20} className="nav_icon" />
                                         <span>{cartLength}</span>
@@ -286,13 +276,7 @@ const cartLength = cart.total_items ?? 0;
                             onKeyDown={handleSearch}
                             autoFocus
                         />
-                        {searchOpen && (
-                            <LuSearch
-                                size={20}
-                                className="input_search_icon"
-                                onClick={goToSearch}
-                            />
-                        )}
+                        {searchOpen && <button type="button" className="input-search-button input_search_icon" onClick={goToSearch} aria-label="Search products"><LuSearch size={20} /></button>}
                     </div>
                 )}
 
@@ -305,41 +289,43 @@ const cartLength = cart.total_items ?? 0;
                     <NavLink to='/' className="logo-link" style={{ marginTop: '5px' }}>
                         <img src={eehook} alt="Logo" className="navbar-logo" />
                     </NavLink>
-                    <IoClose size={25} onClick={() => setMenuOpen(false)} />
+                    <button type="button" className="mobile-close-button" onClick={() => setMenuOpen(false)} aria-label="Close navigation menu"><IoClose size={25} /></button>
                 </div>
                 <ul>
-                    <li onClick={closeMenu}><NavLink to="/">HOME</NavLink></li>
-                    <li onClick={closeMenu}><NavLink to="/shop">SHOP</NavLink></li>
-                    <li onClick={() => setCategoryOpen(!categoryOpen)}>
+                    <li><NavLink to="/" onClick={closeMenu}>HOME</NavLink></li>
+                    <li><NavLink to="/shop" onClick={closeMenu}>SHOP</NavLink></li>
+                    <li>
+                        <button type="button" className="mobile-category-toggle" onClick={() => setCategoryOpen(!categoryOpen)} aria-expanded={categoryOpen}>
                         <span>CATEGORIES</span>
                         <span>{categoryOpen ? <FaAngleUp size={20} /> : <FaAngleDown size={20} />}
                         </span>
+                        </button>
                     </li>
                     {categoryOpen && (
-                        <div className="mobile_categories">
+                        <li className="mobile_categories">
                             {categories.map((cat) => (
                                 <NavLink key={cat.id} to={`/shop?category=${cat.id}`} onClick={() => { setHoveredCategory(cat); setHoveredSubcategory(null); closeMenu(); }}>
                                     {cat.name}
                                 </NavLink>
                             ))}
-                        </div>
+                        </li>
                     )}
 
                     {offerActive && (
 
-                        <li onClick={closeMenu}><NavLink to="/shop?offer=true">OFFERS</NavLink></li>
+                        <li><NavLink to="/shop?offer=true" onClick={closeMenu}>OFFERS</NavLink></li>
                     )}
 
-                    <li onClick={closeMenu}><NavLink to="/shop?sort=new">NEW ARRIVALS</NavLink></li>
+                    <li><NavLink to="/shop?sort=new" onClick={closeMenu}>NEW ARRIVALS</NavLink></li>
 
-                    <li onClick={closeMenu}><NavLink to="/about">ABOUT US</NavLink></li>
-                    <li onClick={closeMenu}><NavLink to="/contact">CONTACT US</NavLink></li>
+                    <li><NavLink to="/about" onClick={closeMenu}>ABOUT US</NavLink></li>
+                    <li><NavLink to="/contact" onClick={closeMenu}>CONTACT US</NavLink></li>
                 </ul>
             </div>
 
             {/* ISOLATED GLOBAL MOBILE BOTTOM NAV BAR (Always locked strictly to bottom window layer) */}
             <div className="mobile_bottom">
-                <NavLink to="profile" className="mobile_bottom_item">
+                <NavLink to="/profile" className="mobile_bottom_item">
                     <CgProfile size={22} />
                 </NavLink>
 

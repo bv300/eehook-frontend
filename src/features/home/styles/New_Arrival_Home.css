@@ -2,7 +2,13 @@
 
 .new-arrivals-wrapper {
     width: 100%;
-    background-color: #F8F9F3;
+    --section-shell: linear-gradient(135deg, #f6fbfd 0%, #edf6fa 54%, #f4f8f7 100%);
+    --section-card: #fdfefe;
+    --section-border: #dbe8ee;
+    --section-shadow: rgba(39, 67, 78, 0.10);
+    --section-accent: #c46e00;
+    --section-heading: #203c46;
+    background: var(--section-shell);
     padding: 30px 4%;
     box-sizing: border-box;
     font-family: Inter, Arial, Helvetica, sans-serif;
@@ -12,10 +18,56 @@
     max-width: 1200px;
     margin: 0 auto;
     padding: 30px;
-    background: #FFFFFF;
-    border: none;
+    background: var(--section-card);
+    border: 1px solid var(--section-border);
     border-radius: 11px;
-    box-shadow: 0 6px 24px rgba(75, 99, 109, 0.14);
+    box-shadow: 0 6px 24px var(--section-shadow);
+}
+
+/* Each product rail gets a calm, retail-ready surface while retaining the same layout and type. */
+.new-arrivals-wrapper--trending {
+    --section-shell: linear-gradient(135deg, #f3f7fc 0%, #e9f2fb 54%, #f4f7fb 100%);
+    --section-card: #fcfdff;
+    --section-border: #d6e2ee;
+    --section-shadow: rgba(42, 72, 100, 0.11);
+    --section-accent: #2f6f9f;
+    --section-heading: #244e6b;
+}
+
+.new-arrivals-wrapper--deals {
+    --section-shell: linear-gradient(135deg, #fffaf1 0%, #fff2d9 53%, #fdf7ec 100%);
+    --section-card: #fffdf9;
+    --section-border: #f0dfbc;
+    --section-shadow: rgba(125, 84, 20, 0.10);
+    --section-accent: #a85d06;
+    --section-heading: #6e430d;
+}
+
+.new-arrivals-wrapper--bestsellers {
+    --section-shell: linear-gradient(135deg, #f5f7f8 0%, #eaf0f3 52%, #f4f6f7 100%);
+    --section-card: #fdfefe;
+    --section-border: #d8e2e6;
+    --section-shadow: rgba(38, 64, 71, 0.10);
+    --section-accent: #4b636d;
+    --section-heading: #26363c;
+}
+
+.new-arrivals-wrapper--personal {
+    --section-shell: linear-gradient(135deg, #f8f5fb 0%, #f0eef8 53%, #f6f4f9 100%);
+    --section-card: #fefeff;
+    --section-border: #e1ddec;
+    --section-shadow: rgba(67, 54, 96, 0.09);
+    --section-accent: #7655ad;
+    --section-heading: #514078;
+}
+
+.new-arrivals-wrapper--recent {
+    --section-shell: linear-gradient(135deg, #f7f8f9 0%, #f0f3f5 54%, #f6f7f8 100%);
+    --section-card: #fdfdfd;
+    --section-border: #dde2e5;
+    --section-shadow: rgba(45, 54, 59, 0.08);
+    --section-accent: #50636b;
+    --section-heading: #30454d;
 }
 
 /* --- Header --- */
@@ -32,7 +84,7 @@
     font-size: 28px;
     line-height: 1.2;
     font-weight: 700;
-    color: #000000;
+    color: var(--section-heading);
     margin: 0 0 8px 0;
     overflow-wrap: anywhere;
 }
@@ -40,7 +92,7 @@
 .heading-sub {
     font-family: Inter, Arial, Helvetica, sans-serif;
     font-size: 1.1rem;
-    color: #000000;
+    color: #5c7078;
     margin: 0;
     overflow-wrap: anywhere;
 }
@@ -96,7 +148,7 @@
 .new-product-card {
     display: flex;
     flex-direction: column;
-    background: transparent;
+    background: rgba(255, 255, 255, .56);
     padding: 0;
     border-radius: 12px;
     box-shadow: none;
@@ -107,6 +159,7 @@
 
 .new-product-card:hover {
     transform: translateY(-8px);
+    box-shadow: 0 10px 22px rgba(38, 64, 71, .08);
 }
 
 
@@ -150,6 +203,10 @@
     font-family: Inter, Arial, Helvetica, sans-serif;
     font-weight: 600;
     letter-spacing: 1px;
+}
+
+.badge-offer + .badge-new {
+    top: 49px;
 }
 
 
@@ -252,7 +309,7 @@
 
 
 .product-tag {
-    color: #4B636D;
+    color: var(--section-accent);
     font-size: 0.7rem;
     font-family: Inter, Arial, Helvetica, sans-serif;
     font-weight: 600;
@@ -319,7 +376,7 @@
     position: absolute;
     top: 15px;
     left: 15px;
-    background: #FF9000;
+    background: var(--section-accent);
     color: #fff;
     padding: 6px 14px;
     border-radius: 50px;
@@ -348,7 +405,7 @@
     font-family: Inter, Arial, Helvetica, sans-serif;
     font-size: 18px;
     font-weight: 600;
-    color: #000000;
+    color: #203c46;
 }
 
 /* Grid and View All Styles */
@@ -478,6 +535,10 @@
         left: 8px;
         padding: 5px 8px;
         font-size: 0.6rem;
+    }
+
+    .badge-offer + .badge-new {
+        top: 39px;
     }
 
     .wishlist-btn {

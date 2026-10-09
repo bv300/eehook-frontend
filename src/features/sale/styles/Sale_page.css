@@ -61,11 +61,18 @@
 .product_count {
     background: #f7f7f7;
     color: #4B636D;
+    border: 0;
+    cursor: pointer;
     padding: 10px 18px;
     border-radius: 30px;
     font-size: 0.95rem;
     font-weight: 500;
     white-space: nowrap;
+}
+
+.product_count:focus-visible {
+    outline: 2px solid #FF9000;
+    outline-offset: 3px;
 }
 
 @media (max-width: 1024px) {

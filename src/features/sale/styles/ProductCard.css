@@ -52,6 +52,11 @@
     border-radius: 15px;
 }
 
+.product_card:focus-visible {
+    outline: 3px solid #FF9000;
+    outline-offset: 3px;
+}
+
 /* --- Image Box Container with Portrait Aspect Ratio --- */
 .product_img {
     position: relative;

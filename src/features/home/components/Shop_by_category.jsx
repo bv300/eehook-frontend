@@ -6,6 +6,7 @@ import specialOffer from '../../../assets/specialOffer-image.jpg';
 
 import { useNavigate } from "react-router-dom";
 import Offer_Query from "../../../hooks/offers/queries/Offer_Query";
+import { isOfferActive } from "../../../hooks/offers/offerEligibility";
 import { RiArrowUpWideLine } from "react-icons/ri";
 import { getImageUrl } from "../../../utils/imageUrl";
 function Shop_by_category({ categories: providedCategories }) {
@@ -20,7 +21,7 @@ function Shop_by_category({ categories: providedCategories }) {
     const navigate = useNavigate();
     const { data: rawOffers = [] } = Offer_Query();
     const offers = Array.isArray(rawOffers) ? rawOffers : rawOffers?.results || [];
-    const activeOffer = offers.find((offer) => offer && offer.is_active !== false);
+    const activeOffer = offers.find(isOfferActive);
 
 
     const categorySliderRef = useRef(null);
@@ -284,7 +285,7 @@ function Shop_by_category({ categories: providedCategories }) {
                 </div>
 
                 {categoryArrow.right &&
-                    <button className="slider-arrow right" onClick={() => scrollCategory("right")}  >
+                    <button type="button" className="slider-arrow right" onClick={() => scrollCategory("right")}>
                         ›
                     </button>
                 }
@@ -305,16 +306,16 @@ function Shop_by_category({ categories: providedCategories }) {
                             </h3>
                         </div>
 
-                        <div className="subcategory-top-title-arrow" onClick={closeSubCategory}>
+                        <button type="button" className="subcategory-top-title-arrow" onClick={closeSubCategory} aria-label="Close subcategories">
                             <RiArrowUpWideLine size={30} />
-                        </div>
+                        </button>
                     </div>
 
 
                     <div className="slider-wrapper">
 
                         {subCategoryArrow.left &&
-                            <button className="slider-arrow left" onClick={() => scrollSubCategory("left")} >
+                            <button type="button" className="slider-arrow left" onClick={() => scrollSubCategory("left")}>
                                 ‹
                             </button>
                         }
@@ -324,7 +325,8 @@ function Shop_by_category({ categories: providedCategories }) {
 
                             {selectedCategory.subcategories?.map(
                                 (item) => (
-                                    <div
+                                    <button
+                                        type="button"
                                         className="subcategory-card"
                                         key={item.id}
                                         onClick={() => navigate(
@@ -339,7 +341,7 @@ function Shop_by_category({ categories: providedCategories }) {
                                         <p>
                                             {item.name}
                                         </p>
-                                    </div>
+                                    </button>
                                 )
                             )
                             }
@@ -349,6 +351,7 @@ function Shop_by_category({ categories: providedCategories }) {
                         {subCategoryArrow.right &&
 
                             <button
+                                type="button"
                                 className="slider-arrow right"
                                 onClick={() => scrollSubCategory("right")}
                             >

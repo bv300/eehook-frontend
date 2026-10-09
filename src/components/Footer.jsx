@@ -1,4 +1,3 @@
-import React from 'react'
 import "./../Footer.css";
 
 // import eehook from './../assets/eehook.jpeg'
@@ -7,21 +6,10 @@ import master from './../assets/master-payment.png'
 import amc from './../assets/american-exp-payment.png'
 import footerlogo from './../assets/footer-logo.png'
 import apple from './../assets/apple-payment.png'
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { FaFacebookF, FaInstagram, FaPhoneAlt, FaEnvelope, FaMapMarkerAlt, } from "react-icons/fa";
 function Footer() {
-    const navigate = useNavigate();
-
-    const WhatsappOpen = () => {
-
-        const text = "Hello";
-
-        const phone = "971501234567";
-
-        const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
-
-        window.open(whatsappUrl, "_blank");
-    }
+    const whatsappUrl = `https://wa.me/971501234567?text=${encodeURIComponent("Hello")}`;
 
 
     return (
@@ -52,12 +40,12 @@ function Footer() {
                         <h3>Quick Links</h3>
 
                         <ul>
-                            <li onClick={() => navigate("/")} >Home</li>
-                            <li onClick={() => navigate("/shop")}>Shop</li>
-                            <li onClick={() => navigate("/shop")}>Categories</li>
-                            <li onClick={() => navigate("/shop?offer=true")} >Offers</li>
-                            <li onClick={() => navigate("/about")}>About Us</li>
-                            <li onClick={() => navigate("/contact")}>Contact Us</li>
+                            <li><Link to="/">Home</Link></li>
+                            <li><Link to="/shop">Shop</Link></li>
+                            <li><Link to="/shop">Categories</Link></li>
+                            <li><Link to="/shop?offer=true">Offers</Link></li>
+                            <li><Link to="/about">About Us</Link></li>
+                            <li><Link to="/contact">Contact Us</Link></li>
                         </ul>
                     </div>
 
@@ -65,9 +53,9 @@ function Footer() {
                         <h3>Customer Care</h3>
 
                         <ul>
-                            <li onClick={() => navigate("profile")}>My Account</li>
-                            <li onClick={() => navigate("myorders")}>Track Order</li>
-                            <li onClick={() => navigate("myorders")}>Shipping & Delivery</li>
+                            <li><Link to="/profile">My Account</Link></li>
+                            <li><Link to="/myorders">Track Order</Link></li>
+                            <li><Link to="/myorders">Shipping &amp; Delivery</Link></li>
 
                         </ul>
                     </div>
@@ -76,10 +64,7 @@ function Footer() {
                         <h3>Contact Us</h3>
 
                         <ul className="contact">
-                            <li  onClick={WhatsappOpen}  style={{ cursor: "pointer" }} >
-                                <FaPhoneAlt />
-                                +971 50 123 4567
-                            </li>
+                            <li><a href={whatsappUrl} target="_blank" rel="noopener noreferrer"><FaPhoneAlt /> +971 50 123 4567</a></li>
 
                             <li>
                                 <FaEnvelope />  <a href="mailto:info@eehook.com">info@eehook.com</a>

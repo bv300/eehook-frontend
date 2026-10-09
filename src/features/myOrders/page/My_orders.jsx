@@ -85,7 +85,7 @@ const MyOrders = () => {
         if (!date) return "—";
 
         return new Date(date).toLocaleDateString(
-            "en-NZ",
+            "en-AE",
             {
                 day: "2-digit",
                 month: "short",

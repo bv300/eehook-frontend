@@ -1,29 +1,15 @@
-import React, { useState , useEffect } from "react";
+import { useState } from "react";
 import "./../Contact.css"
+import { getAuthValue } from "../features/auth/authUtils";
 
 const ContactUs = () => {
-
-
-
-    useEffect(() => {
-        const name = localStorage.getItem("first_name");
-        const email = localStorage.getItem("email");
-
-        setFormData((prev) => ({
-            ...prev,
-            name: name || "",
-            email: email || "",
-        }));
-    }, []);
-
-
-    const [formData, setFormData] = useState({
-        name: "",
-        email: "",
+    const [formData, setFormData] = useState(() => ({
+        name: getAuthValue("first_name"),
+        email: getAuthValue("email"),
         phone: "",
         subject: "",
         message: "",
-    });
+    }));
 
     const handleChange = (e) => {
         setFormData({
@@ -59,10 +45,12 @@ ${message}
 
 Thank you.`;
 
-        window.open(
+        const messageWindow = window.open(
             `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(text)}`,
-            "_blank"
+            "_blank",
+            "noopener,noreferrer"
         );
+        if (messageWindow) messageWindow.opener = null;
     };
 
     return (

@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import client from "../../../lib/ApiClient";
 import "../style/Checkout.css";
 import { getImageUrl } from "../../../utils/imageUrl";
 import showToast from "../../../utils/toast";
 import { clearCouponApplication, isInactiveCouponError } from "../../coupon/couponState";
+import { getSafeCheckoutUrl } from "../../../lib/checkoutUrl";
 
 const Checkout = () => {
 
@@ -24,26 +25,8 @@ const Checkout = () => {
     const [loading, setLoading] = useState(true);
     const [processing, setProcessing] = useState(false);
     const [checkoutError, setCheckoutError] = useState("");
-    const checkoutIdempotencyKey = useRef(null);
 
-    useEffect(() => {
-
-        loadCheckout();
-
-    }, []);
-
-    const loadCheckout = async () => {
-
-        await Promise.all([
-            fetchAddresses(),
-            fetchCart()
-        ]);
-
-        setLoading(false);
-
-    };
-
-    const fetchAddresses = async () => {
+    const fetchAddresses = useCallback(async () => {
 
         try {
 
@@ -63,9 +46,9 @@ const Checkout = () => {
 
         }
 
-    };
+    }, []);
 
-    const fetchCart = async () => {
+    const fetchCart = useCallback(async () => {
 
         try {
 
@@ -94,7 +77,20 @@ const Checkout = () => {
 
         }
 
-    };
+    }, []);
+
+    useEffect(() => {
+        const loadCheckout = async () => {
+            await Promise.all([
+                fetchAddresses(),
+                fetchCart()
+            ]);
+
+            setLoading(false);
+        };
+
+        loadCheckout();
+    }, [fetchAddresses, fetchCart]);
 
     const proceedToPayment = async () => {
 
@@ -128,19 +124,20 @@ const Checkout = () => {
                 return;
             }
 
-            if (!checkoutIdempotencyKey.current) {
-                checkoutIdempotencyKey.current = crypto.randomUUID();
-            }
-
+            // A failed checkout attempt must never reuse a key: each button
+            // click represents a new user-initiated checkout operation.
+            const idempotencyKey = crypto.randomUUID();
             const response = await client.post(
                 "payment/create-checkout-session/",
                 {
                     address: selectedAddress
                 },
-                { headers: { "Idempotency-Key": checkoutIdempotencyKey.current } }
+                {
+                    headers: { "Idempotency-Key": idempotencyKey }
+                }
             );
 
-            window.location.href = response.data.checkout_url;
+            window.location.assign(getSafeCheckoutUrl(response.data?.checkout_url));
 
         } catch (error) {
 
@@ -435,7 +432,7 @@ const Checkout = () => {
 
                                 <span>
 
-                                    AED{cartSummary.subtotal.toFixed(2)}
+                                            AED{cartSummary.subtotal.toFixed(2)}
 
                                 </span>
 
@@ -514,7 +511,7 @@ const Checkout = () => {
 
                                 <h2>
 
-                                    AED{cartSummary.total.toFixed(2)}
+                                            AED{cartSummary.total.toFixed(2)}
 
                                 </h2>
 

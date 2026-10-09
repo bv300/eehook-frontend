@@ -226,6 +226,24 @@
 
 .subcategory-top-title-arrow {
     color: #FF9000;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+}
+
+.subcategory-top-title-arrow:focus-visible,
+.subcategory-card:focus-visible {
+    outline: 2px solid #FF9000;
+    outline-offset: 3px;
+}
+
+.subcategory-card {
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: inherit;
+    cursor: pointer;
 }
 
 .subcategory-top-title h3 {

@@ -1,4 +1,5 @@
 import client from "../../lib/ApiClient";
+import { getAuthValue, hasAuthSession } from "../auth/authUtils";
 
 const STORAGE_PREFIX = "eehook:coupon-applications:v1";
 
@@ -7,26 +8,13 @@ export function normalizeCouponCode(code) {
 }
 
 function getUserKey() {
-    const userId = localStorage.getItem("user_id");
+    const userId = getAuthValue("user_id");
     if (userId) return `id:${userId}`;
 
-    const email = localStorage.getItem("email");
+    const email = getAuthValue("email");
     if (email) return `email:${email.trim().toLowerCase()}`;
 
-    // A user id is normally saved at login. Decoding the JWT is a fallback for
-    // sessions created before that field was introduced.
-    const token = localStorage.getItem("access_token") || localStorage.getItem("access");
-    if (!token) return null;
-
-    try {
-        const base64Payload = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
-        const paddedPayload = base64Payload.padEnd(Math.ceil(base64Payload.length / 4) * 4, "=");
-        const payload = JSON.parse(atob(paddedPayload));
-        const identity = payload.user_id || payload.id || payload.sub || payload.email;
-        return identity ? `jwt:${identity}` : null;
-    } catch {
-        return null;
-    }
+    return null;
 }
 
 function storageKey(userKey) {
@@ -132,7 +120,7 @@ export function isInactiveCouponError(errorOrResponse) {
 }
 
 export function isAuthenticatedForCoupons() {
-    return Boolean((localStorage.getItem("access_token") || localStorage.getItem("access")) && getUserKey());
+    return Boolean(hasAuthSession() && getUserKey());
 }
 
 export async function validateCoupon(code, productId) {

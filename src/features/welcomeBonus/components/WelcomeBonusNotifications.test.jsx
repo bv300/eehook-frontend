@@ -20,7 +20,8 @@ let payload;
 const response = () => Promise.resolve({ data: payload });
 
 beforeEach(() => {
-    localStorage.setItem("access", "customer-token");
+    sessionStorage.setItem("authenticated", "true");
+    sessionStorage.setItem("user_id", "42");
     payload = {
         unread_count: 1,
         notifications: [{ id: 7, title: "A welcome gift", message: "Use your Welcome Bonus on your first order.", discount_text: "10% off", eligible_target: "Valid for: Travel Mug", masked_code: "••••••••••••••••", can_claim: true, can_copy_code: false, is_read: false }],
@@ -38,7 +39,7 @@ beforeEach(() => {
     mocks.clipboardWrite.mockResolvedValue(undefined);
     Object.defineProperty(navigator, "clipboard", { configurable: true, get: () => ({ writeText: mocks.clipboardWrite }) });
 });
-afterEach(() => { cleanup(); localStorage.clear(); vi.clearAllMocks(); });
+afterEach(() => { cleanup(); localStorage.clear(); sessionStorage.clear(); vi.clearAllMocks(); });
 
 describe("Welcome Bonus notifications", () => {
     it("shows the server unread badge and only ever renders a masked code", async () => {

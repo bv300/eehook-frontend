@@ -99,9 +99,11 @@ function Login() {
                 const seconds = getRetryAfterSeconds(error);
                 setRetryAfter(seconds);
                 setErrorMessage(`Too many attempts. Try again after ${seconds} seconds.`);
+            } else if (error.response?.status === 400) {
+                setErrorMessage("Use a Google account with a verified email.");
             } else if (error.response?.status === 403) {
                 clearAuthSession();
-                setErrorMessage(error.response?.data?.detail || "Admin accounts must use the Super Admin login page.");
+                setErrorMessage("This account is disabled or is not allowed for this login area.");
             } else {
                 setErrorMessage("Google login failed.");
             }

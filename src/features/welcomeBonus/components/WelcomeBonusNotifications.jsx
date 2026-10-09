@@ -7,12 +7,13 @@ import {
     getWelcomeBonusNotifications,
     markWelcomeBonusNotificationRead,
 } from "../api/welcomeBonusApi";
+import { hasAuthSession } from "../../auth/authUtils";
 import "../styles/WelcomeBonusNotifications.css";
 
 const MASKED_CODE = "••••••••••••••••";
 
 function isAuthenticated() {
-    return Boolean(localStorage.getItem("access_token") || localStorage.getItem("access"));
+    return hasAuthSession();
 }
 
 function notificationRows(payload) {

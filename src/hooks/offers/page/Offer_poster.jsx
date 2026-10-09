@@ -2,10 +2,11 @@
 import '../styles/Offer.css';
 import Offer_Query from "../queries/Offer_Query";
 import { getImageUrl } from '../../../utils/imageUrl';
+import { isOfferActive } from "../offerEligibility";
 
 function OfferPoster() {
   const { data: offers = [], isLoading, error } = Offer_Query();
-  const offer = offers[0];
+  const offer = offers.find(isOfferActive);
 
 if (isLoading) {
     return (

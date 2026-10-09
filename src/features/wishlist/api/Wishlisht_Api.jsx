@@ -49,7 +49,7 @@ export const Wishlist_get = async () => {
             "wishlist get : ",
             error
         );
-
+        throw error;
     }
 
 };

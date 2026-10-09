@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { GoogleLogin } from "@react-oauth/google";
 import client from "../../../lib/ApiClient";
-import { isSuperAdminUser, saveAuthUser } from "../authUtils";
+import { clearAuthSession, isSuperAdminUser, saveAuthSession } from "../authUtils";
 import { getPasswordPolicyError, PASSWORD_POLICY_HELP } from "../passwordPolicy";
 import showToast from "../../../utils/toast";
 import "./SignUp.css";
@@ -92,9 +92,7 @@ function Signup() {
             });
             const user = response.data.user || response.data;
 
-            localStorage.setItem("access", response.data.access);
-            localStorage.setItem("refresh", response.data.refresh);
-            saveAuthUser(user);
+            saveAuthSession(response.data);
 
             if (isSuperAdminUser(user)) {
 
@@ -108,10 +106,15 @@ function Signup() {
 
         } catch (error) {
 
-            alert(
-                error.response?.data?.detail || error.response?.data?.error ||
-                "Google Signup Failed"
-            );
+            const status = error.response?.status;
+            if (status === 400) {
+                setFormError("Use a Google account with a verified email.");
+            } else if (status === 403) {
+                clearAuthSession();
+                setFormError("This account is disabled or is not allowed for this login area.");
+            } else {
+                setFormError(error.response?.data?.detail || error.response?.data?.error || "Google Signup Failed");
+            }
 
         }
 

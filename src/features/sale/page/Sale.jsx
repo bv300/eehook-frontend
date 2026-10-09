@@ -101,12 +101,14 @@ function Sale() {
 
                 <div className="salepage_button">
                     {isMobile && (
-                        <span
+                        <button
+                            type="button"
                             className="product_count"
                             onClick={() => setShowFilter(!showFilter)}
+                            aria-expanded={showFilter}
                         >
                             {showFilter ? "Close Filter" : "Filter"}
-                        </span>
+                        </button>
                     )}
 
                 </div>
@@ -140,11 +142,9 @@ function Sale() {
                             ))}
 
 
-                            <div onClick={ ()=> navigate('/shop')}>
-                                <div className='shop_category_item' onClick={() => setShowFilter(false)} >
-                                    see all
-                                </div>
-                            </div>
+                            <button type="button" className="shop_category_item" onClick={() => { navigate("/shop"); setShowFilter(false); }}>
+                                See all
+                            </button>
                         </div>
                     </div>
 
